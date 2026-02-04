@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "my-app",
-    "slug": "my-app",
+    "slug": "memento",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
@@ -22,7 +22,6 @@
       "output": "static"
     },
     "plugins": [
-      
       "expo-router",
       [
         "expo-splash-screen",
@@ -37,11 +36,23 @@
         }
       ],
       "expo-secure-store"
-      
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "58bef6eb-fac3-49d4-b253-19955a566f88"
+      }
+    },
+    "owner": "muxi_fe",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/58bef6eb-fac3-49d4-b253-19955a566f88"
     }
   }
 }

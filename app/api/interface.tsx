@@ -1,4 +1,4 @@
- export interface Post{
+ export default interface Post{
     id:string,
     images:string[],
     caption:string,

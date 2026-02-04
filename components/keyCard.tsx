@@ -1,41 +1,47 @@
 import { Link } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
-import Idea from '../../my-app/assets/images/idea.svg'
+import Idea from "../assets/images/idea.svg";
 import Smalltip from "./tipsmall";
 export default function KeyCard() {
   const [tipstate, setTipstate] = useState(false);
-  const [detail, setDetail] = useState(false);
   return (
     <View style={styles.card}>
-      <Pressable style={styles.findIcon} onPress={() => setTipstate(true)} >
+      <Pressable style={styles.findIcon} onPress={() => setTipstate(true)}>
         <Idea width={24} height={26}></Idea>
       </Pressable>
       <Modal
         animationType="slide"
         transparent={true}
         visible={tipstate}
-        onRequestClose={() => setTipstate(false)}>
+        onRequestClose={() => setTipstate(false)}
+      >
         <Pressable style={styles.modalMask} onPress={() => setTipstate(false)}>
           <Pressable
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
-            <Smalltip borderColor="#D2E1FF"
+            <Smalltip
+              borderColor="#D2E1FF"
               textColor="#72B6FF"
               tagText="直觉"
               tagColor="#D2E1FF"
-              describeText="基于第一感受与当下情绪"></Smalltip>
-              <Smalltip borderColor="#FFCCD2"
-                textColor="#FFA9BF"
-                tagText="空间"
-                tagColor="#FFCCD2"
-                describeText="关注个体在空间中的位置与方向"></Smalltip>
-                <Smalltip borderColor="#DCCFFD"
-                  textColor="#CBA9FF"
-                  tagText="观念"
-                  tagColor="#DCCFFD"
-                  describeText="围绕意义、主题与表达"></Smalltip>
+              describeText="基于第一感受与当下情绪"
+            ></Smalltip>
+            <Smalltip
+              borderColor="#FFCCD2"
+              textColor="#FFA9BF"
+              tagText="空间"
+              tagColor="#FFCCD2"
+              describeText="关注个体在空间中的位置与方向"
+            ></Smalltip>
+            <Smalltip
+              borderColor="#DCCFFD"
+              textColor="#CBA9FF"
+              tagText="观念"
+              tagColor="#DCCFFD"
+              describeText="围绕意义、主题与表达"
+            ></Smalltip>
           </Pressable>
         </Pressable>
       </Modal>
@@ -69,8 +75,8 @@ const styles = StyleSheet.create({
   },
   modalMask: {
     flex: 1,
-    backgroundColor: 'rgba(21, 24, 30, 0.2)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(21, 24, 30, 0.2)",
+    justifyContent: "flex-end",
   },
   // 抽屉内容
   modalContent: {
@@ -79,7 +85,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     height: 429,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -104,23 +110,14 @@ const styles = StyleSheet.create({
   },
   findtext: {
     fontSize: 22,
-    fontWeight: '400',
-    color: '#333333',
+    fontWeight: "400",
+    color: "#333333",
   },
   findsmalltext: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: "400",
     marginTop: 4,
   },
-  // 模态框遮罩
-
-  // modalTitle: {
-  //   fontSize: 18,
-  //   fontWeight: 'bold',
-  //   color: '#333333',
-  //   textAlign: 'center',
-  //   marginBottom: 20,
-  // },
   contentBox: {
     width: "100%",
     height: 220,
@@ -165,8 +162,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 12,
-    fontWeight: "400",//字重没有350
+    fontWeight: "400", //字重没有350
     color: "#666666",
-
   },
-})
+});

@@ -7,22 +7,49 @@ import {
   Pressable,
   Button,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import { Link, useNavigation } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Agree from "../assets/images/agree.svg";
+import { loginPwd } from "./api/user";
 type LoginType = "phone" | "password";
 export default function SignIn() {
   const [loginway, setLoginway] = useState<LoginType>("password");
   const [agree, setAgree] = useState(false);
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, []);
-
+  const handlelogin = async () => {
+    if (!agree) {
+      alert("请阅读并同意《隐私协议》和《用户协议》");
+      return;
+    }
+    const token = await SecureStore.getItemAsync("signup_token");
+    if (!token) {
+      alert("请先注册");
+    } else {
+      const res = await loginPwd(email, password);
+      if (res.status === 200) {
+        const { access_token, refresh_token, expires_in, token_type } =
+          res.data;
+        await SecureStore.setItemAsync("access_token", access_token);
+        await SecureStore.setItemAsync("refresh_token", refresh_token);
+        // await SecureStore.setItemAsync("expires_in", expires_in.toString());
+        await SecureStore.setItemAsync("token_type", token_type);
+        alert("登录成功");
+navigation.navigate("(tabs)/_layout" , { screen: "today" });
+      } else {
+        alert("登录失败，请检查邮箱和密码");
+      }
+    }
+  };
   return (
     <SafeAreaProvider style={styles.container}>
       <LinearGradient
@@ -36,7 +63,7 @@ export default function SignIn() {
           <Pressable
             onPress={() => setLoginway("password")}
             style={[
-              styles.way, // 基础样式
+              styles.way,
               loginway === "password"
                 ? { backgroundColor: "#FFFFFF" }
                 : { backgroundColor: "transparent" },
@@ -66,6 +93,8 @@ export default function SignIn() {
                     style={styles.Inputkuang}
                     placeholder="请输入邮箱"
                     placeholderTextColor="#999"
+                    value={email}
+                    onChangeText={(text)=>setEmail(text)}
                   ></TextInput>
                 </View>
                 <View>
@@ -73,6 +102,10 @@ export default function SignIn() {
                   <TextInput
                     style={styles.Inputkuang}
                     placeholder="请输入邮箱"
+                    onChangeText={(text) => setPassword(text)}
+                    value={password}
+                    autoCapitalize="none"
+                    autoCorrect={false}
                     placeholderTextColor="#999"
                   ></TextInput>
                   <Link style={styles.getcode} href="/forgotpassword">
@@ -80,7 +113,7 @@ export default function SignIn() {
                   </Link>
                 </View>
               </View>
-              <Pressable style={styles.loginBtn}>
+              <Pressable style={styles.loginBtn} onPress={handlelogin}>
                 <Text style={styles.loginText}>登录</Text>
               </Pressable>
               <View

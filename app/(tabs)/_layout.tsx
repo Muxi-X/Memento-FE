@@ -1,13 +1,13 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import React, { useEffect } from 'react'; 
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { StyleSheet } from 'react-native';
-import { useAuthStore } from '../stores/authstore';
-import TodayScreen from './today';    // 今日页面
-import RememberScreen from './remember'; // 回顾页面
-import HomeScreen from './home';      // 我的页面
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import React, { useEffect } from "react";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { StyleSheet } from "react-native";
+import { useAuthStore } from "../stores/authstore";
+import TodayScreen from "./today"; // 今日页面
+import RememberScreen from "./remember"; // 回顾页面
+import HomeScreen from "./home"; // 我的页面
 
 type TabParamList = {
   remember: undefined;
@@ -30,24 +30,25 @@ export default function TabLayout() {
     checkAuth();
   }, [checkAuth]);
   const handleTabPress = (name: keyof TabParamList) => {
-    if (name === 'home') {
+    if (name === "home") {
       if (!isLoggedIn) {
-        navigation.navigate('signin');
-        return false; 
+        navigation.navigate("signin");
+        return false;
       }
     }
-    return true; 
+    return true;
   };
 
   return (
-    <Tabs.Navigator 
+    <Tabs.Navigator
+      initialRouteName="today"
       screenOptions={{
         tabBarStyle: styles.tabbarstyle,
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
       }}
       screenListeners={{
         tabPress: (e) => {
-          const route = e.target?.split('-')[0];
+          const route = e.target?.split("-")[0];
           if (route && !handleTabPress(route as keyof TabParamList)) {
             e.preventDefault();
           }
@@ -56,9 +57,9 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="today"
-        component={TodayScreen} 
+        component={TodayScreen}
         options={{
-          title: '今日',
+          title: "今日",
           headerShown: false,
         }}
       />
@@ -66,25 +67,25 @@ export default function TabLayout() {
         name="remember"
         component={RememberScreen}
         options={{
-          title: '回顾',
+          title: "回顾",
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="home"
-        component={HomeScreen} 
+        component={HomeScreen}
         options={{
-          title: '我的',
+          title: "我的",
           headerShown: false,
         }}
       />
-    </Tabs.Navigator> 
+    </Tabs.Navigator>
   );
 }
 
 const styles = StyleSheet.create({
   tabbarstyle: {
     height: 80,
-    backgroundColor: '#ffffff'
-  }
+    backgroundColor: "#ffffff",
+  },
 });

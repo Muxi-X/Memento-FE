@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import{useState} from 'react';
+import  React, {useState}from 'react';
 import { Pressable, Text, View, StyleSheet } from 'react-native';
 import Picture from '../assets/images/picture.svg'
 import Camera from '../assets/images/photogarph.svg'
