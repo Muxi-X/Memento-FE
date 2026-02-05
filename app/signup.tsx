@@ -29,7 +29,6 @@ export default function Signup() {
     });
   }, []);
   const checkPwdEqual = () => {
-    // 1. 若有未执行的定时器，先清理（防抖核心）
     if (pwdDebounceTimer.current) {
       clearTimeout(pwdDebounceTimer.current);
     }

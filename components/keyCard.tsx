@@ -51,7 +51,7 @@ export default function KeyCard() {
       </View>
       <View style={styles.footer}>
         <Text style={styles.statText}>已有xxx人参与今日创作</Text>
-        <Link href={"/find"}>
+        <Link href={"/find"} asChild>
           <Text style={styles.linkText}>查看作品&gt;</Text>
         </Link>
       </View>

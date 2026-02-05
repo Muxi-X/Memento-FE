@@ -1,24 +1,30 @@
 
-import {  StyleSheet,View } from 'react-native';
-import SignIn from '../signin'
+import {  StyleSheet,View,Text, Pressable } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {LinearGradient}  from 'expo-linear-gradient'
+import { useRouter } from 'expo-router';
+const router = useRouter();
+const handleout = async() => {
+  await SecureStore.deleteItemAsync("refresh_token");
+  await SecureStore.deleteItemAsync("access_token");
+  router.navigate("/signin");
+}
 export default function HomeScreen() {
+  console.log("渲染了");
+  
   return (
     <SafeAreaView>
-      <LinearGradient colors={['#94d1ff', '#c9def6', '#d4e7f8','#ffffff']} style={[styles.container,styles.gradientBackground]}>
-        <SignIn></SignIn>
-        </LinearGradient>
-      </SafeAreaView>
-
+      <View style={styles.container}>
+        <View style={styles.touxiang}></View>
+      </View>
+      <Pressable onPress={handleout}>
+        <Text > 退出登录</Text>
+      </Pressable>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-     gradientBackground: {
-    flex: 1,
-    width: '100%',
-  },
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
@@ -26,4 +32,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  touxiang:{
+    position: 'absolute',
+    top:118,
+    left:138,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#858181',
+  }
 });
