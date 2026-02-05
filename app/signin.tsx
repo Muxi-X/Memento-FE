@@ -43,8 +43,7 @@ export default function SignIn() {
         await SecureStore.setItemAsync("refresh_token", refresh_token);
         // await SecureStore.setItemAsync("expires_in", expires_in.toString());
         await SecureStore.setItemAsync("token_type", token_type);
-        alert("登录成功");
-navigation.navigate("(tabs)/_layout" , { screen: "today" });
+        navigation.navigate("index" as never); ;
       } else {
         alert("登录失败，请检查邮箱和密码");
       }
@@ -94,7 +93,7 @@ navigation.navigate("(tabs)/_layout" , { screen: "today" });
                     placeholder="请输入邮箱"
                     placeholderTextColor="#999"
                     value={email}
-                    onChangeText={(text)=>setEmail(text)}
+                    onChangeText={(text) => setEmail(text)}
                   ></TextInput>
                 </View>
                 <View>
@@ -108,7 +107,7 @@ navigation.navigate("(tabs)/_layout" , { screen: "today" });
                     autoCorrect={false}
                     placeholderTextColor="#999"
                   ></TextInput>
-                  <Link style={styles.getcode} href="/forgotpassword">
+                  <Link style={styles.getcode} href="/forgotpassword" asChild>
                     <Text style={styles.getcodeText}>忘记密码</Text>
                   </Link>
                 </View>
@@ -123,7 +122,7 @@ navigation.navigate("(tabs)/_layout" , { screen: "today" });
                   marginTop: 8,
                 }}
               >
-                <Link href={"/signup"}>
+                <Link href={"/signup"} asChild>
                   <Text style={styles.registerText}>新用户注册</Text>
                 </Link>
               </View>
@@ -176,7 +175,7 @@ navigation.navigate("(tabs)/_layout" , { screen: "today" });
                   marginTop: 8,
                 }}
               >
-                <Link href={"/signup"}>
+                <Link href={"/signup"} asChild>
                   <Text style={styles.registerText}>新用户注册</Text>
                 </Link>
               </View>

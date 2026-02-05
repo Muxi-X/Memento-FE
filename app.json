@@ -4,7 +4,7 @@
     "slug": "memento",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "myapp",
+    "scheme": "memento",//深度链接
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
