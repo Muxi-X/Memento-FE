@@ -7,44 +7,6 @@ export default function KeyCard() {
   const [tipstate, setTipstate] = useState(false);
   return (
     <View style={styles.card}>
-      <Pressable style={styles.findIcon} onPress={() => setTipstate(true)}>
-        <Idea width={24} height={26}></Idea>
-      </Pressable>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={tipstate}
-        onRequestClose={() => setTipstate(false)}
-      >
-        <Pressable style={styles.modalMask} onPress={() => setTipstate(false)}>
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <Smalltip
-              borderColor="#D2E1FF"
-              textColor="#72B6FF"
-              tagText="直觉"
-              tagColor="#D2E1FF"
-              describeText="基于第一感受与当下情绪"
-            ></Smalltip>
-            <Smalltip
-              borderColor="#FFCCD2"
-              textColor="#FFA9BF"
-              tagText="空间"
-              tagColor="#FFCCD2"
-              describeText="关注个体在空间中的位置与方向"
-            ></Smalltip>
-            <Smalltip
-              borderColor="#DCCFFD"
-              textColor="#CBA9FF"
-              tagText="观念"
-              tagColor="#DCCFFD"
-              describeText="围绕意义、主题与表达"
-            ></Smalltip>
-          </Pressable>
-        </Pressable>
-      </Modal>
       <View style={styles.contentBox}>
         <Text style={styles.chineseText}>安静</Text>
         <Text style={styles.englishText}>quiet</Text>
@@ -154,9 +116,9 @@ const styles = StyleSheet.create({
     marginBottom: 13,
     borderRadius: 20,
   },
+
   statText: {
     fontSize: 12,
-
     color: "#8EB7E7",
     paddingRight: 106,
   },
