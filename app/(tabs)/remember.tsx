@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons"; // 用于右侧箭头图标
+import { Ionicons}  from "@expo/vector-icons";
 
 const keywords = [
   "安静",
@@ -26,7 +26,8 @@ const keywordColors = {
   孤独: "#FFDCA4",
   希望: "#FEDEE1",
   回忆: "#B7E0FE",
-};
+};//后续颜色前五个一循环
+
 
 export default function FindScreen() {
   const [activeTab, setActiveTab] = useState("keyword");

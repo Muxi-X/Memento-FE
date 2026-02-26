@@ -1,9 +1,10 @@
 import React,{ useEffect } from'react';
-import { View ,Text,StyleSheet, Pressable } from'react-native';
+import { View ,Text,StyleSheet, Pressable, Image } from'react-native';
 import Arrow_back from "../assets/images/arrow-back.svg";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-const beforePublish = (photos:Object[]) => {
+import { PhotoObject } from './api/interface';
+const beforePublish = (photos:PhotoObject[]) => {
     const navigation = useNavigation();
       useEffect(() => {
         navigation.setOptions({
@@ -23,15 +24,26 @@ const beforePublish = (photos:Object[]) => {
             <Text>发布</Text>
         </View>
        </View >
-       <View>
-{/* {
-    photos.map((photo,index) => (
-        <View key={index} style={{marginTop: 20,marginBottom: 20}}>
-            <Text>{photo.title}</Text>
-            <Text>{photo.description}</Text>
+{
+    photos.map((photo) => (
+        <View key={photo.id} >
+          <Image
+            source={{ uri: photo.uri }}
+            resizeMode="contain"
+            // 调试用：打印加载状态
+            onLoad={() => console.log(`图片 ${photo.fileName} 加载成功`)}
+            onError={(e) => console.error(`图片 ${photo.fileName} 加载失败:`, e.nativeEvent.error)}
+          />
+          {/* 可选：显示文件名，方便调试 */}
+          <View >
+            <Text >{photo.fileName}</Text>
+          </View>
         </View>
     ))
-} */}
+}
+
+       <View>
+
        </View>
     </SafeAreaProvider>
   )
@@ -54,5 +66,8 @@ const styles=StyleSheet.create({
         justifyContent:'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
-    }
+    },
+    button1:{},
+    button2:{},
+
 })

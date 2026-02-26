@@ -42,7 +42,7 @@ export default function SignIn() {
           res.data;
         await SecureStore.setItemAsync("access_token", access_token);
         await SecureStore.setItemAsync("refresh_token", refresh_token);
-        // await SecureStore.setItemAsync("expires_in", expires_in.toString());
+        await SecureStore.setItemAsync("expires_in", expires_in.toString());
         await SecureStore.setItemAsync("token_type", token_type);
         navigation.navigate("index" as never); ;
       } else {
@@ -135,6 +135,7 @@ export default function SignIn() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     placeholderTextColor="#999"
+                    
                   ></TextInput>
                   <Link style={styles.getcode} href="/forgotpassword" asChild>
                     <Text style={styles.getcodeText}>忘记密码</Text>

@@ -35,7 +35,8 @@ export default function TabTwoScreen() {
     "焦虑也没关系，饼干焦焦的也很好吃",
   ];
   return (
-    <SafeAreaProvider style={styles.container}>
+    <ScrollView >
+      <SafeAreaProvider style={styles.container}>
       <View style={styles.dateIconRow}>
         <Text style={styles.dateText}>2026/2/4</Text>
         <Idea></Idea>
@@ -69,21 +70,16 @@ export default function TabTwoScreen() {
           <Text style={styles.linkText}>查看作品 &gt;</Text>
         </Link>
       </View>
-
-    </SafeAreaProvider>
+</SafeAreaProvider>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  gradientBackground: {
-    flex: 1,
-    width: "100%",
-  },
   container: {
-    flex: 1,
+    flexDirection: "column",
     backgroundColor: "#F5F5F5",
     alignItems: "center",
-    justifyContent: "center",
     position: "relative",
   },
   dateIconRow: {
@@ -101,7 +97,7 @@ const styles = StyleSheet.create({
     color: "#666666",
   },
   talkkuang: {
-    backgroundColor: "#CEE6FF",
+    backgroundColor: "#EFF7FF",
     height: 56,
     width: 160,
     borderColor: "#72B6FF",
@@ -123,7 +119,7 @@ const styles = StyleSheet.create({
   keyword: {
     width: 154,
     height: 70,
-    marginTop: 369,//有问题
+    marginTop: 269,//有问题
   },
   keywordtext: {
     fontSize: 48,

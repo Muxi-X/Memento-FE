@@ -134,7 +134,7 @@ export default function Signup() {
       console.log("验证码校验结果", res);
       if (res.status === 200 && res.data.valid === true) {
         setVerifyResult(<Pass />);
-        await SecureStore.setItemAsync("signup_token", res.data.signup_token);
+        await SecureStore.set("signup_token", res.data.signup_token);
       } else {
         setVerifyResult(<Warning />);
         alert("验证码错误");
