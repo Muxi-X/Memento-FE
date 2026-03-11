@@ -1,21 +1,29 @@
 {
   "expo": {
-    "name": "my-app",
+    "name": "此行",
     "slug": "memento",
+    "splash": {
+      "image": "./assets/images/mmexport .png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "hideAfter": 0
+    },
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "memento",//深度链接
+    "scheme": "memento",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "jsEngine": "jsc",
+      "bundleIdentifier": "com.kazjj.memento"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.kazjj.memento"
     },
     "web": {
       "bundler": "metro",
@@ -34,8 +42,20 @@
             "backgroundColor": "#000000"
           }
         }
+
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font",
+      "expo-image",
+      "expo-web-browser",
+      ["expo-audio",
+      {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone.",
+          "enableBackgroundPlayback": true,
+          "enableBackgroundRecording": false
+        }
+    ]
+      
     ],
     "experiments": {
       "typedRoutes": true,
