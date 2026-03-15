@@ -25,12 +25,20 @@ export default function RootLayout() {
           name="beforepublish"
           options={{ headerShown: false }}
         ></Stack.Screen>
+         <Stack.Screen
+          name="index"
+          options={{ headerShown: false }}
+        ></Stack.Screen>
         <Stack.Screen
           name="message"
           options={{ headerShown: false }}
         ></Stack.Screen>
         <Stack.Screen
           name="configure"
+          options={{ headerShown: false }}
+        ></Stack.Screen>
+         <Stack.Screen
+          name="postCardDetail"
           options={{ headerShown: false }}
         ></Stack.Screen>
       </Stack>

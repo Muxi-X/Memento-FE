@@ -38,16 +38,16 @@ export default function SplashScreenPage() {
 
         if (svgLoaded) {
           fadeAnim.value = withTiming(1, {
-            duration: 3000,
+            duration: 1000,
             easing: Easing.ease 
           });
           scaleAnim.value = withTiming(1, {
-            duration: 3000,
+            duration: 1000,
             easing: Easing.ease
           });
           const timer = setTimeout(() => {
             handleAnimationEnd();
-          }, 3000);
+          }, 1000);
           return () => clearTimeout(timer);
         }
       } catch (e) {
@@ -80,10 +80,9 @@ export default function SplashScreenPage() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexDirection:"column",
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    justifyContent: 'center', 
   },
   logonContainer: {
     width: '100%', 
@@ -91,6 +90,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 153,
+    marginTop:178,
+  
   },
   logo: {   
     width: '100%',
