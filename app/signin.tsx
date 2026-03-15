@@ -13,7 +13,10 @@ import { Link, useNavigation } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Agree from "../assets/images/agree.svg";
-import { loginPwd, sendlogincode,loginPhone} from "./api/user";
+import { loginPwd, sendlogincode, loginPhone } from "./api/user";
+import Mmnoeyes from "../assets/images/Mmnoeyes.svg";
+import Mmeyes from "../assets/images/Mmeyes.svg";
+
 type LoginType = "phone" | "password";
 export default function SignIn() {
   const [loginway, setLoginway] = useState<LoginType>("password");
@@ -21,6 +24,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [Mm, setMm] = useState(false);
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({
@@ -44,7 +48,7 @@ export default function SignIn() {
         await SecureStore.setItemAsync("refresh_token", refresh_token);
         await SecureStore.setItemAsync("expires_in", expires_in.toString());
         await SecureStore.setItemAsync("token_type", token_type);
-        navigation.navigate("index" as never); ;
+        navigation.navigate("index" as never);
       } else {
         alert("登录失败，请检查邮箱和密码");
       }
@@ -60,175 +64,217 @@ export default function SignIn() {
       alert("验证码已发送，请注意查收");
     } else {
       alert("验证码发送失败，请稍后再试");
-  }
-}
-  const handldeloginByPhone = async() => {
+    }
+  };
+  const handldeloginByPhone = async () => {
     if (!agree) {
       alert("请阅读并同意《隐私协议》和《用户协议》");
       return;
-  }
-  const res=await loginPhone(email,code)
-  if(res.status===200){
-    const { access_token, refresh_token, expires_in, token_type } = res.data;
-    await SecureStore.setItemAsync("access_token", access_token);
-    await SecureStore.setItemAsync("refresh_token", refresh_token);
-    // await SecureStore.setItemAsync("expires_in", expires_in.toString());
-    await SecureStore.setItemAsync("token_type", token_type);
-    navigation.navigate("index" as never); ;
-  }else{
-    alert("登录失败，请检查邮箱和验证码");}
-}
+    }
+    const res = await loginPhone(email, code);
+    if (res.status === 200) {
+      const { access_token, refresh_token, expires_in, token_type } = res.data;
+      await SecureStore.setItemAsync("access_token", access_token);
+      await SecureStore.setItemAsync("refresh_token", refresh_token);
+      await SecureStore.setItemAsync("expires_in", expires_in.toString());
+      await SecureStore.setItemAsync("token_type", token_type);
+      navigation.navigate("index" as never);
+    } else {
+      alert("登录失败，请检查邮箱和验证码");
+    }
+  };
+
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider>
       <LinearGradient
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
         locations={[0, 0.48, 1]}
-        style={[styles.gradientBackground, styles.container]}
+        style={[styles.gradientBackground]}
       >
-        <View style={styles.tabcontainer}>
-          <Pressable
-            onPress={() => setLoginway("password")}
+        {Mm ? (
+          <Mmnoeyes style={styles.Mm}></Mmnoeyes>
+        ) : (
+          <Mmeyes style={styles.Mm}></Mmeyes>
+        )}
+        <View style={styles.card}>
+          <View style={styles.tabcontainer}>
+            <Pressable
+              onPress={() => setLoginway("password")}
+              style={[
+                styles.way,
+                loginway === "password"
+                  ? { backgroundColor: "#FFFFFF" }
+                  : { backgroundColor: "transparent" },
+              ]}
+            >
+              <Pressable  onPress={() => setLoginway("password")} style={{zIndex:1}} >
+                <Text style={loginway === "password" && styles.wayText}>密码登录</Text>
+                
+              </Pressable>
+              {loginway === "password" && <View style={styles.line}></View>}
+            </Pressable>
+            <View
+              style={[
+                styles.way,
+                loginway === "phone"
+                  ? { backgroundColor: "#ffffff" }
+                  : { backgroundColor: "transparent" },
+              ]}
+            >
+                 <Pressable  onPress={() => setLoginway("phone")} style={{zIndex:2}} >
+                <Text style={loginway === "phone" && styles.wayText}>验证码登陆</Text>
+              </Pressable>
+              {loginway === "phone" && <View style={styles.line}></View>}
+            </View>
+          </View>
+          <View
             style={[
-              styles.way,
-              loginway === "password"
-                ? { backgroundColor: "#FFFFFF" }
-                : { backgroundColor: "transparent" },
-            ]}
-          >
-            <Text>密码登录</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setLoginway("phone")}
-            style={[
-              styles.way,
+              styles.cardcontainer,
               loginway === "phone"
-                ? { backgroundColor: "#ffffff" }
-                : { backgroundColor: "transparent" },
+                ? { borderTopLeftRadius: 24 }
+                : { borderTopRightRadius: 24 },
             ]}
           >
-            <Text>验证码登录</Text>
-          </Pressable>
-        </View>
-        <View style={styles.cardcontainer}>
-          {loginway === "password" ? (
-            <View>
-              <View style={styles.passwordlist}>
-                <View style={styles.smalllist}>
-                  <Text style={styles.titletext}>邮箱</Text>
-                  <TextInput
-                    style={styles.Inputkuang}
-                    placeholder="请输入邮箱"
-                    placeholderTextColor="#999"
-                    value={email}
-                    onChangeText={(text) => setEmail(text)}
-                  ></TextInput>
+            {loginway === "password" ? (
+              <View>
+                <View style={styles.passwordlist}>
+                  <View style={styles.smalllist}>
+                    <Text style={styles.titletext}>邮箱</Text>
+                    <TextInput
+                      style={styles.Inputkuang}
+                      placeholder="请输入邮箱"
+                      placeholderTextColor="#999"
+                      value={email}
+                      onChangeText={(text) => setEmail(text)}
+                    ></TextInput>
+                  </View>
+                  <View>
+                    <Text style={styles.titletext}>密码</Text>
+                    <TextInput
+                      style={styles.Inputkuang}
+                      placeholder="请输入密码"
+                      onChangeText={(text) => setPassword(text)}
+                      secureTextEntry={true}
+                      value={password}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      placeholderTextColor="#999"
+                      onFocus={() => {
+                        setMm(true);
+                      }}
+                      onBlur={() => {
+                        setMm(false);
+                      }}
+                    ></TextInput>
+                    <Link style={styles.getcode} href="/forgotpassword" asChild>
+                      <Text style={styles.getcodeText}>忘记密码</Text>
+                    </Link>
+                  </View>
                 </View>
-                <View>
-                  <Text style={styles.titletext}>密码</Text>
-                  <TextInput
-                    style={styles.Inputkuang}
-                    placeholder="请输入邮箱"
-                    onChangeText={(text) => setPassword(text)}
-                    value={password}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    placeholderTextColor="#999"
-                    
-                  ></TextInput>
-                  <Link style={styles.getcode} href="/forgotpassword" asChild>
-                    <Text style={styles.getcodeText}>忘记密码</Text>
+                <Pressable style={styles.loginBtn} onPress={handleloginByPwd}>
+                  <Text style={styles.loginText}>登录</Text>
+                </Pressable>
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: 8,
+                  }}
+                >
+                  <Link href={"/signup"} asChild>
+                    <Text style={styles.registerText}>注册新用户</Text>
                   </Link>
                 </View>
-              </View>
-              <Pressable style={styles.loginBtn} onPress={handleloginByPwd}>
-                <Text style={styles.loginText}>登录</Text>
-              </Pressable>
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: 8,
-                }}
-              >
-                <Link href={"/signup"} asChild>
-                  <Text style={styles.registerText}>新用户注册</Text>
-                </Link>
-              </View>
-              <View style={styles.agree}>
-                <Pressable
-                  style={[
-                    styles.agreeIcon,
-                    agree
-                      ? { borderColor: "#72B6FF" }
-                      : { borderColor: "#999" },
-                  ]}
-                  onPress={() => setAgree(!agree)}
-                >
-                  {agree ? <Agree></Agree> : <></>}
-                </Pressable>
-                <Text>已阅读并同意《隐私协议》和《用户协议》</Text>
-              </View>
-            </View>
-          ) : (
-            <View>
-              <View style={styles.passwordlist}>
-                <View style={styles.smalllist}>
-                  <Text style={styles.titletext}>邮箱</Text>
-                  <TextInput
-                    style={styles.Inputkuang}
-                    placeholder="请输入邮箱"
-                    placeholderTextColor="#999"
-                    value={email}
-                    onChangeText={(text) => setEmail(text)}
-                  ></TextInput>
-                </View>
-                <View style={{ position: "relative" }}>
-                  <Text style={styles.titletext}>验证码</Text>
-                  <TextInput
-                    style={styles.Inputkuang}
-                    placeholder="请输入邮箱"
-                    placeholderTextColor="#999"
-                    value={code}
-                    onChangeText={(text) => setCode(text)}
-                  ></TextInput>
-                  <Pressable style={styles.getcode} onPress={handleSendCode}>
-                    {/* 后续点击获取验证码 */}
-                    <Text style={styles.getcodeText}>获取验证码</Text>
+                <View style={styles.agree}>
+                  <Pressable
+                    style={[
+                      styles.agreeIcon,
+                      agree
+                        ? { borderColor: "#72B6FF" }
+                        : { borderColor: "#999" },
+                    ]}
+                    onPress={() => setAgree(!agree)}
+                  >
+                    {agree ? <Agree></Agree> : <></>}
                   </Pressable>
+                  <Text style={{ color: "#999999", fontSize: 12 }}>
+                    已阅读并同意
+                  </Text>
+                  <Text style={{ color: "#72B6FF", fontSize: 12 }}>
+                    《隐私协议》
+                  </Text>
+                  <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
+                  <Text style={{ color: "#72B6FF", fontSize: 12 }}>
+                    《用户协议》
+                  </Text>
                 </View>
               </View>
-              <Pressable style={styles.loginBtn} onPress={handldeloginByPhone}>
-                <Text style={styles.loginText}>登录</Text>
-              </Pressable>
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: 8,
-                }}
-              >
-                <Link href={"/signup"} asChild>
-                  <Text style={styles.registerText}>新用户注册</Text>
-                </Link>
-              </View>
-              <View style={styles.agree}>
+            ) : (
+              <View>
+                <View style={styles.passwordlist}>
+                  <View style={styles.smalllist}>
+                    <Text style={styles.titletext}>邮箱</Text>
+                    <TextInput
+                      style={styles.Inputkuang}
+                      placeholder="请输入邮箱"
+                      placeholderTextColor="#999"
+                      value={email}
+                      onChangeText={(text) => setEmail(text)}
+                    ></TextInput>
+                  </View>
+                  <View style={{ position: "relative" }}>
+                    <Text style={styles.titletext}>验证码</Text>
+                    <TextInput
+                      style={styles.Inputkuang}
+                      placeholder="请输入邮箱"
+                      placeholderTextColor="#999"
+                      value={code}
+                      onChangeText={(text) => setCode(text)}
+                    ></TextInput>
+                    <Pressable style={styles.getcode} onPress={handleSendCode}>
+                      <Text style={styles.getcodeText}>获取验证码</Text>
+                    </Pressable>
+                  </View>
+                </View>
                 <Pressable
-                  style={[
-                    styles.agreeIcon,
-                    agree
-                      ? { borderColor: "#72B6FF" }
-                      : { borderColor: "#999" },
-                  ]}
-                  onPress={() => setAgree(!agree)}
+                  style={styles.loginBtn}
+                  onPress={handldeloginByPhone}
                 >
-                  {agree ? <Agree></Agree> : <></>}
+                  <Text style={styles.loginText}>登录</Text>
                 </Pressable>
-                <Text>已阅读并同意《隐私协议》和《用户协议》</Text>
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: 8,
+                  }}
+                >
+                  <Link href={"/signup"} asChild>
+                    <Text style={styles.registerText}>新用户注册</Text>
+                  </Link>
+                </View>
+                <View style={styles.agree}>
+                  <Pressable
+                    style={[
+                      styles.agreeIcon,
+                      agree
+                        ? { borderColor: "#72B6FF" }
+                        : { borderColor: "#999" },
+                    ]}
+                    onPress={() => setAgree(!agree)}
+                  >
+                    {agree ? <Agree></Agree> : <></>}
+                  </Pressable>
+                  <Text style={{ color: "#999999" }}>已阅读并同意</Text>
+                  <Text style={{ color: "#72B6FF" }}>《隐私协议》</Text>
+                  <Text style={{ color: "#999999" }}>和</Text>
+                  <Text style={{ color: "#72B6FF" }}>《用户协议》</Text>
+                </View>
               </View>
-            </View>
-          )}
+            )}
+          </View>
         </View>
       </LinearGradient>
     </SafeAreaProvider>
@@ -238,14 +284,17 @@ const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,
     width: "100%",
-  },
-  container: {
-    display: "flex",
-    backgroundColor: "#F5F5F5",
     alignItems: "center",
-    justifyContent: "center",
+
     position: "relative",
   },
+  Mm: {
+    position: "absolute",
+    left: 80,
+    top: 59,
+    zIndex: 1,
+  },
+  card: {},
   cardcontainer: {
     display: "flex",
     flexDirection: "column",
@@ -256,6 +305,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     paddingTop: 30,
+    marginTop: -20,
   },
   tabcontainer: {
     display: "flex",
@@ -265,15 +315,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#EFF7FF",
     borderTopRightRadius: 24,
     borderTopLeftRadius: 24,
+    marginTop: 184,
   },
   way: {
     width: "50%",
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    borderTopRightRadius: 24,
-    borderTopLeftRadius: 24,
-    backgroundColor: "#D8D8D8",
+    height: 60,
+    paddingTop: 12,
+    paddingLeft: 46,
+    borderRadius: 24,
+  },
+  wayText: {
+    fontSize: 16,
+    color: "#333333",
+    fontWeight: "700",
+    
+  },
+  line: {
+    width: 28,
+    height: 2.4,
+    backgroundColor: "#72B6FF",
+    marginLeft: 23,
+    marginTop: 3,
+    borderRadius: 1,
   },
   passwordlist: {
     display: "flex",
@@ -292,7 +355,7 @@ const styles = StyleSheet.create({
     width: 296,
     height: 47,
     borderRadius: 20,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     fontSize: 14,
     marginTop: 7,
   },
@@ -326,14 +389,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   registerText: {
-    marginTop: 10,
     color: "#A9D1FF",
   },
   agree: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 32,
     paddingLeft: 10,
     gap: 8,
   },
@@ -342,5 +404,7 @@ const styles = StyleSheet.create({
     height: 14,
     width: 14,
     borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
