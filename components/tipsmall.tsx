@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { Createway } from "./createway";
+import  Createway  from "./createway";
+import { drawOfficialPrompt } from "@/app/api/keywords";
+import { PromptWords } from "@/app/api/interface";
+import usePromptStore from "@/app/stores/usePromptStore";
 
 interface SmalltipProps {
   borderColor: string;
@@ -8,6 +11,7 @@ interface SmalltipProps {
   tagText: string;
   tagColor: string;
   describeText: string;
+  kind: PromptWords;
 }
 export default function Smalltip({
   borderColor,
@@ -15,9 +19,16 @@ export default function Smalltip({
   tagText,
   tagColor,
   describeText,
+  kind
 }: SmalltipProps) {
   const [detail, setDetail] = useState(false);
-
+  const  [ideas, setIdeas]=useState("")
+  const id=usePromptStore((state)=>state.keyword_id)
+const getPromptWords= async()=>{
+  
+    const Words = await drawOfficialPrompt(id,kind);
+    setIdeas(Words.data.content)
+}
   return (
     <>
       <Pressable
@@ -25,9 +36,12 @@ export default function Smalltip({
           styles.findkuang,
           {
             borderColor: borderColor,
+            padding: 22,
           },
         ]}
-        onPress={() => setDetail(true)}
+        onPress={() => {setDetail(true)
+          getPromptWords()}
+        }
       >
         <Text style={[styles.findtext]}>{tagText}</Text>
         <Text style={[styles.findsmalltext, { color: textColor }]}>
@@ -44,16 +58,17 @@ export default function Smalltip({
           <Pressable
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
+
           >
             <View style={[styles.findkuang, { borderColor: borderColor }]}>
               <Text style={[styles.ideatext, { color: textColor }]}>
-                提示提示提示提示
+                {ideas}
               </Text>
-              <Text style={[styles.smalltext, { color: tagColor }]}>
+              <Text style={[styles.smalltext, { color: borderColor }]}>
                 {tagText}
               </Text>
             </View>
-            <Text style={styles.modalTitle}>有灵感了？马上试试</Text>
+            <Text style={styles.modalTitle}>有灵感了？马上试试?</Text>
             <Createway />
           </Pressable>
         </Pressable>
@@ -88,8 +103,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     justifyContent: "center",
     marginBottom: 20,
-    paddingLeft: 22,
-    gap: 6,
     position: "relative",
   },
   smalltext: {
@@ -109,6 +122,7 @@ const styles = StyleSheet.create({
   ideatext: {
     fontSize: 22,
     fontWeight: "400",
+    padding :10
   },
   findtext: {
     color: "#333333",
