@@ -1,21 +1,19 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Pressable,
-  Button,
-} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link, useNavigation } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
-import { Link, useNavigation } from "expo-router";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import Agree from "../assets/images/agree.svg";
-import { loginPwd, sendlogincode, loginPhone } from "./api/user";
-import Mmnoeyes from "../assets/images/Mmnoeyes.svg";
 import Mmeyes from "../assets/images/Mmeyes.svg";
+import Mmnoeyes from "../assets/images/Mmnoeyes.svg";
+import { loginPhone, loginPwd, sendlogincode } from "./api/user";
 
 type LoginType = "phone" | "password";
 export default function SignIn() {
@@ -41,6 +39,7 @@ export default function SignIn() {
       alert("请先注册");
     } else {
       const res = await loginPwd(email, password);
+      console.log(res.data);
       if (res.status === 200) {
         const { access_token, refresh_token, expires_in, token_type } =
           res.data;
@@ -94,9 +93,9 @@ export default function SignIn() {
         style={[styles.gradientBackground]}
       >
         {Mm ? (
-          <Mmnoeyes style={styles.Mm}></Mmnoeyes>
+          <Mmnoeyes style={[styles.Mm,{pointerEvents:"none" }]}></Mmnoeyes>
         ) : (
-          <Mmeyes style={styles.Mm}></Mmeyes>
+          <Mmeyes style={[styles.Mm,{pointerEvents:"none" }]}></Mmeyes>
         )}
         <View style={styles.card}>
           <View style={styles.tabcontainer}>
@@ -109,9 +108,13 @@ export default function SignIn() {
                   : { backgroundColor: "transparent" },
               ]}
             >
-              <Pressable  onPress={() => setLoginway("password")} style={{zIndex:1}} >
-                <Text style={loginway === "password" && styles.wayText}>密码登录</Text>
-                
+              <Pressable
+                onPress={() => setLoginway("password")}
+                style={{ zIndex: 1,}}
+              >
+                <Text style={loginway === "password" && styles.wayText}>
+                  密码登录
+                </Text>
               </Pressable>
               {loginway === "password" && <View style={styles.line}></View>}
             </Pressable>
@@ -123,8 +126,13 @@ export default function SignIn() {
                   : { backgroundColor: "transparent" },
               ]}
             >
-                 <Pressable  onPress={() => setLoginway("phone")} style={{zIndex:2}} >
-                <Text style={loginway === "phone" && styles.wayText}>验证码登陆</Text>
+              <Pressable
+                onPress={() => setLoginway("phone")}
+                style={{ zIndex: 2 }}
+              >
+                <Text style={loginway === "phone" && styles.wayText}>
+                  验证码登陆
+                </Text>
               </Pressable>
               {loginway === "phone" && <View style={styles.line}></View>}
             </View>
@@ -328,7 +336,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333333",
     fontWeight: "700",
-    
   },
   line: {
     width: 28,

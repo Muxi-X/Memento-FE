@@ -126,8 +126,13 @@ export default function Signup() {
       const res = await signupComplete({ signup_token, password });
       console.log("注册结果", res);
       if (res.status === 200) {
-        alert("注册成功");
-        navigation.navigate("signin" as never);
+        if (res.data.access_token) {
+          await SecureStore.setItemAsync("access_token", res.data.access_token);
+          navigation.navigate("index" as never);
+        } else {
+          alert("注册成功，请登录");
+          navigation.navigate("signin" as never);
+        }
       } else {
         alert("注册失败，请稍后重试");
       }
@@ -289,10 +294,10 @@ export default function Signup() {
               ></View>
             )}
           </Pressable>
-          <Text style={{ color: "#999999",fontSize:12 }}>已阅读并同意</Text>
-          <Text style={{ color: "#72B6FF",fontSize:12 }}>《隐私协议》</Text>
-          <Text style={{ color: "#999999" ,fontSize:12}}>和</Text>
-          <Text style={{ color: "#72B6FF",fontSize:12 }}>《用户协议》</Text>
+          <Text style={{ color: "#999999", fontSize: 12 }}>已阅读并同意</Text>
+          <Text style={{ color: "#72B6FF", fontSize: 12 }}>《隐私协议》</Text>
+          <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
+          <Text style={{ color: "#72B6FF", fontSize: 12 }}>《用户协议》</Text>
         </View>
       </View>
     </LinearGradient>
