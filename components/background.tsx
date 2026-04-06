@@ -1,26 +1,30 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 export default function Background({ children }: { children: React.ReactNode }) {
   return (
+    <KeyboardAvoidingView 
+     behavior={"padding"}
+      keyboardVerticalOffset={100}
+    >
     <LinearGradient
-      colors={["#94d1ff", "#c9def6", "#d4e7f8", "#ffffff"]}
-      style={[styles.container, styles.gradientBackground]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
+      locations={[0, 0.48, 1]}
+      style={styles.gradientBackground}
     >
       {children}
     </LinearGradient>
+    </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,
     width: "100%",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-    alignItems: "center",
-    justifyContent: "center",
     position: "relative",
   },
 });
