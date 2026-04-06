@@ -4,20 +4,39 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  Image,
 } from "react-native";
+import * as Progress from 'react-native-progress';
 import ArrowRgiht from "../assets/images/arrow-right.svg";
+import CoverImageNull  from "../assets/images/coverImagenull.svg";
+import { coverImage } from "@/app/api/interface";
 type Props = {
   hasAim: boolean;
+  target: number;
+  progress: number;
+  title: string;
+  cover: coverImage|null;
 };
 export default function HomeCard(props: Props) {
   return (
     <View style={styles.card}>
-      <View style={styles.Imagedata}></View>
+      {      props.cover!==null ?
+      <View style={styles.Imagedata}>
+
+  <Image source={{uri:props.cover.variants.card_4x3.url}}/></View>
+:
+  <View style={[styles.Imagedata ,{backgroundColor:"#EFEFEF",alignItems:"center",justifyContent:"center"
+  }]}>
+    <Text style={{ fontSize: 36, color: "#666666",  }}>?</Text>
+    </View>}
+      
+      
       <Text style={{ fontSize: 18, color: "#3D3D3D", marginLeft: 12 }}>
-        关键
+        {props.title}
       </Text>
-      <Text style={{ fontSize: 12, color: "#666666", marginLeft: 116 }}>
-        x张作品
+     <View style={{flexDirection: "row",alignItems: "center",position:"absolute",top:33,right:21}}>
+       <Text style={{ fontSize: 12, color: "#666666", marginLeft: 116 }}>
+        {props.progress}张作品
       </Text>
       <Pressable
         style={styles.detailArrow}
@@ -27,14 +46,18 @@ export default function HomeCard(props: Props) {
       >
         <ArrowRgiht></ArrowRgiht>
       </Pressable>
-      {/* {props.hasAim && (
-        <ProgressView
-          progress={0.5} // 0-1 之间的数值
-          progressTintColor="#0066FF" // 进度条颜色
-          trackTintColor="#E5E7EB" // 背景轨道颜色
+     </View>
+      {props.hasAim && (
+        <Progress.Bar
           style={styles.progressBar}
-        />
-      )} */}
+          height={8}
+          width={100}
+        progress={props.progress/props.target}
+        borderWidth={0}
+        color="#72B6FF"
+        unfilledColor="#EEEEEE"
+        ></Progress.Bar>
+      )}
     </View>
   );
 }
@@ -48,12 +71,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
+    position: "relative",
   },
   Imagedata: {
     width: 50,
     height: 50,
     borderRadius: 12,
-    backgroundColor: "#ff0000",
+    overflow: "hidden",
   },
 
   detailArrow: {
@@ -66,8 +90,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressBar: {
-    height: 8,
-    width: "100%",
-    borderRadius: 4,
+    position:"absolute",
+    top:50,
+    left:79
   },
 });

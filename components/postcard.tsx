@@ -1,108 +1,178 @@
+import Post from "@/app/api/interface";
+import { useState } from "react";
 import {
-  View,
-  Text,
+  Dimensions,
+  FlatList,
   Image,
   Pressable,
   StyleSheet,
-  FlatList,
-  Dimensions,
-} from 'react-native';
-import HaveIdea from '../assets/images/haveidea.svg';
-import HaveLightIdea from '../assets/images/havelightIdea.svg'
-import Heart from '../assets/images/heart.svg'
-import HeartLight from '../assets/images/heartlight.svg'
-import { useState } from 'react';
-import  Post  from '@/app/api/interface';
-const { width: screenWidth } = Dimensions.get('window');
+  Text,
+  View,
+  Alert,
+} from "react-native";
+import * as SecureStore from "expo-secure-store";
 
-  export function PostCard({post}:{post:Post} ) {
-  const [hasInspiration, setHasInspiration] = useState(post.hasInspiration);
-  const [hasEmpathy, setHasEmpathy] = useState(post.hasempathy);
+import { useRouter } from "expo-router";
+import HaveIdea from "../assets/images/haveidea.svg";
+import HaveLightIdea from "../assets/images/havelightIdea.svg";
+import Heart from "../assets/images/heart.svg";
+import HeartLight from "../assets/images/heartlight.svg";
+import Sound from "../assets/images/sound1.svg";
+import Ablum from "../assets/images/ablum.svg";
+import { ImageBackground } from "expo-image";
+const { width: screenWidth } = Dimensions.get("window");
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(1);
-  const toggleInspiration = () => {
-    setHasInspiration(!hasInspiration);
+const generateIdempotencyKey = () => {
+  return `react_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// 封装点赞/取消点赞的 API 请求
+const reactToUpload = async (
+  uploadId: string,
+  reactionType: "inspired" | "resonated",
+) => {
+  const idempotencyKey = generateIdempotencyKey();
+  try {
+    const token = SecureStore.getItemAsync("access_token");
+    const response = await fetch(
+      `http://47.104.25.166:8080/v1/reactions/uploads/${uploadId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reaction_type: reactionType,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("请求失败");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("reactToUpload error:", error);
+    throw error;
+  }
+};
+
+export function PostCard({ post }: { post: Post }) {
+  const router = useRouter();
+  const [myReactions, setMyReactions] = useState<string[]>(
+    post.my_reactions || [],
+  );
+
+  // 切换「有启发」反应
+  const toggleInspiration = async () => {
+    const newReactions = myReactions.includes("inspired")
+      ? myReactions.filter((r) => r !== "inspired") // 取消
+      : [...myReactions, "inspired"]; // 点赞
+    setMyReactions(newReactions);
+
+    try {
+      await reactToUpload(String(post.id), "inspired");
+    } catch (error) {
+      // 请求失败时回滚状态
+      setMyReactions(post.my_reactions || []);
+      Alert.alert("操作失败", "请稍后重试");
+    }
   };
-  const toggleEmpathy = () => {
-    setHasEmpathy(!hasEmpathy);
+
+  // 切换「有共鸣」反应
+  const toggleEmpathy = async () => {
+    const newReactions = myReactions.includes("resonated")
+      ? myReactions.filter((r) => r !== "resonated")
+      : [...myReactions, "resonated"];
+
+    setMyReactions(newReactions);
+
+    try {
+      await reactToUpload(String(post.id), "resonated");
+    } catch (error) {
+      setMyReactions(post.my_reactions || []);
+      Alert.alert("操作失败", "请稍后重试");
+    }
   };
 
   return (
-    <View style={styles.postCard}>
-      {/* 滑动展示区 */}
-      <FlatList
-        data={post.images}
-        horizontal
-        pagingEnabled
-        keyExtractor={(img, index) => index.toString()}
-        renderItem={({ item }) => (
-          <Image source={{ uri: item }} style={styles.postImage} />
-        )}
-        onScroll={(e) => {
-          const index = Math.floor(e.nativeEvent.contentOffset.x / screenWidth);
-          setCurrentImageIndex(index);
-        }}
-        showsHorizontalScrollIndicator={false}
+    <Pressable
+      style={styles.postCard}
+      onPress={() => {
+        router.navigate({
+          pathname: "/postCardDetail",
+          params: { upload_id: String(post.id) },
+        });
+      }}
+    >
+      <ImageBackground
+        source={{ uri: post.cover_image.variants.card_4x3.url }}
+        style={styles.postImage}
       />
-      {post.images.length > 1 && (
-        <View style={styles.pageBadge}>
-          <Text style={styles.pageBadgeText}>
-            {currentImageIndex+1 }/{post.images.length}
-          </Text>
-        </View>
-      )}
-      {post.images.length > 1 && (
-        <View style={styles.imageIndicatorContainer}>
-          {post.images.map((_: any,index: number )=> (
-            <View
-              key={index}
-              style={[
-                styles.imageIndicator,
-                currentImageIndex === index && styles.activeIndicator,
-              ]}
-            />
-            
-          ))}
 
-        </View>
-      )}
+      <View
+        style={{
+          width: 42,
+          height: 22,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          borderRadius: 999,
+          alignItems: "center",
+          justifyContent: "center",
+          position: "absolute",
+          right: 6,
+          zIndex: 1,
+          bottom: 70,
+          flexDirection: "row",
+          gap: 5,
+        }}
+      >
+        <Ablum></Ablum>
+        <Text style={{ color: "#fff", fontSize: 10 }}>{post.image_count}</Text>
+      </View>
 
-      {/* 文案 */}
       <Text style={styles.postCaption} numberOfLines={1}>
-        {post.caption}
+        {post.display_text}
       </Text>
 
       <View style={styles.interactionRow}>
-        <Pressable 
-          style={styles.interactionButton}
-          onPress={toggleInspiration}
-        >
-          {
-            hasInspiration?<HaveIdea></HaveIdea>:<HaveLightIdea></HaveLightIdea>
-          }
-          <Text style={[
-            styles.interactionText,
-            hasInspiration ? { color: '#999999' } : {color:'#666666'} // 文字同步变色（可选）
-          ]}>
+        <Pressable style={styles.interactionButton} onPress={toggleInspiration}>
+          {myReactions.includes("inspired") ? <HaveIdea /> : <HaveLightIdea />}
+          <Text
+            style={[
+              styles.interactionText,
+              myReactions.includes("inspired")
+                ? { color: "#999999" }
+                : { color: "#666666" },
+            ]}
+          >
             有启发
           </Text>
         </Pressable>
 
-        {/* 有共鸣按钮：切换颜色 + 点击反馈 */}
-        <Pressable 
-          style={styles.interactionButton}
-          onPress={toggleEmpathy}
-        >
-            {hasEmpathy?<Heart></Heart>:<HeartLight></HeartLight>}
-          <Text style={[
-            styles.interactionText,
-            hasEmpathy ? { color: '#999999' } : {color:'#666666'} // 文字同步变色（可选）
-          ]}>
+        <Pressable style={styles.interactionButton} onPress={toggleEmpathy}>
+          {myReactions.includes("resonated") ? <Heart /> : <HeartLight />}
+          <Text
+            style={[
+              styles.interactionText,
+              myReactions.includes("resonated")
+                ? { color: "#999999" }
+                : { color: "#666666" },
+            ]}
+          >
             有共鸣
           </Text>
         </Pressable>
+
+        {post.cover_has_audio && (
+          <View style={styles.audioInfo}>
+            <Text style={styles.audioDuration}>
+              {post.cover_audio_duration_ms}'
+            </Text>
+            <Sound />
+          </View>
+        )}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -110,77 +180,53 @@ const styles = StyleSheet.create({
   postCard: {
     marginBottom: 24,
     borderRadius: 12,
-    height:500,
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    height: 500,
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-    position: 'relative', 
+    position: "relative",
   },
   postImage: {
     width: screenWidth - 32,
     height: 436,
-    resizeMode: 'cover',
-  },
-  // 图片页码角标样式（右下角）
-  pageBadge: {
-    width:30,
-    height:16,
-    position: 'absolute',
-    right: 12,
-    bottom: 70, 
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pageBadgeText: {
-    fontSize: 10,
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
-  // 原有图片指示器样式
-  imageIndicatorContainer: {
-    position: 'absolute',
-    bottom: 12,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    gap: 6,
-  },
-  imageIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-  },
-  activeIndicator: {
-    backgroundColor: '#FFFFFF',
+    resizeMode: "cover",
   },
   postCaption: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   interactionRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 12,
     paddingBottom: 12,
     gap: 16,
   },
   interactionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   interactionText: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
+  },
+  audioInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    right: 13,
+    bottom: 15,
+  },
+  audioDuration: {
+    color: "#666666",
+    fontSize: 12,
+    marginRight: 4,
   },
 });
-

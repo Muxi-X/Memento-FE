@@ -113,7 +113,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
           onRecordingSaved(recordingUri, finalDuration);
         }
         console.log("录音已保存:", recordingUri, "时长:", finalDuration);
-        setRecordingTime(0); // 重置时长
+        setRecordingTime(0); 
       } catch (err) {
         console.error("保存录音失败:", err);
         Alert.alert("保存失败", "无法保存录音，请重试");
@@ -211,10 +211,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 14,
-    color: "#333333",
+    color: "#999999",
   },
   recordingText: {
     fontSize: 14,
+    
   },
   modalOverlay: {
     flex: 1,
