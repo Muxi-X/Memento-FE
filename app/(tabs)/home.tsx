@@ -1,32 +1,106 @@
-import { StyleSheet, View, Text, Pressable, ScrollView, ImageBackground } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  ImageBackground,
+  Image,
+  Modal,
+  TextInput,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {  useRouter } from "expo-router";
-import React, { use } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import Edit from "../../assets/images/edit.svg";
 import Message from "../../assets/images/message.svg";
 import Configure from "../../assets/images/configure.svg";
 import HomeCard from "../../components/homeCard";
-
+import Goodmm from "../../assets/images/goodmmm.svg";
+import { getMedata } from "../api/me";
+import { mydataItem } from "../api/interface";
+import { useMyStore } from "../stores/authstore";
+import NewCreate from "@/components/newCreate";
+import Touxiang from "../../assets/images/basetouxaing.svg";
+import { getCustomKeywordList } from "../api/me";
 export default function HomeScreen() {
-    const router = useRouter();
 
+  const router = useRouter();
+  const [mask, setMask] = useState(false);
+  const [mydata, setMydata] = useState<mydataItem>({
+    nickname: "",
+    avatar_url: "",
+    official_image_count: 0,
+    custom_image_count: 0,
+    unread_notification_count: 0,
+    custom_keywords: [],
+  });
+  const setNickname = useMyStore((state) => state.setNickname);
+  useEffect(() => {
+    const getMydata = async () => {
+      const res = await getMedata();
+      setMydata(res.data);
+    };
+    getMydata();
+  }, []);
+  if (mydata === null) {
+    return null;
+  }
+  const {
+    nickname,
+    avatar_url,
+    official_image_count,
+    custom_image_count,
+    unread_notification_count,
+    custom_keywords,
+  } = mydata;
+  setNickname(nickname);
+const getCustomlist=async()=>{
+const res=await getCustomKeywordList();
+return res.data;
+}
   return (
-    
     <ScrollView>
-      <SafeAreaView style={styles.container}>
-      
-        <Pressable style={[styles.ConfigureIcon, { right: 74 }]} onPress={()=>{router.navigate("/message")}}>
+      <View style={styles.container}>
+        <Pressable
+          style={[styles.ConfigureIcon, { right: 74 }]}
+          onPress={() => {
+            router.navigate("/message");
+          }}
+        >
           <Message />
         </Pressable>
-        <View style={styles.chatnum}>
-          <Text style={styles.numtext}>12</Text>
-        </View>
-          <Pressable style={styles.ConfigureIcon}  onPress={()=>{router.navigate("/configure")}}>
+
+        {unread_notification_count > 0 && (
+          <View style={styles.chatnum}>
+            <Text style={styles.numtext}>
+              {unread_notification_count > 99
+                ? "99+"
+                : unread_notification_count}
+            </Text>
+          </View>
+        )}
+
+        <Pressable
+          style={styles.ConfigureIcon}
+          onPress={() => {
+            router.navigate("/configure");
+          }}
+        >
           <Configure />
         </Pressable>
-        <View style={styles.touxiangcontainer}>
-          <View style={styles.touxiang}></View>
-          <Text style={styles.username}>用户名</Text>
+        <ImageBackground
+          style={styles.touxiangcontainer}
+          source={{ uri: avatar_url }}
+          imageStyle={styles.backgroundImageStyle}
+        >
+          {avatar_url ? (
+            <Image style={styles.touxiang} source={{ uri: avatar_url }}></Image>
+          ) : (
+            <Touxiang style={styles.touxiang}></Touxiang>
+          )}
+
+          <Text style={styles.username}>{nickname}</Text>
           <Pressable
             onPress={() => {
               console.log("换头像");
@@ -35,39 +109,42 @@ export default function HomeScreen() {
           >
             <Edit />
           </Pressable>
-          {/* <View style={styles.goodmm}>
-            <ImageBackground source={'../../assets/images/goodmm.svg'}/>
-          </View> */}
           <View style={styles.sumcontainer}>
             <View style={styles.sumitem}>
-              <Text style={styles.sumnumber}>xxx</Text>
+              <Text style={styles.sumnumber}>{official_image_count}</Text>
               <Text style={styles.sumlable}>官方作品</Text>
             </View>
+            <View style={styles.fengeline}></View>
             <View style={styles.sumitem}>
-              <Text style={styles.sumnumber}>xxx</Text>
+              <Text style={styles.sumnumber}>{custom_image_count}</Text>
               <Text style={styles.sumlable}>自定义作品</Text>
             </View>
           </View>
-        </View>
+        </ImageBackground>
         <View style={styles.listheader}>
           <Text>自定义关键词</Text>
-          <Pressable
-            onPress={() => {
-              console.log("新建自定义关键词");
-            }}
-          >
-            <Text style={{ fontSize: 12, color: "#999999" }}>+新建</Text>
-          </Pressable>
+          <NewCreate></NewCreate>
         </View>
         <ScrollView>
-          <HomeCard hasAim={true}></HomeCard>
-          <HomeCard hasAim={false}></HomeCard>
-          <HomeCard hasAim={false}></HomeCard>
-          <HomeCard hasAim={false}></HomeCard>
-          <HomeCard hasAim={false}></HomeCard>
+          {custom_keywords.map((item, index) => {
+            let Aim = false;
+            if (item.target_image_count > 0) {
+              Aim = true;
+            }
+            return (
+              <HomeCard
+                key={item.id}
+                hasAim={Aim}
+                target={item.target_image_count}
+                progress={item.my_image_count}
+                title={item.text}
+                cover={item.cover_image}
+              ></HomeCard>
+            );
+          })}
         </ScrollView>
-
-      </SafeAreaView>
+        <Goodmm style={styles.Goodmm}></Goodmm>
+      </View>
     </ScrollView>
   );
 }
@@ -114,21 +191,23 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 375,
     width: "100%",
-    // backgroundColor: '#fdfdfd',后续背景是头像
+    zIndex: -1,
+    alignItems: "center",
+  },
+  backgroundImageStyle: {
+    opacity: 0.25,
   },
   touxiang: {
-    position: "absolute",
+    flex: 1,
     width: 100,
     height: 100,
     top: 118,
-    left: 138,
-    borderRadius: 50,
-    backgroundColor: "#858181", //后边改图片
+    borderRadius: "50%",
+    overflow: "hidden",
   },
   username: {
-    position: "absolute",
-    top: 225,
-    left: 158,
+    top: 120,
+    // left: 158,
     fontSize: 20,
     color: "#3D3D3D",
     fontWeight: "700",
@@ -136,8 +215,8 @@ const styles = StyleSheet.create({
   },
   editkuang: {
     position: "absolute",
-    top: 190,
-    left: 213,
+    top: 180,
+    left: 210,
     backgroundColor: "#72B6FF",
     width: 26,
     height: 26,
@@ -146,28 +225,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  goodmm:{
-    width:150,
-    height:150,
-    position:"absolute",
-    top:198,
-    right:11,
-    backgroundColor:"#ffffff"
+  goodmm: {
+    width: 150,
+    height: 150,
+    position: "absolute",
+    top: 198,
+    right: 11,
+    backgroundColor: "#ffffff",
   },
   sumcontainer: {
     height: 100,
     width: 327,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#ffffff",
     borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 96,
     position: "absolute",
     top: 287,
     left: 24,
+    zIndex: 2,
   },
-  sumitem: {},
+  sumitem: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 163,
+    height: 120,
+  },
+  fengeline: {
+    position: "absolute",
+    width: 46,
+    height: 0,
+    transform: [{ rotate: "90deg" }],
+    borderColor: "#EFEFEF",
+    borderTopWidth: 1.4,
+  },
   sumnumber: {
     fontSize: 36,
     color: "#3D3D3D",
@@ -181,5 +273,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 180,
     marginTop: 39,
+  },
+  Goodmm: {
+    width: 150,
+    height: 150,
+    position: "absolute",
+    left: 214,
+    top: 195,
+    zIndex: 1,
   },
 });
