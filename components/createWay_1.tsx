@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Pressable, Text, View, StyleSheet, Alert } from "react-native";
 import { PhotoObject } from "../app/api/interface";
+import { logger } from "react-native-reanimated/lib/typescript/common";
 export function TakePhotoWay() {
   // 打开相机
    const router=useRouter();
@@ -71,7 +72,7 @@ export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
       if (typeof onPhotosSelected === "function") {
         onPhotosSelected(selectedPhotos);
       }
-      console.log("子组件选中的照片列表:", selectedPhotos);
+      console.log("子组件选中的照片列表:", selectedPhotos);      
     router.navigate({
       pathname: "/beforepulish",
         params: {

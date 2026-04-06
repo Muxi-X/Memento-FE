@@ -56,7 +56,7 @@ const Createway = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.8,
       allowsMultipleSelection: true,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ 枚举值更稳定
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
       allowsEditing: false,
     });
 
@@ -66,7 +66,7 @@ const Createway = () => {
         uri: asset.uri,
         width: asset.width,
         height: asset.height,
-        fileName: asset.fileName || `photo_${index}`, // ✅ 兼容无 fileName 情况
+        fileName: asset.fileName || `photo_${index}`, 
       }));
 
       console.log('选中的照片列表:', selectedPhotos);
