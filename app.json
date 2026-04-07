@@ -2,20 +2,12 @@
   "expo": {
     "name": "此行",
     "slug": "memento",
-    "splash": {
-      "image": "./assets/images/mmexport .png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-      "hideAfter": 0
-    },
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "memento",
     "userInterfaceStyle": "automatic",
-    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "jsEngine": "jsc",
       "bundleIdentifier": "com.kazjj.memento"
     },
     "android": {
@@ -23,7 +15,13 @@
         "backgroundColor": "#E6F4FE"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.kazjj.memento"
+      "package": "com.kazjj.memento",
+      "permissions": [
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -31,31 +29,18 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-
-      ],
       "expo-secure-store",
       "expo-font",
       "expo-image",
       "expo-web-browser",
-      ["expo-audio",
-      {
+      [
+        "expo-audio",
+        {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone.",
           "enableBackgroundPlayback": true,
           "enableBackgroundRecording": false
         }
-    ]
-      
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

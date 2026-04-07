@@ -29,7 +29,6 @@
     "expo-image-picker": "~55.0.11",
     "expo-linear-gradient": "~55.0.8",
     "expo-linking": "~55.0.7",
-    "expo-permissions": "^14.4.0",
     "expo-router": "~55.0.4",
     "expo-secure-store": "~55.0.8",
     "expo-splash-screen": "~55.0.10",
