@@ -14,6 +14,14 @@ export const updateMeNickname = (nickname: string) => {
     },
   });
 };
+export const updateMeAvatar = (avatar: string) => {
+  return request({
+    url: "/v1/me/profile/avatar",
+    method: "patch",
+    data: {
+      avatar: avatar,
+    },
+  });}
 export const getMeSetting = () => {
   return request({
     url: "/v1/me/settings",

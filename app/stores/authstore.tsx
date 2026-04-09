@@ -1,11 +1,17 @@
 import { create } from "zustand";
-interface Mystore{
+interface UseMystore{
     nickname: string;
+      avatar_url: string;
+  email: string;
     setNickname: (nickname: string) => void;
+    setAvater:(avatar_url: string) => void;
 }
- export const useMyStore = create<Mystore>((set) => ({
+ export const useMyStore = create<UseMystore>((set) => ({
     nickname: "",
+    avatar_url: "",
+    email: "",
     setNickname: (nickname) => set(() => ({ nickname })),
+    setAvater: (avatar_url) => set(() => ({ avatar_url })),
 }));
 interface setting{
     public_pool_enabled:boolean;
