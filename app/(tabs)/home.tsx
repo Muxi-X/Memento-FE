@@ -3,11 +3,8 @@ import {
   View,
   Text,
   Pressable,
-  ScrollView,
   ImageBackground,
   Image,
-  Modal,
-  TextInput,
   FlatList,
   RefreshControl,
 } from "react-native";
@@ -24,12 +21,11 @@ import { useMyStore } from "../stores/authstore";
 import NewCreate from "@/components/newCreate";
 import Touxiang from "../../assets/images/basetouxaing.svg";
 import { getCustomKeywordList } from "../api/me";
+import * as SecureStore from "expo-secure-store";
 export default function HomeScreen() {
-
   const router = useRouter();
-  const [mask, setMask] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const [mydata, setMydata] = useState<mydataItem>({
     nickname: "",
     avatar_url: "",
@@ -42,8 +38,16 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const getMydata = async () => {
-      const res = await getMedata();
-      setMydata(res.data);
+      try {
+const token = await SecureStore.getItemAsync("access_token");        if (token !== null) {
+          const res = await getMedata();
+          setMydata(res.data);
+        } else {
+          router.navigate("/signin");
+        }
+      } catch (e) {
+        console.log(e);
+      }
     };
     getMydata();
   }, []);
@@ -130,33 +134,33 @@ export default function HomeScreen() {
           <Text>自定义关键词</Text>
           <NewCreate></NewCreate>
         </View>
-<FlatList
-  data={custom_keywords}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => {
-    let hasAim = item.target_image_count > 0;
-    return (
-      <HomeCard
-      keyword_id={item.id}
-        hasAim={hasAim}
-        target={item.target_image_count}
-        progress={item.my_image_count}
-        title={item.text}
-        cover={item.cover_image}
-      />
-    )
-  }}
-  refreshControl={
-    <RefreshControl
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-      colors={["#72B6FF"]}
-      tintColor="#72B6FF"
-      title="正在刷新..."
-      titleColor="#999"
-    />
-  }
-/>
+        <FlatList
+          data={custom_keywords}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            let hasAim = item.target_image_count > 0;
+            return (
+              <HomeCard
+                keyword_id={item.id}
+                hasAim={hasAim}
+                target={item.target_image_count}
+                progress={item.my_image_count}
+                title={item.text}
+                cover={item.cover_image}
+              />
+            );
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#72B6FF"]}
+              tintColor="#72B6FF"
+              title="正在刷新..."
+              titleColor="#999"
+            />
+          }
+        />
         <Goodmm style={styles.Goodmm}></Goodmm>
       </View>
     </View>
