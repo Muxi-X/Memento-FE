@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
 export function ChangeButton2() {
   const setsort2 = useFindStore((state) => state.setsort2);
   const sort2 = useFindStore((state) => state.sort2);
-  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <Pressable onPress={() => setsort2("me")}>
