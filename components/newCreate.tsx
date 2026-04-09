@@ -50,9 +50,7 @@ export default function NewCreate() {
       alert("关键词不能为空");
       return;
     }
-    try {
-      console.log("sssssccd cdsvsd",await SecureStore.getItemAsync("access_token"));
-      
+    try {      
       await addCustomKeyword(keyword, typeof target === "number" ? target : null);
       alert("添加成功");
       setMask(false);
