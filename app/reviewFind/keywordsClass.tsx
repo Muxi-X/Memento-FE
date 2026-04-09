@@ -36,7 +36,6 @@ export default function KeywordScreen() {
   useEffect(() => {
     getPublicList();
   }, [sort, keyword_id]);
-  const keyword = usePromptStore((state) => state.todayKeyword);
   const navigation = useNavigation();
 
   const handleGoBack = () => {

@@ -20,22 +20,21 @@ const { width: screenWidth } = Dimensions.get("window");
 export default function DateScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
-  const sort = useFindStore((state) => state.sort);
+  const sort2 = useFindStore((state) => state.sort2);
   const params = useLocalSearchParams();
-
-  const keyword_id = (() => {
-    if (Array.isArray(params.keyword_id)) return params.keyword_id[0] || "";
-    return params.keyword_id || "";
-  })();
   const [item, setItem] = useState<Post[]>([]);
   const getPublicList = async () => {
-    const res = await listReviewdateDetail();
+    if(sort2==="me"){
+    const res = await listReviewdateDetail(params.biz_date as string);
     setItem(res.data.items);
-    console.log(res.data.items);
+    }else{
+      const res = await listReviewdateDetail(params.biz_date as string);
+    setItem(res.data.items);
+    }
   };
   useEffect(() => {
     getPublicList();
-  }, [sort, keyword_id]);
+  }, [sort2]);
   const navigation = useNavigation();
 
   const handleGoBack = () => {
