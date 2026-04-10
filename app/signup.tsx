@@ -112,6 +112,10 @@ export default function Signup() {
       alert("请完成密码和确认密码的输入");
       return;
     }
+    if(password.length < 8){
+      alert("密码长度必须大于等于8位");
+      return;
+    }
     if (password !== confirmPwd) {
       alert("两次输入的密码不一致，请重新输入");
       return;
@@ -234,7 +238,7 @@ export default function Signup() {
             maxLength={6}
             keyboardType="numeric"
           />
-          <Text style={styles.tiptext}>设置密码</Text>
+          <Text style={styles.tiptext}>设置密码&gt;8</Text>
           <TextInput
             style={styles.inputKuang}
             autoComplete="off"

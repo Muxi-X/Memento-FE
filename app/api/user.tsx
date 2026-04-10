@@ -11,7 +11,7 @@ interface SignupData {
 export const sendCode = (email:string)=>{
     return request(
         {
-            url: "//v1/auth/signup/email/send_code",
+            url: "/v1/auth/signup/email/send_code",
             method: "POST",
             data: { email }
         }
