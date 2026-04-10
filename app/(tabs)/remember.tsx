@@ -46,19 +46,29 @@ export default function FindScreen() {
   };
   const getReviewdateList = async () => {
     try {
-      const token = SecureStore.getItemAsync("access_token");
+      const token = await SecureStore.getItemAsync("access_token");
       console.log(token);
-      const res = await listReviewDates();
-      setReviewData(res.data);
+      if (token !== null) {
+        const res = await listReviewDates();
+        setReviewData(res.data);
+      } else {
+        router.navigate("/signin");
+      }
     } catch (error) {
       console.log(error);
     }
   };
   const getReviewKeywordList = async () => {
     try {
-      const res = await listReviewKeywords();
-      setKeywordData(res.data.items);
-      console.log(res.data.items);
+      const token = await SecureStore.getItemAsync("access_token");
+      console.log(token);
+      if (token !== null) {
+        const res = await listReviewKeywords();
+        setKeywordData(res.data.items);
+        console.log(res.data.items);
+      } else {
+        router.navigate("/signin");
+      }
     } catch (error) {
       console.log(error);
     }

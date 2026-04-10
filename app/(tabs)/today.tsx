@@ -14,7 +14,7 @@ import { PhotoWay, TakePhotoWay } from "../../components/createWay_1";
 import { Idea } from "@/components/Idea";
 import { Link, useRouter } from "expo-router";
 import { PhotoObject } from "../api/interface";
-import { getKeywords, getoffcialHome } from "../api/keywords";
+import {  getoffcialHome } from "../api/keywords";
 import usePromptStore from "../stores/usePromptStore";
 import TalkKuang from "../../assets/images/talkkuang.svg";
 import axios from "axios";

@@ -39,11 +39,12 @@ export default function HomeScreen() {
   useEffect(() => {
     const getMydata = async () => {
       try {
-const token = await SecureStore.getItemAsync("access_token");        if (token !== null) {
+const token = await SecureStore.getItemAsync("access_token");    
+    if (token !== null) {
           const res = await getMedata();
           setMydata(res.data);
         } else {
-          router.navigate("/signin");
+          router.replace("/signin");
         }
       } catch (e) {
         console.log(e);

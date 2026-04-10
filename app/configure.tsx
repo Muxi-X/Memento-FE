@@ -25,8 +25,13 @@ export default function Configure() {
   });
 
   const getSetting = useCallback(async () => {
-    const res = await getMeSetting();
+    const token =  await SecureStore.getItemAsync("access_token");
+    if(token!==null)
+    {    const res = await getMeSetting();
     const data = res.data;
+}else{
+  router.navigate("/signin");
+}
 
     // 更新状态
   //   setPublicPoolEnabled(data.public_pool_enabled);
@@ -45,24 +50,23 @@ export default function Configure() {
   useEffect(() => {
     getSetting();
   }, [getSetting]);
-
-
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        const hasPublicChange = initialSettings.current.public_pool_enabled !== public_pool_enabled;
-        const hasNotifyChange =
-          initialSettings.current.reaction_enabled !== reaction_enabled ||
-          initialSettings.current.creation_reminder_enabled !== creation_reminder_enabled;
-        if (hasPublicChange) {
-          updatePublicable(public_pool_enabled);
-        }
-        if (hasNotifyChange) {
-          updateMeNotificationSettings(reaction_enabled, creation_reminder_enabled);
-        }
-      };
-    }, [public_pool_enabled, reaction_enabled, creation_reminder_enabled])
-  );
+  // 记得验证token后再更新
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     return () => {
+  //       const hasPublicChange = initialSettings.current.public_pool_enabled !== public_pool_enabled;
+  //       const hasNotifyChange =
+  //         initialSettings.current.reaction_enabled !== reaction_enabled ||
+  //         initialSettings.current.creation_reminder_enabled !== creation_reminder_enabled;
+  //       if (hasPublicChange) {
+  //         updatePublicable(public_pool_enabled);
+  //       }
+  //       if (hasNotifyChange) {
+  //         updateMeNotificationSettings(reaction_enabled, creation_reminder_enabled);
+  //       }
+  //     };
+  //   }, [public_pool_enabled, reaction_enabled, creation_reminder_enabled])
+  // );
 
   // 退出登录
   const handleout = async () => {
