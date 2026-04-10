@@ -76,7 +76,7 @@ export default function CustomPage() {
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        <View style={[styles.header]}>
+        <View style={[styles.header,{backgroundColor:"#777676"}]}>
           {item?.cover_image && (
             <ImageBackground
               source={{ uri: item.cover_image.variants.original.url }}
@@ -238,14 +238,14 @@ const styles = StyleSheet.create({
     top: 56,
   },
   postList: {
-    paddingHorizontal: 16,
     shadowColor: "#000",
     backgroundColor: "#ffffff",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 2,
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     zIndex: 999,
     position: "absolute",
     top: 264,
@@ -274,10 +274,5 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 74,
     right: 24,
-  },
-    modalMask: {
-    flex: 1,
-    backgroundColor: "rgba(21, 24, 30, 0.2)",
-    justifyContent: "flex-end",
   },
 });
