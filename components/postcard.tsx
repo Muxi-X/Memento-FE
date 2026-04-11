@@ -147,7 +147,7 @@ export function PostCard({ post }: { post: Post }) {
 
       <View style={styles.interactionRow}>
         <Pressable style={styles.interactionButton} onPress={toggleInspired}>
-          {myReactions.includes("inspired") ? <HaveIdea /> : <HaveLightIdea />}
+          {myReactions.includes("inspired") ?   <HaveLightIdea />:<HaveIdea />}
           <Text
             style={[
               styles.interactionText,
@@ -161,7 +161,7 @@ export function PostCard({ post }: { post: Post }) {
         </Pressable>
 
         <Pressable style={styles.interactionButton} onPress={toggleResonated}>
-          {myReactions.includes("resonated") ? <Heart /> : <HeartLight />}
+          {myReactions.includes("resonated") ?  <HeartLight />:<Heart /> }
           <Text
             style={[
               styles.interactionText,

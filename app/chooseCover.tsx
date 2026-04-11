@@ -1,13 +1,21 @@
-import { View, StyleSheet, Pressable, Text, FlatList, Image, Dimensions } from "react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
-import { useEffect } from "react";
-import { useRouter, useNavigation, useLocalSearchParams } from "expo-router";
-import { CustomImageItem } from "./api/interface";
 import { setCustomKeywordCover } from "./api/custom";
+import { CustomImageItem } from "./api/interface";
 
 const { width } = Dimensions.get("window");
-const itemSize = (width - 30) / 3; 
+const itemSize = (width - 30) / 3;
 
 export default function ChooseCover() {
   const router = useRouter();
@@ -16,9 +24,9 @@ export default function ChooseCover() {
   const images: CustomImageItem[] = params.images
     ? JSON.parse(params.images as string)
     : [];
-const handeleChangecover = async(keyword_id:string,item_id:string,) => {
-  await setCustomKeywordCover(keyword_id,item_id)
-}
+  const handeleChangecover = async (keyword_id: string, item_id: string) => {
+    await setCustomKeywordCover(keyword_id, item_id);
+  };
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
@@ -30,7 +38,7 @@ const handeleChangecover = async(keyword_id:string,item_id:string,) => {
         style={styles.imageItem}
         onPress={() => {
           console.log("选中封面：", item.id);
-          handeleChangecover(params.keyword_id as string,item.id,)
+          handeleChangecover(params.keyword_id as string, item.id);
           router.back();
         }}
       >
@@ -46,7 +54,12 @@ const handeleChangecover = async(keyword_id:string,item_id:string,) => {
   return (
     <SafeAreaProvider style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={styles.backBtn}
+        >
           <Arrowback />
         </Pressable>
         <Text style={styles.headertext}>选择封面</Text>
@@ -81,6 +94,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
   },
   headertext: {
     fontSize: 16,

@@ -1,7 +1,6 @@
 import VoiceRecorder from "@/components/voiceRecord";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,11 +15,14 @@ import {
   TextInput,
   View,
 } from "react-native";
-import Voicecocle from "../assets/images/voiceConcel.svg"
-import { KeyboardAwareScrollView,KeyboardProvider } from "react-native-keyboard-controller";
+import {
+  KeyboardAwareScrollView,
+  KeyboardProvider,
+} from "react-native-keyboard-controller";
 import AddPhotos from "../assets/images/addphoto.svg";
 import Arrow_back from "../assets/images/arrow-back.svg";
 import Sound from "../assets/images/sound.svg";
+import Voicecocle from "../assets/images/voiceConcel.svg";
 import {
   commitUpload,
   CompleteItem,
@@ -169,8 +171,8 @@ const BeforePublish = () => {
         });
       }
       const res = await presignUpload(sid, reqItems);
-      console.log('========oooo',reqItems);
-      
+      console.log("========oooo", reqItems);
+
       console.log("____________________", res.data);
 
       return res.data["items"] as image_upload[];
@@ -296,6 +298,7 @@ const BeforePublish = () => {
     try {
       if (photos && typeof photos === "string") {
         const parsed = JSON.parse(photos);
+        console.log("parsed", parsed);
         if (Array.isArray(parsed)) {
           const init: PhotoItem[] = parsed.map((item, idx) => ({
             ...item,
@@ -490,157 +493,162 @@ const BeforePublish = () => {
   const currentPhoto =
     currentActiveIndex >= 0 ? photoList[currentActiveIndex] : null;
 
-return (
-  <KeyboardProvider>
-    <KeyboardAwareScrollView
-      bottomOffset={200}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      style={styles.container}
-    >
-      <View style={[styles.container,{  alignItems: "center",    paddingTop: 56,}]}>
-        {/* 头部 */}
-        <View style={styles.header}>
-          <Pressable onPress={() => setBackAlert(true)} style={styles.goback}>
-            <Arrow_back />
-          </Pressable>
+  return (
+    <KeyboardProvider>
+      <KeyboardAwareScrollView
+        bottomOffset={200}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        style={styles.container}
+      >
+        <View
+          style={[styles.container, { alignItems: "center", paddingTop: 56 }]}
+        >
+          {/* 头部 */}
+          <View style={styles.header}>
+            <Pressable onPress={() => setBackAlert(true)} style={styles.goback}>
+              <Arrow_back />
+            </Pressable>
 
-          {backAlert && (
-            <View
-              style={{
-                width: 113,
-                height: 60,
-                borderRadius: 12,
-                backgroundColor: "#fff",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "absolute",
-                gap: 7,
-                left: 24,
-                shadowColor: "#000",
-                shadowOffset: { width: 4, height: 10 },
-                shadowOpacity: 0.1,
-                zIndex: 999,
-              }}
-            >
-              <Pressable onPress={() => navigation.goBack()}>
-                <Text style={{ color: "#FE585B", fontSize: 12 }}>
-                  不保留返回
-                </Text>
-              </Pressable>
+            {backAlert && (
               <View
                 style={{
-                  width: 97,
-                  height: 0,
-                  borderTopColor: "#EEEEEE",
-                  borderTopWidth: 1,
+                  width: 113,
+                  height: 60,
+                  borderRadius: 12,
+                  backgroundColor: "#fff",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "absolute",
+                  gap: 7,
+                  left: 24,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 4, height: 10 },
+                  shadowOpacity: 0.1,
+                  zIndex: 999,
                 }}
-              ></View>
-              <Pressable onPress={() => setBackAlert(false)}>
-                <Text style={{ color: "#3D3D3D", fontSize: 12 }}>保留编辑</Text>
-              </Pressable>
-            </View>
-          )}
-
-          <Pressable
-            style={[
-              styles.button2,
-              isPublishing && { backgroundColor: "#ccc" },
-            ]}
-            onPress={handlePublish}
-            disabled={isPublishing}
-          >
-            <Text style={{ color: "#FFF", fontWeight: "500", fontSize: 15 }}>
-              {isPublishing ? "发布中..." : "发布"}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* 图片展示区 */}
-        <View style={styles.photoshow}>
-          {photoList.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={{ color: "#999" }}>暂无选中的照片</Text>
-            </View>
-          ) : (
-            <>
-              <Pressable
-                style={[
-                  styles.coverbtn1,
-                  currentPhoto?.isCover && {
-                    backgroundColor: "#72B6FF",
-                    width: 50,
-                  },
-                ]}
-                onPress={() =>
-                  currentActiveIndex >= 0 && handleSetCover(currentActiveIndex)
-                }
               >
-                <Text style={{ color: "#fff" }}>
-                  {currentPhoto?.isCover ? "封面" : "设为封面"}
-                </Text>
-              </Pressable>
-
-              <FlatList
-                data={renderData}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.flatListContent}
-                snapToAlignment="center"
-                decelerationRate="fast"
-                onScroll={handleScroll}
-                scrollEventThrottle={16}
-              />
-            </>
-          )}
-        </View>
-
-        {/* 文案输入区 */}
-        {currentPhoto && (
-          <View style={styles.copywriting}>
-            <TextInput
-              style={{ color: "#999", fontSize: 16, marginBottom: 5 }}
-              placeholder="为你的照片取个名字"
-              value={currentPhoto.title}
-              onChangeText={handleTitleChange}
-            />
-            <TextInput
-              placeholder="分享你对这个关键词的理解、照片背后的故事~"
-              placeholderTextColor="#CCC"
-              style={styles.textInput}
-              multiline
-              value={currentPhoto.desc}
-              onChangeText={handleDescChange}
-            />
-            {currentPhoto.recordingUri && (
-              <View style={styles.voice}>
-                <View style={styles.voiceBar}>
-                  <Sound width={16} height={16} />
-                  <Text style={styles.voiceDuration}>
-                    {currentPhoto.recordingDuration}'
+                <Pressable onPress={() => navigation.goBack()}>
+                  <Text style={{ color: "#FE585B", fontSize: 12 }}>
+                    不保留返回
                   </Text>
-                </View>
-                <Pressable
-                  onPress={handleDeleteRecording}
-                  style={styles.deleteVoice}
-                >
-                  <Voicecocle/>
+                </Pressable>
+                <View
+                  style={{
+                    width: 97,
+                    height: 0,
+                    borderTopColor: "#EEEEEE",
+                    borderTopWidth: 1,
+                  }}
+                ></View>
+                <Pressable onPress={() => setBackAlert(false)}>
+                  <Text style={{ color: "#3D3D3D", fontSize: 12 }}>
+                    保留编辑
+                  </Text>
                 </Pressable>
               </View>
             )}
-          </View>
-        )}
 
-        {photoList.length > 0 && (
-          <VoiceRecorder onRecordingSaved={handleRecordingSaved} />
-        )}
-      </View>
-    </KeyboardAwareScrollView>
-  </KeyboardProvider>
-);
+            <Pressable
+              style={[
+                styles.button2,
+                isPublishing && { backgroundColor: "#ccc" },
+              ]}
+              onPress={handlePublish}
+              disabled={isPublishing}
+            >
+              <Text style={{ color: "#FFF", fontWeight: "500", fontSize: 15 }}>
+                {isPublishing ? "发布中..." : "发布"}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* 图片展示区 */}
+          <View style={styles.photoshow}>
+            {photoList.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={{ color: "#999" }}>暂无选中的照片</Text>
+              </View>
+            ) : (
+              <>
+                <Pressable
+                  style={[
+                    styles.coverbtn1,
+                    currentPhoto?.isCover && {
+                      backgroundColor: "#72B6FF",
+                      width: 50,
+                    },
+                  ]}
+                  onPress={() =>
+                    currentActiveIndex >= 0 &&
+                    handleSetCover(currentActiveIndex)
+                  }
+                >
+                  <Text style={{ color: "#fff" }}>
+                    {currentPhoto?.isCover ? "封面" : "设为封面"}
+                  </Text>
+                </Pressable>
+
+                <FlatList
+                  data={renderData}
+                  renderItem={renderItem}
+                  keyExtractor={keyExtractor}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.flatListContent}
+                  snapToAlignment="center"
+                  decelerationRate="fast"
+                  onScroll={handleScroll}
+                  scrollEventThrottle={16}
+                />
+              </>
+            )}
+          </View>
+
+          {/* 文案输入区 */}
+          {currentPhoto && (
+            <View style={styles.copywriting}>
+              <TextInput
+                style={{ color: "#999", fontSize: 16, marginBottom: 5 }}
+                placeholder="为你的照片取个名字"
+                value={currentPhoto.title}
+                onChangeText={handleTitleChange}
+              />
+              <TextInput
+                placeholder="分享你对这个关键词的理解、照片背后的故事~"
+                placeholderTextColor="#CCC"
+                style={styles.textInput}
+                multiline
+                value={currentPhoto.desc}
+                onChangeText={handleDescChange}
+              />
+              {currentPhoto.recordingUri && (
+                <View style={styles.voice}>
+                  <View style={styles.voiceBar}>
+                    <Sound width={16} height={16} />
+                    <Text style={styles.voiceDuration}>
+                      {currentPhoto.recordingDuration}'
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={handleDeleteRecording}
+                    style={styles.deleteVoice}
+                  >
+                    <Voicecocle />
+                  </Pressable>
+                </View>
+              )}
+            </View>
+          )}
+
+          {photoList.length > 0 && (
+            <VoiceRecorder onRecordingSaved={handleRecordingSaved} />
+          )}
+        </View>
+      </KeyboardAwareScrollView>
+    </KeyboardProvider>
+  );
 };
 
 const styles = StyleSheet.create({
