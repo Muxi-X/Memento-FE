@@ -41,7 +41,7 @@ interface ReactionCounts {
 }
 
 export interface PhotoObject {
-  id: string;
+  id: number;
   uri: string;
   width: number;
   height: number;

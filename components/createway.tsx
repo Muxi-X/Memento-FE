@@ -59,7 +59,7 @@ const Createway = () => {
 
     if (!result.canceled) {
       const selectedPhotos = result.assets.map((asset, index) => ({
-        id: Date.now().toString(),
+        id: index,
         uri: asset.uri,
         width: asset.width,
         height: asset.height,
