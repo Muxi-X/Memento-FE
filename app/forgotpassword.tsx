@@ -1,8 +1,9 @@
 import Arrowleft from "@/assets/images/arrow-left.svg";
-import Background from "@/components/background";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View, } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+
 export default function ForgotPassword() {
   const navigation = useNavigation();
   useEffect(() => {
@@ -11,8 +12,13 @@ export default function ForgotPassword() {
     });
   }, []);
   return (
-    <>
-      <Background>
+      <LinearGradient
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
+        locations={[0, 0.48, 1]}
+        style={styles.gradientBackground}
+      >
         <View style={styles.forgetcard}>
           <View style={styles.header}>
             <Pressable onPress={() => navigation.goBack()}>
@@ -46,11 +52,16 @@ export default function ForgotPassword() {
             <Text style={styles.loginText}>确认</Text>
           </Pressable>
         </View>
-      </Background>
-    </>
+      </LinearGradient>
   );
 }
 const styles = StyleSheet.create({
+    gradientBackground: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   forgetcard: {
     backgroundColor: "#ffffff",
     width: 327,
