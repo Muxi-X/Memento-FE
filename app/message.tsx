@@ -4,20 +4,35 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
 import MessageTip from "@/components/messageTip";
 import { use, useEffect,useState } from "react";
-import { getNotificationslist } from "./api/me";
+import { getNotificationslist, markNotificationsRead  } from "./api/me";
 import { notfiItem } from "./api/interface";
 
 export default function Message() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<notfiItem[]>([]);
   const [next_cursor, setNext_cursor]=useState("")
-  useEffect(()=>{
-    const getNotifications=async()=>{
+      const getNotifications=async()=>{
       const res=await getNotificationslist()
       setNotifications(res.data.items)
       setNext_cursor(res.data.next_cursor)
     }
+    const markRead=async()=>{
+      try{
+        const res=await markNotificationsRead()
+        if(res.status===204)
+          {
+            console.log("标记已读成功")
+          }
+          else{
+            console.log("标记已读失败",res.status)
+          }
+      }catch(e){
+        console.log(e)
+      }
+    }
+  useEffect(()=>{
     getNotifications()
+    markRead()
   },[])
   return (
     <SafeAreaProvider style={styles.container}>

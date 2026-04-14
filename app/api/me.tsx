@@ -21,53 +21,64 @@ export const updateMeAvatar = (avatar: string) => {
     data: {
       avatar: avatar,
     },
-  });}
+  });
+};
 export const getMeSetting = () => {
   return request({
     url: "/v1/me/settings",
     method: "GET",
   });
 };
-export const updatePublicable = (public_pool_enabled:boolean) => {
+export const updatePublicable = (public_pool_enabled: boolean) => {
   return request({
-    url:"/v1/me/settings/privacy",
-    method:"PATCH",
-    data:{
-        public_pool_enabled:public_pool_enabled}
+    url: "/v1/me/settings/privacy",
+    method: "PATCH",
+    data: {
+      public_pool_enabled: public_pool_enabled,
+    },
   });
 };
-export const updateMeNotificationSettings=(reaction_enabled:boolean,creation_reminder_enabled:boolean)=>{
-    return request({
-        url:"/v1/me/settings/notifications",
-        method:"patch",
-        data:{
-            reaction_enabled:reaction_enabled,
-            creation_reminder_enabled:creation_reminder_enabled
-        }
-    })
-}
+export const updateMeNotificationSettings = (
+  reaction_enabled: boolean,
+  creation_reminder_enabled: boolean,
+) => {
+  return request({
+    url: "/v1/me/settings/notifications",
+    method: "patch",
+    data: {
+      reaction_enabled: reaction_enabled,
+      creation_reminder_enabled: creation_reminder_enabled,
+    },
+  });
+};
 export const getNotificationslist = () => {
   return request({
     url: "/v1/me/notifications",
     method: "GET",
   });
 };
-export const getCustomKeywordList=()=>{
-    return request({
-        url:"/v1/custom-keywords",
-        method:"GET"
-    })
-}
-export  const addCustomKeyword=(keyword:string, target:number|null)=>{
-    return request({
-        url:"/v1/custom-keywords",
-        method:"POST",
-        data:{
-            text:keyword,
-            target:target
-        }
-    })
-}
+export const markNotificationsRead = () => {
+  return request({
+    url: "/v1/me/notifications/read",
+    method: "patch",
+  });
+};
+export const getCustomKeywordList = () => {
+  return request({
+    url: "/v1/custom-keywords",
+    method: "GET",
+  });
+};
+export const addCustomKeyword = (keyword: string, target: number | null) => {
+  return request({
+    url: "/v1/custom-keywords",
+    method: "POST",
+    data: {
+      text: keyword,
+      target: target,
+    },
+  });
+};
 // export const getMeUnreadNotificationCount=()=>{
 //     return request(
 //         {
