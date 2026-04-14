@@ -104,12 +104,10 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     width: "100%",
     height: 179,
-    backgroundColor: "#FBFBFD00",
     position: "relative",
-    paddingTop: 50,
+    paddingTop: 59,
     gap: 11,
   },
   buttonGroup: {
@@ -148,7 +146,7 @@ const styles = StyleSheet.create({
   changebutton: {
     position: "absolute",
     top: 134,
-    right: 34,
+    right: 24,
   },
   postList: {
     paddingHorizontal: 16,

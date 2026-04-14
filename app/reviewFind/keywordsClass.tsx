@@ -94,12 +94,11 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     width: "100%",
     height: 179,
     backgroundColor: "#FBFBFD00",
     position: "relative",
-    paddingTop: 50,
+    paddingTop: 67,
     gap: 11,
   },
   buttonGroup: {
