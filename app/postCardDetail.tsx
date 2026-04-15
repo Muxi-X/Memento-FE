@@ -11,8 +11,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
+import ImageViewer from "react-native-image-zoom-viewer";
+import Modal from "react-native-modal";
 import Arrow from "../assets/images/arrow-bottom.svg";
 import Arrowback from "../assets/images/goback.svg";
 import VoiceIcon from "../assets/images/sound2.svg";
@@ -27,6 +29,8 @@ export default function PostCardDetail() {
   const [detaildata, setDetaildata] = useState<detaildataItem>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showImageView, setShowImageView] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const params = useLocalSearchParams();
   const router = useRouter();
   const formatIsoDateToYMD = (isoDate: string) => {
@@ -113,7 +117,7 @@ export default function PostCardDetail() {
         })}
         decelerationRate="fast"
         pagingEnabled={true}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           // 6. 每个item宽度设为屏幕宽度
           <View style={{ width: screenWidth, height: screenHeight }}>
             <ImageBackground
@@ -127,26 +131,40 @@ export default function PostCardDetail() {
                 style={StyleSheet.absoluteFill}
               >
                 <View style={styles.contentContainer}>
-                  <Pressable style={styles.imagelist}>
+                  <Pressable
+                    style={[styles.imagelist]}
+                    onPress={() => {
+                      setCurrentImageIndex(index);
+                      setShowImageView(true);
+                    }}
+                  >
                     <Image
                       source={{
                         uri: item.image?.variants?.detail_large?.url || "",
                       }}
-                      style={{ flex: 1 }}
+                      style={{
+                        height: undefined,
+                        maxHeight: screenHeight,
+                        width:"100%",
+                        aspectRatio:
+                          item.image.variants.detail_large.width /
+                          item.image.variants.detail_large.height,
+                      }}
                       resizeMode="cover"
                     />
                   </Pressable>
-                  <View
+               <View style={styles.wenanContainter}>
+                   <View
                     style={{
                       flexDirection: "row",
                       paddingBottom: 5,
                       height: 35,
-                      width: 327,
+                      width: screenWidth-24,
                       alignItems: "flex-end",
                       position: "relative",
                     }}
                   >
-                    <Text style={styles.title}>{item.title || "无标题"}</Text>
+                    <Text style={styles.title}>{item.title || ""}</Text>
                     {item.has_audio && (
                       <Pressable style={styles.voice}>
                         <VoiceIcon />
@@ -160,14 +178,14 @@ export default function PostCardDetail() {
                       {formatIsoDateToYMD(item.created_at)}
                     </Text>
                   </View>
+                  {/* 分界线 */}
                   <View
                     style={{
                       height: 0,
-                      width: 327,
+                      width: screenWidth-24,
                       borderColor: "rgba(253, 253, 253, 0.2)",
                       borderWidth: 1,
                       marginBottom: 24,
-                      marginHorizontal: 24,
                     }}
                   ></View>
 
@@ -178,7 +196,7 @@ export default function PostCardDetail() {
                         showsVerticalScrollIndicator={false}
                       >
                         <Text style={styles.copywritingText}>
-                          {item.note || "暂无文案"}
+                          {item.note}
                         </Text>
 
                         {item.note.length > 30 && (
@@ -205,6 +223,7 @@ export default function PostCardDetail() {
                       </Text>
                     )}
                   </View>
+               </View>
                 </View>
               </BlurView>
             </ImageBackground>
@@ -213,6 +232,29 @@ export default function PostCardDetail() {
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1 }}
       />
+      {/* 原图预览弹窗 */}
+      <Modal
+        isVisible={showImageView}
+        onBackdropPress={() => setShowImageView(false)}
+        onSwipeComplete={() => setShowImageView(false)}
+        onBackButtonPress={() => setShowImageView(false)}
+        swipeDirection={["up"]}
+        style={{ margin: 0 }}
+        statusBarTranslucent
+      >
+        <ImageViewer
+          imageUrls={detaildata.images.map((img) => ({
+            url: img.image?.variants?.detail_large.url || "",
+          }))}
+          index={currentImageIndex}
+          onCancel={() => setShowImageView(false)}
+          enableSwipeDown
+          onSwipeDown={() => setShowImageView(false)}
+          saveToLocalByLongPress={false}
+          enablePreload
+          backgroundColor="rgba(0,0,0,0.9)"
+        />
+      </Modal>
     </>
   );
 }
@@ -247,7 +289,7 @@ const styles = StyleSheet.create({
   },
 
   backgroundImage: {
-    flex: 1,
+    alignItems: "center",
     width: "100%",
     height: screenHeight,
   },
@@ -256,16 +298,23 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    position: "relative",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
   imagelist: {
     width: "100%",
-    height: 301,
-    marginTop: 243,
-    marginBottom: 52,
     zIndex: 1,
+    marginBottom: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  wenanContainter: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: screenHeight*0.73,
+    zIndex: 999,
+    position: "absolute",
   },
   title: {
     fontSize: 24,
@@ -293,7 +342,7 @@ const styles = StyleSheet.create({
     bottom: 5,
   },
   copywritingWrapper: {
-    width: 308,
+    width: screenWidth-24,
     position: "relative",
   },
   copywritingCollapsed: {
