@@ -464,7 +464,7 @@ const BeforePublish = () => {
   }, []);
 
   const renderItem = useCallback(
-    ({ item }: { item: RenderItemType }) => {
+    ({ item ,index}: { item: RenderItemType ,index: number}) => {
       if ("type" in item) {
         return (
           <Pressable
@@ -479,16 +479,17 @@ const BeforePublish = () => {
       }
       const p = item as PhotoItem;
       return (
-        <View style={styles.imageItemContainer}>
+        <Pressable style={styles.imageItemContainer}
+        onLongPress={()=>handleDeletePhoto(index)}>
           <Image
             source={{ uri: p.uri }}
             style={styles.image}
             resizeMode="cover"
           />
-        </View>
+        </Pressable>
       );
     },
-    [handleAddPhoto],
+    [handleAddPhoto,handleDeletePhoto],
   );
   const currentPhoto =
     currentActiveIndex >= 0 ? photoList[currentActiveIndex] : null;
@@ -575,7 +576,7 @@ const BeforePublish = () => {
                   style={[
                     styles.coverbtn1,
                     currentPhoto?.isCover && {
-                      backgroundColor: "#72B6FF",
+                      backgroundColor: "#A9D1FF",
                       width: 50,
                     },
                   ]}
