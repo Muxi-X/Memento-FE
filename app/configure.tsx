@@ -73,7 +73,8 @@ export default function Configure() {
     await SecureStore.deleteItemAsync("access_token");
     await SecureStore.deleteItemAsync("user_id");
     await SecureStore.deleteItemAsync("user_name");
-    router.navigate("/signin");
+    router.dismissAll();
+    router.replace("/signin");
   };
 
   return (

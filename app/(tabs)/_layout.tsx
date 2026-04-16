@@ -23,7 +23,7 @@ export default function TabLayout() {
     if (name === "home"||name==="remember") {
       const access_token = await SecureStore.getItemAsync("access_token");
       if (!access_token) {
-      router.navigate("/signin");
+      router.replace("/signin");
       return false;
     } else {
       router.navigate(`/${name}`);
