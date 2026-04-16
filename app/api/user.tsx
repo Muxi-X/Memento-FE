@@ -8,6 +8,10 @@ interface SignupData {
     signup_token:string,
     password:string,
 }
+interface resetData{
+    reset_token:string,
+    new_password:string
+}
 export const sendCode = (email:string)=>{
     return request(
         {
@@ -60,4 +64,25 @@ export const loginPhone = (email:string, code:string)=>{
             data:{email, code}
         }
     )
+}
+export const resetSendcode=(email:string)=>{
+    return request({
+        url:"/v1/auth/password_reset/email/send_code",
+        method:"POST",
+        data:{email}
+    })
+}
+export const verifyResetEmailCode=(email:string, code:string)=>{
+    return request({
+        url:"/v1/auth/password_reset/email/verify_code",
+        method:"POST",
+        data:{email, code}
+    })
+}
+ export const resetComplete=(data:resetData)=>{
+    return request({
+        url:"/v1/auth/password_reset/complete",
+        method:"POST",
+        data
+    })
 }
