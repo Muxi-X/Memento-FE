@@ -169,7 +169,7 @@ export default function PostCardDetail() {
                       <Pressable style={styles.voice}>
                         <VoiceIcon />
                         <Text style={{ color: "#FFFFFF", fontSize: 12 }}>
-                          {item.audio_duration_ms || 0}'
+                          {item.audio_duration_ms || 0}
                         </Text>
                       </Pressable>
                     )}

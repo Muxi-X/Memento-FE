@@ -1,15 +1,15 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 const service = axios.create({
-  baseURL:"https://47.104.25.166",
+  baseURL: "https://47.104.25.166",
   timeout: 10000,
 });
 service.interceptors.request.use(
   async (config) => {
     try {
       const token = await SecureStore.getItemAsync("access_token");
-        console.log("拦截器读取 token:", token);
-         if (token) {
+      console.log("拦截器读取 token:", token);
+      if (token) {
         config.headers["Authorization"] = `Bearer ${token.trim()}`;
       } else {
         console.log("token 为空");
