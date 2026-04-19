@@ -2,12 +2,14 @@ import { useLocalSearchParams, Stack } from "expo-router";//从 URL 里拿参数
 import { useEffect, useState } from "react";
 import { Text, View,Dimensions,Image ,Pressable} from "react-native";
 import { getCustomImageDetail } from "./api/custom";
+import type { CustomImageDetail } from "./api/interface";
+
 
 //详情页组件
 export default function CustomImageDetail() {
   const [expanded, setExpanded] = useState(false);
   const { image_id } = useLocalSearchParams();//从 URL 里拿 image_id
-  const [detail, setDetail] = useState<any>(null);//准备一个变量存详情数据
+  const [detail, setDetail] = useState<CustomImageDetail | null>(null);//准备一个变量存详情数据
   useEffect(() => {
     fetchDetail();
   }, []);
@@ -27,8 +29,10 @@ export default function CustomImageDetail() {
       console.log("获取详情失败：", error);
     }
   };
-
-  return (
+if (!detail) {
+  return null;
+}
+ return (
     <View style={{ flex: 1}}>
       <Stack.Screen
         options={{
@@ -43,10 +47,10 @@ export default function CustomImageDetail() {
       {/* Layer 1 背景模糊 */}
       <Image
   source={{ uri: 
-      detail?.image
-        ?.variants
-        ?.detail_large
-        ?.url }}
+      detail.image
+        .variants
+        .detail_large
+        .url }}
   style={{
     position: "absolute",
       width: "100%",
@@ -60,10 +64,10 @@ export default function CustomImageDetail() {
 <Image
   source={{
     uri:
-      detail?.image
-        ?.variants
-        ?.detail_large
-        ?.url
+      detail.image
+        .variants
+        .detail_large
+        .url
   }}
   style={{
     position: "absolute",
@@ -83,7 +87,7 @@ export default function CustomImageDetail() {
           fontWeight: "500",
           color: "#fff",
         }}>
-  {detail?.title}
+  {detail.title}
 </Text>
 {/*日期 */}
 <Text  style={{
@@ -93,7 +97,7 @@ export default function CustomImageDetail() {
     fontSize: 14,
     color: "#fff",
   }}>
-  {detail?.created_at?.slice(0, 10)}
+  {new Date(detail.created_at).toISOString().slice(0, 10)}
 </Text>
 {/* 横线 */}
 
