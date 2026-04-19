@@ -164,3 +164,22 @@ export interface CustomImageItem {
   display_order: number;
   created_at: string;
 }
+export interface CustomImageDetail {
+  id: string;
+  title: string;
+  note: string;
+
+  created_at: string;
+
+  image: {
+    variants: {
+      detail_large: {
+        url: string;
+      };
+    };
+  };
+
+  has_audio: boolean;
+  audio_duration_ms: number;
+  audio_play_url: string;
+}
