@@ -1,10 +1,11 @@
 import VoiceRecorder from "@/components/voiceRecord";
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { getInfoAsync } from 'expo-file-system/legacy'
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   FlatList,
@@ -17,7 +18,6 @@ import {
 } from "react-native";
 import {
   KeyboardAwareScrollView,
-  KeyboardProvider,
 } from "react-native-keyboard-controller";
 import AddPhotos from "../assets/images/addphoto.svg";
 import Arrow_back from "../assets/images/arrow-back.svg";
@@ -32,6 +32,7 @@ import {
   presignUpload,
 } from "./api/Publish";
 import usePromptStore from "./stores/usePromptStore";
+import { useImageStore } from "./stores/useImageStore";
 
 interface PhotoItem {
   id: string | number;
@@ -45,23 +46,20 @@ interface PhotoItem {
   recordingDuration: number;
   isCover: boolean;
 }
+interface UploadPresignedTarget {
+  method: "POST" | "PUT";
+  url: string;
+  headers?: Record<string, string> | null;
+  form_fields?: Record<string, string> | null;
+  object_key: string;
+  expires_at: string;
+}
 interface image_upload {
   client_image_id: string;
   item_id: string;
   image_id: string;
-  image_upload: {
-    method: "put";
-    url: string;
-    headers?: Record<string, string>;
-    objectkey: string;
-  };
-  audio_upload?: {
-    method: "put";
-    url: string;
-    headers: Record<string, string>;
-    objectkey: string;
-  };
-
+  image_upload: UploadPresignedTarget;
+  audio_upload?: UploadPresignedTarget;
   expires_at: string;
 }
 type RenderItemType = PhotoItem | { type: "add" };
@@ -73,10 +71,11 @@ const ITEM_WIDTH = screenWidth * 0.85;
 
 const BeforePublish = () => {
   const type = useLocalSearchParams().type;
-  const photos = useLocalSearchParams().photos;
   const keyword_id = useLocalSearchParams().keyword_id;
-  console.log(photos);
-
+  
+  const photos=useImageStore((state) => state.selectedPhotos);
+  const takenPhoto = useImageStore((state) => state.takenPhoto);
+  const clearPhotos = useImageStore((state) => state.clearPhotos);
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -87,15 +86,14 @@ const BeforePublish = () => {
 
   const keywordId = usePromptStore((state) => state.keyword_id);
   const bizDate = usePromptStore((state) => state.date);
-  const getFileSize = useCallback(async (uri: string) => {
-    try {
-      const res = await fetch(uri);
-      const blob = await res.blob();
-      return blob.size;
-    } catch {
-      return 0;
-    }
-  }, []);
+const getFileSize = useCallback(async (uri: string) => {
+  try {
+    const res = await getInfoAsync(uri);
+    return res.exists ? res.size : 0;
+  } catch {
+    return 0;
+  }
+}, []);
   const getFullMediaParams = useMemo(() => {
     return photoList.map((item, idx) => ({
       clientId: String(item.id),
@@ -119,18 +117,20 @@ const BeforePublish = () => {
     }
     try {
       let res: any;
-      if (type === "custom_keyword") {
+      const finalType = (type as string) || "official_today"; // 默认使用官方关键词
+      
+      if (finalType === "custom_keyword") {
         res = await CreateSession({
           context: {
-            type: type,
-            custom_keyword_id: keyword_id as string,
+            type: finalType,
+            custom_keyword_id: keywordId, // 统一使用 store 中的 keywordId
           },
           expected_image_count: photoList.length,
         });
       } else {
         res = await CreateSession({
           context: {
-            type: type as string,
+            type: finalType,
             official_keyword_id: keywordId,
             biz_date: bizDate,
           },
@@ -144,7 +144,7 @@ const BeforePublish = () => {
       Alert.alert("错误", "创建发布会话失败");
       return null;
     }
-  }, [photoList, keywordId, bizDate]);
+  }, [photoList, keywordId, bizDate, type]);
 
   //  获取预签名
   const getPresignList = useCallback(
@@ -179,79 +179,132 @@ const BeforePublish = () => {
     },
     [getFullMediaParams, getFileSize],
   );
-
   //上传文件
-  const uploadByPresign = useCallback(
-    async (presignArr: image_upload[]) => {
-      const result: Array<{
-        clientId: string;
-        imgEtag: string;
-        audioEtag: string | null;
-      }> = [];
+const uploadByPresign = useCallback(
+  async (presignArr: image_upload[]) => {
+    const result: Array<{
+      clientId: string;
+      imgEtag: string;
+      audioEtag: string | null;
+    }> = [];
 
-      for (let index = 0; index < presignArr.length; index++) {
-        let imgEtag = null;
-        let audioEtag = null;
-        const item = presignArr[index];
-        const x = getFullMediaParams[index];
-        // 传图片
-        if (item.image_upload) {
-          const blob = await fetch(x.uri).then((r) => r.blob());
-          const resp = await axios({
-            method: item.image_upload.method,
-            url: item.image_upload.url,
-            headers: item.image_upload.headers,
-            transformRequest: [(data) => data],
-            maxContentLength: -1,
-            data: blob,
-          });
-          imgEtag =
-            resp.headers.etag || resp.headers.ETag || resp.headers["Etag"];
-          imgEtag = imgEtag.replace(/^"|"$/g, "");
-          if (imgEtag === "") {
-            throw new Error("图片上传失败：未获取到 ETag");
+    // 从响应中获取 hash
+    const getHashFromResponse = async (resp: Response): Promise<string> => {
+      let hash = "";
+      try {
+        const body = await resp.json();
+        hash = body.hash || "";
+      } catch {}
+      
+      // 如果 body 中没有，尝试从 header 获取（
+      if (!hash) {
+        hash = resp.headers.get("etag") || resp.headers.get("ETag") || "";
+        hash = hash.replace(/^"|"$/g, "");
+      }
+      
+      return hash;
+    };
+
+    for (let index = 0; index < presignArr.length; index++) {
+      let imgEtag: string = "";
+      let audioEtag: string | null = null;
+      const item = presignArr[index];
+      const x = getFullMediaParams[index];
+
+      //  传图片 
+      if (item.image_upload) {
+        const upload = item.image_upload;
+        const formData = new FormData();
+        
+        // 遍历 form_fields 追加
+        if (upload.form_fields) {
+          for (const [k, v] of Object.entries(upload.form_fields)) {
+            formData.append(k, v as string);
           }
         }
-
-        // 传音频
-        if (item.audio_upload && item.audio_upload.url && x.audioUri) {
-          const blob = await fetch(x.audioUri).then((r) => r.blob());
-          const resp = await axios({
-            method: item.audio_upload.method,
-            url: item.audio_upload.url,
-            headers: item.audio_upload.headers,
-            transformRequest: [(data) => data],
-            maxContentLength: -1,
-            data: blob,
-          });
-          audioEtag = resp.headers.etag || resp.headers.ETag;
-          audioEtag = audioEtag.replace(/^"|"$/g, "");
-        }
-
-        result.push({
-          clientId: item.client_image_id,
-          imgEtag,
-          audioEtag,
+        // 必须传 key
+        formData.append("key", upload.object_key);
+        
+        const fileName = x.uri.split('/').pop() || 'image.jpg';
+        // @ts-ignore
+        formData.append('file', {
+          uri: x.uri,
+          type: 'image/jpeg',
+          name: fileName,
         });
+        
+        const fetchOpts: RequestInit = { 
+          method: upload.method, 
+          body: formData 
+        };
+        // headers 可能为 null，过滤掉
+        if (upload.headers) {
+          fetchOpts.headers = upload.headers;
+        }
+        
+        const resp = await fetch(upload.url, fetchOpts);
+        const hash = await getHashFromResponse(resp);
+        
+        if (!hash) {
+          throw new Error("图片上传失败：未获取到 hash");
+        }
+        imgEtag = hash;
       }
-      console.log("result", result);
 
-      return result;
-    },
-    [getFullMediaParams],
-  );
+      // 传音频
+      if (item.audio_upload && item.audio_upload.url && x.audioUri) {
+        const upload = item.audio_upload;
+        const formData = new FormData();
+        if (upload.form_fields) {
+          for (const [k, v] of Object.entries(upload.form_fields)) {
+            formData.append(k, v as string);
+          }
+        }
+        // 传 key
+        formData.append("key", upload.object_key);
+        
+        const fileName = x.audioUri.split('/').pop() || 'audio.m4a';
+        // @ts-ignore
+        formData.append('file', {
+          uri: x.audioUri,
+          type: 'audio/m4a',
+          name: fileName,
+        });
+        
+        const fetchOpts: RequestInit = { 
+          method: upload.method, 
+          body: formData 
+        };
+        if (upload.headers) {
+          fetchOpts.headers = upload.headers;
+        }
+        
+        const resp = await fetch(upload.url, fetchOpts);
+        const hash = await getHashFromResponse(resp);
+        audioEtag = hash ? hash.replace(/^"|"$/g, "") : null;
+      }
 
+      result.push({
+        clientId: item.client_image_id,
+        imgEtag,
+        audioEtag,
+      });
+    }
+    console.log("result", result);
+
+    return result;
+  },
+  [getFullMediaParams],
+);
   const handlePublish = useCallback(async () => {
     if (photoList.length === 0 || isPublishing) return;
     setIsPublishing(true);
-    Alert.alert("提示", "开始发布，请稍候...");
-
     try {
       const sid = await createUploadSession();
       if (!sid) throw new Error("会话创建失败");
       const presignArr = await getPresignList(sid);
       if (!presignArr || presignArr.length === 0) throw new Error("预签名失败");
-      console.log("---------------", presignArr);
+      console.log("预签名结果", presignArr);
       const uploadRes = await uploadByPresign(presignArr);
       console.log("oooooooooooooyyyyyy", uploadRes);
 
@@ -280,6 +333,7 @@ const BeforePublish = () => {
 
       Alert.alert("成功", "发布完成！");
       router.push("/(tabs)/remember");
+      clearPhotos(); // 清除 store 中的照片
       setPhotoList([]);
       setCurrentActiveIndex(-1);
     } catch (err) {
@@ -288,35 +342,44 @@ const BeforePublish = () => {
     } finally {
       setIsPublishing(false);
     }
-  }, [photoList, router]);
+  }, [photoList, router, clearPhotos]);
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
-  useEffect(() => {
-    try {
-      if (photos && typeof photos === "string") {
-        const parsed = JSON.parse(photos);
-        console.log("parsed", parsed);
-        if (Array.isArray(parsed)) {
-          const init: PhotoItem[] = parsed.map((item, idx) => ({
-            ...item,
-            title: "",
-            desc: "",
-            recordingUri: null,
-            recordingDuration: 0,
-            isCover: idx === 0,
-          }));
-          setPhotoList(init);
-          setCurrentActiveIndex(0);
-        }
-      }
-    } catch (e) {
-      console.error("解析照片失败", e);
-    }
-  }, [photos]);
-
+useEffect(() => {
+  // 处理相册选择的照片
+  if (Array.isArray(photos) && photos.length > 0) {
+    const init: PhotoItem[] = photos.map((item, idx) => ({
+      ...item,
+      title: "",
+      desc: "",
+      recordingUri: null,
+      recordingDuration: 0,
+      isCover: idx === 0,
+    }));
+    setPhotoList(init);
+    setCurrentActiveIndex(0);
+  } 
+  // 处理相机拍摄的照片
+  else if (takenPhoto) {
+    const init: PhotoItem[] = [{
+      id: Date.now().toString(),
+      uri: takenPhoto.uri,
+      width: takenPhoto.width || 0,
+      height: takenPhoto.height || 0,
+      fileName: takenPhoto.fileName,
+      title: "",
+      desc: "",
+      recordingUri: null,
+      recordingDuration: 0,
+      isCover: true,
+    }];
+    setPhotoList(init);
+    setCurrentActiveIndex(0);
+  }
+}, [photos, takenPhoto]);
   const handleRecordingSaved = useCallback(
     (uri: string, duration: number) => {
       if (currentActiveIndex < 0) return;
@@ -495,7 +558,17 @@ const BeforePublish = () => {
     currentActiveIndex >= 0 ? photoList[currentActiveIndex] : null;
 
   return (
-    <KeyboardProvider>
+    <>
+      {/* 加载遮罩 */}
+      {isPublishing && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#72B6FF" />
+            <Text style={styles.loadingText}>正在发布中...</Text>
+          </View>
+        </View>
+      )}
+      
       <KeyboardAwareScrollView
         bottomOffset={200}
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -602,6 +675,7 @@ const BeforePublish = () => {
                   decelerationRate="fast"
                   onScroll={handleScroll}
                   scrollEventThrottle={16}
+                  
                 />
               </>
             )}
@@ -648,7 +722,7 @@ const BeforePublish = () => {
           )}
         </View>
       </KeyboardAwareScrollView>
-    </KeyboardProvider>
+    </>
   );
 };
 
@@ -779,6 +853,36 @@ const styles = StyleSheet.create({
     backgroundColor: "#D8D8D8",
     alignItems: "center",
     justifyContent: "center",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+  loadingContainer: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
   },
 });
 

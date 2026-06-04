@@ -1,13 +1,12 @@
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, Text, View, StyleSheet, Alert,Dimensions } from "react-native";
-import { PhotoObject } from "../app/api/interface";
-import { logger } from "react-native-reanimated/lib/typescript/common";
+import { Pressable, Text,  StyleSheet, Alert,Dimensions } from "react-native";
 import usePromptStore from "@/app/stores/usePromptStore";
+import { useImageStore } from "@/app/stores/useImageStore";
 const { width: screenWidth } = Dimensions.get("window");
-
 export function TakePhotoWay() {
+  const settakenPhoto = useImageStore((state) => state.settakenPhoto); 
   // 打开相机
    const router=useRouter();
   const handleOpenCamera = async () => {
@@ -30,13 +29,10 @@ export function TakePhotoWay() {
         height: result.assets[0].height,
         fileName: result.assets[0].fileName,
       };
-      console.log("拍摄的照片:", result.assets[0].uri);
-      Alert.alert("拍摄成功", `已获取照片：${result.assets[0].uri.substring(0, 20)}...`);
+      settakenPhoto(photo);
          router.navigate({
       pathname: "/beforePulish",
-        params: {
-          photos: JSON.stringify([photo]), 
-        },
+
     });
     }
  
@@ -50,6 +46,8 @@ export function TakePhotoWay() {
   );
 }
 export function PhotoWay() {
+  const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
+
     const router=useRouter();
   // 打开相册
   const keyword_id=usePromptStore(state => state.keyword_id);
@@ -69,7 +67,7 @@ export function PhotoWay() {
     });
 
     if (!result.canceled) {
-      
+ // 设置选中的照片
       const selectedPhotos = result.assets.map((asset, index) => ({
         id: index, 
         uri: asset.uri,
@@ -77,11 +75,11 @@ export function PhotoWay() {
         height: asset.height,
         fileName: asset.fileName, 
       }));
+      setSelectedPhotos(selectedPhotos);
     router.navigate({
       pathname: "/beforePulish",
         params: {
-          type:"official_today",
-        photos: JSON.stringify(selectedPhotos),
+        type:"official_today",
         keyword_id:keyword_id,
       }
     })
