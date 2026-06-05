@@ -76,6 +76,7 @@ const BeforePublish = () => {
   const photos=useImageStore((state) => state.selectedPhotos);
   const takenPhoto = useImageStore((state) => state.takenPhoto);
   const clearPhotos = useImageStore((state) => state.clearPhotos);
+  const setKeywordId = usePromptStore((state) => state.setKeywordId);
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -347,6 +348,13 @@ const uploadByPresign = useCallback(
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
+
+  // 同步 URL 参数到 store
+  useEffect(() => {
+    if (keyword_id) {
+      setKeywordId(keyword_id as string);
+    }
+  }, [keyword_id, setKeywordId]);
 
 useEffect(() => {
   // 处理相册选择的照片
