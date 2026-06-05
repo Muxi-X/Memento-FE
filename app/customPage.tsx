@@ -17,6 +17,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
 import { listCustomKeywordImages } from "./api/custom";
 import { CustomImage, CustomImageItem } from "./api/interface";
+import { useImageStore } from "./stores/useImageStore";
+import usePromptStore from "./stores/usePromptStore";
 
 import Add from "../assets/images/add.svg";
 import CustomShow from "../components/customShow";
@@ -29,6 +31,8 @@ export default function CustomPage() {
   const [item, setItem] = useState<CustomImage>();
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
+  const setKeywordId = usePromptStore((state) => state.setKeywordId);
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
@@ -122,7 +126,12 @@ export default function CustomPage() {
                     horizontal
                     data={images}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <CustomShow item={item} />}
+                    renderItem={({ item }) => (
+                      <CustomShow
+                        item={item}
+                        allImageIds={images.map((img) => img.id)}
+                      />
+                    )}
                     showsHorizontalScrollIndicator={false}
                   />
                 </View>
@@ -167,12 +176,12 @@ export default function CustomPage() {
                 height: asset.height,
                 fileName: asset.fileName,
               }));
-              console.log("子组件选中的照片列表:", selectedPhotos);
+              setSelectedPhotos(selectedPhotos);
+              setKeywordId(keyword_id as string);
               router.navigate({
                 pathname: "/beforePulish",
                 params: {
                   type: "custom_keyword",
-                  photos: JSON.stringify(selectedPhotos),
                   keyword_id: keyword_id,
                 },
               });
