@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Dimensions,
   View,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -105,12 +106,13 @@ export default function SignIn() {
         locations={[0, 0.48, 1]}
         style={[styles.gradientBackground]}
       >
+        <View>
         {Mm ? (
           <Mmnoeyes style={[styles.Mm, { pointerEvents: "none" }]}></Mmnoeyes>
         ) : (
           <Mmeyes style={[styles.Mm, { pointerEvents: "none" }]}></Mmeyes>
         )}
-        <View style={styles.card}>
+        <View>
           <View style={styles.tabcontainer}>
             <Pressable
               onPress={() => setLoginway("password")}
@@ -303,6 +305,7 @@ export default function SignIn() {
             )}
           </View>
         </View>
+        </View>
       </LinearGradient>
     </SafeAreaProvider>
   );
@@ -312,16 +315,14 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
-
     position: "relative",
   },
   Mm: {
     position: "absolute",
-    left: 80,
+    left: 56,
     top: 59,
     zIndex: 1,
   },
-  card: {},
   cardcontainer: {
     display: "flex",
     flexDirection: "column",

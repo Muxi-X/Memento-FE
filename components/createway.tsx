@@ -4,9 +4,12 @@ import { Pressable, Text, View, StyleSheet, Alert, Platform } from 'react-native
 import Picture from '../assets/images/picture.svg';
 import Camera from '../assets/images/photogarph.svg';
 import { useRouter } from 'expo-router';
+import { useImageStore } from "@/app/stores/useImageStore";
 
 const Createway = () => {
   const router = useRouter();
+  const settakenPhoto = useImageStore((state) => state.settakenPhoto); 
+      const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
 
   // 打开相机
   const handleOpenCamera = async () => {
@@ -31,12 +34,10 @@ const Createway = () => {
         height: result.assets[0].height,
         fileName: result.assets[0].fileName,
       };
+      settakenPhoto(photo);
       console.log('拍摄的照片:', photo);
       router.navigate({
         pathname: '/beforePulish',
-        params: {
-          photos: JSON.stringify([photo]), 
-        },
       });
     }
   };
@@ -65,16 +66,13 @@ const Createway = () => {
         height: asset.height,
         fileName: asset.fileName || `photo_${index}`, 
       }));
-
+      setSelectedPhotos(selectedPhotos); // 更新选中的照片列表
       console.log('选中的照片列表:', selectedPhotos);
       Alert.alert('选择成功', `共选中 ${selectedPhotos.length} 张照片`);
       
       // 跳转并传参
       router.navigate({
         pathname: '/beforePulish',
-        params: {
-          photos: JSON.stringify(selectedPhotos),
-        },
       });
     }
   };

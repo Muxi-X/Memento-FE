@@ -16,12 +16,11 @@ import Message from "../../assets/images/message.svg";
 import Configure from "../../assets/images/configure.svg";
 import HomeCard from "../../components/homeCard";
 import Goodmm from "../../assets/images/goodmmm.svg";
-import { getMedata } from "../api/me";
 import { mydataItem } from "../api/interface";
 import { useMyStore } from "../stores/authstore";
 import NewCreate from "@/components/newCreate";
 import Touxiang from "../../assets/images/baseTouxiang.svg";
-import { getCustomKeywordList } from "../api/me";
+import { getCustomKeywordList,getMedata } from "../api/me";
 import * as SecureStore from "expo-secure-store";
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -121,7 +120,7 @@ export default function HomeScreen() {
           <Text style={styles.username}>{nickname}</Text>
           <Pressable
             onPress={() => {
-              console.log("换头像");
+              router.navigate("/setAuthdata")
             }}
             style={styles.editkuang}
           >

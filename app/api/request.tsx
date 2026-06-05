@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 const service = axios.create({
-  baseURL: "https://47.104.25.166",
+  baseURL: "https://test.memento.muxixyz.com",
   timeout: 10000,
 });
 service.interceptors.request.use(

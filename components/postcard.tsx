@@ -177,7 +177,7 @@ export function PostCard({ post }: { post: Post }) {
         {post.cover_has_audio && (
           <View style={styles.audioInfo}>
             <Text style={styles.audioDuration}>
-              {post.cover_audio_duration_ms}'
+              {post.cover_audio_duration_ms}&apos;
             </Text>
             <Sound />
           </View>
