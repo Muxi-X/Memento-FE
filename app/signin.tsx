@@ -211,28 +211,32 @@ export default function SignIn() {
                   </Link>
                 </View>
                 <View style={styles.agree}>
-                  <Pressable
-                    style={[
-                      styles.agreeIcon,
-                      agree
-                        ? { borderColor: "#72B6FF" }
-                        : { borderColor: "#999" },
-                    ]}
-                    onPress={() => setAgree(!agree)}
-                  >
-                    {agree ? <Agree></Agree> : <></>}
-                  </Pressable>
-                  <Text style={{ color: "#999999", fontSize: 12 }}>
-                    已阅读并同意
-                  </Text>
-                  <Text style={{ color: "#72B6FF", fontSize: 12 }}>
-                    《隐私协议》
-                  </Text>
-                  <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
-                  <Text style={{ color: "#72B6FF", fontSize: 12 }}>
-                    《用户协议》
-                  </Text>
-                </View>
+          <Pressable
+            style={[
+              styles.agreeIcon,
+              agree
+                ? { borderColor: "#72B6FF" }
+                : { borderColor: "#999" },
+            ]}
+            onPress={() => setAgree(!agree)}
+          >
+            {agree ? <Agree></Agree> : <></>}
+          </Pressable>
+          <Text style={{ color: "#999999", fontSize: 12 }}>
+            已阅读并同意
+          </Text>
+          <Pressable onPress={() => navigation.navigate("privacyAgreement" as never)}>
+            <Text style={{ color: "#72B6FF", fontSize: 12 }}>
+              《隐私协议》
+            </Text>
+          </Pressable>
+          <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
+          <Pressable onPress={() => navigation.navigate("userAgreement" as never)}>
+            <Text style={{ color: "#72B6FF", fontSize: 12 }}>
+              《用户协议》
+            </Text>
+          </Pressable>
+        </View>
               </View>
             ) : (
               <View>
@@ -281,26 +285,30 @@ export default function SignIn() {
                   }}
                 >
                   <Link href={"/signup"} asChild>
-                    <Text style={styles.registerText}>新用户注册</Text>
+                    <Text style={styles.registerText}>注册新用户</Text>
                   </Link>
                 </View>
                 <View style={styles.agree}>
-                  <Pressable
-                    style={[
-                      styles.agreeIcon,
-                      agree
-                        ? { borderColor: "#72B6FF" }
-                        : { borderColor: "#999" },
-                    ]}
-                    onPress={() => setAgree(!agree)}
-                  >
-                    {agree ? <Agree></Agree> : <></>}
-                  </Pressable>
-                  <Text style={{ color: "#999999" }}>已阅读并同意</Text>
-                  <Text style={{ color: "#72B6FF" }}>《隐私协议》</Text>
-                  <Text style={{ color: "#999999" }}>和</Text>
-                  <Text style={{ color: "#72B6FF" }}>《用户协议》</Text>
-                </View>
+          <Pressable
+            style={[
+              styles.agreeIcon,
+              agree
+                ? { borderColor: "#72B6FF" }
+                : { borderColor: "#999" },
+            ]}
+            onPress={() => setAgree(!agree)}
+          >
+            {agree ? <Agree></Agree> : <></>}
+          </Pressable>
+          <Text style={{ color: "#999999", fontSize: 12 }}>已阅读并同意</Text>
+          <Pressable onPress={() => navigation.navigate("privacyAgreement" as never)}>
+            <Text style={{ color: "#72B6FF", fontSize: 12 }}>《隐私协议》</Text>
+          </Pressable>
+          <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
+          <Pressable onPress={() => navigation.navigate("userAgreement" as never)}>
+            <Text style={{ color: "#72B6FF", fontSize: 12 }}>《用户协议》</Text>
+          </Pressable>
+        </View>
               </View>
             )}
           </View>
