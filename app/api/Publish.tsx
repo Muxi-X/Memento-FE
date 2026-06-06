@@ -24,10 +24,10 @@ export interface CompleteItem {
   image_height: number;
   display_order: number;
   is_cover?: boolean;
-  title: string|null;
-  note: string|null;
-  audio_etag?: string|null;
-  audio_duration_ms?: number|null;
+  title: string | null;
+  note: string | null;
+  audio_etag?: string | null;
+  audio_duration_ms?: number | null;
 }
 export const CreateSession = (data: Createtype) => {
   return request({
@@ -67,3 +67,4 @@ export const concelSession = (session_id: string) => {
     method: "DELETE",
   });
 };
+

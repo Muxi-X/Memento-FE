@@ -9,8 +9,8 @@ import {
   RefreshControl,
   Dimensions,
 } from "react-native";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import React, { useEffect, useState, useCallback } from "react";
 import Edit from "../../assets/images/edit.svg";
 import Message from "../../assets/images/message.svg";
 import Configure from "../../assets/images/configure.svg";
@@ -20,7 +20,7 @@ import { mydataItem } from "../api/interface";
 import { useMyStore } from "../stores/authstore";
 import NewCreate from "@/components/newCreate";
 import Touxiang from "../../assets/images/baseTouxiang.svg";
-import { getCustomKeywordList,getMedata } from "../api/me";
+import { getCustomKeywordList, getMedata } from "../api/me";
 import * as SecureStore from "expo-secure-store";
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -36,36 +36,51 @@ export default function HomeScreen() {
     unread_notification_count: 0,
     custom_keywords: [],
   });
+  const storeNickname = useMyStore((state) => state.nickname);
+  const storeAvatarUrl = useMyStore((state) => state.avatar_url);
   const setNickname = useMyStore((state) => state.setNickname);
+  const setAvatar = useMyStore((state) => state.setAvatar);
 
-  useEffect(() => {
-    const getMydata = async () => {
-      try {
-        const token = await SecureStore.getItemAsync("access_token");
-        if (token !== null) {
-          const res = await getMedata();
-          setMydata(res.data);
-        } else {
-          router.replace("/signin");
+  const getMydata = async () => {
+    try {
+      const token = await SecureStore.getItemAsync("access_token");
+      if (token !== null) {
+        const res = await getMedata();
+        setMydata(res.data);
+        // 同步更新 store
+        setNickname(res.data.nickname);
+        if (res.data.avatar_url) {
+          setAvatar(res.data.avatar_url);
         }
-      } catch (e) {
-        console.log(e);
+      } else {
+        router.replace("/signin");
       }
-    };
-    getMydata();
-  }, []);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // 页面聚焦时刷新数据
+  useFocusEffect(
+    useCallback(() => {
+      getMydata();
+    }, [])
+  );
+
+  // 优先使用 store 中的数据，如果没有则使用本地状态
+  const displayNickname = storeNickname || mydata.nickname;
+  const displayAvatarUrl = storeAvatarUrl || mydata.avatar_url;
+
   if (mydata === null) {
     return null;
   }
+
   const {
-    nickname,
-    avatar_url,
     official_image_count,
     custom_image_count,
     unread_notification_count,
     custom_keywords,
   } = mydata;
-  setNickname(nickname);
   const onRefresh = async () => {
     setRefreshing(true);
     await getCustomKeywordList();
@@ -103,21 +118,21 @@ export default function HomeScreen() {
         </Pressable>
         <ImageBackground
           style={styles.touxiangcontainer}
-          source={{ uri: avatar_url }}
+          source={{ uri: displayAvatarUrl }}
           imageStyle={styles.backgroundImageStyle}
         >
           <View style={styles.touxiang}>
-            {avatar_url ? (
+            {displayAvatarUrl ? (
               <Image
                 style={{ width: "100%", height: "100%" }}
-                source={{ uri: avatar_url }}
+                source={{ uri: displayAvatarUrl }}
               ></Image>
             ) : (
               <Touxiang style={{ width: "100%", height: " 100%" }}></Touxiang>
             )}
           </View>
 
-          <Text style={styles.username}>{nickname}</Text>
+          <Text style={styles.username}>{displayNickname}</Text>
           <Pressable
             onPress={() => {
               router.navigate("/setAuthdata")

@@ -14,15 +14,6 @@ export const updateMeNickname = (nickname: string) => {
     },
   });
 };
-export const updateMeAvatar = (avatar: string) => {
-  return request({
-    url: "/v1/me/profile/avatar",
-    method: "patch",
-    data: {
-      avatar: avatar,
-    },
-  });
-};
 export const getMeSetting = () => {
   return request({
     url: "/v1/me/settings",
@@ -79,11 +70,34 @@ export const addCustomKeyword = (keyword: string, target: number | null) => {
     },
   });
 };
-// export const getMeUnreadNotificationCount=()=>{
-//     return request(
-//         {
-//             url:'/v1/me/notifications/unread-count',
-//             method:'GET'
-//         }
-//     )
-// } 没必要了，首页的通知数量已经显示了
+//头像上传
+export interface AvatarPresignItem{
+  image_content_type: string;
+  image_content_length: number;
+  image_sha256?: string
+}
+export interface AvatarCompleteItem{
+  image_etag: string;
+  image_width: number;
+  image_height: number;
+}
+export const createAvatarUploadSession = () => {
+  return request({
+    url: "/v1/me/avatar-upload-sessions",
+    method: "POST",
+  });
+};
+export const presignAvatarUpload = (session_id: string,data:AvatarPresignItem) => {
+  return request({
+    url: `/v1/me/avatar-upload-sessions/${session_id}/image/presign`,
+    method: "POST",
+    data: data,
+  });
+};
+export const completeAvatarUpload = (session_id: string, data: AvatarCompleteItem) => {
+  return request({
+    url: `/v1/me/avatar-upload-sessions/${session_id}/complete`,
+    method: "POST",
+    data: data,
+  });
+};
