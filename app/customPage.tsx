@@ -10,7 +10,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -19,20 +19,20 @@ import { listCustomKeywordImages } from "./api/custom";
 import { CustomImage, CustomImageItem } from "./api/interface";
 import { useImageStore } from "./stores/useImageStore";
 import usePromptStore from "./stores/usePromptStore";
-
 import Add from "../assets/images/add.svg";
 import CustomShow from "../components/customShow";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function CustomPage() {
+  const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
+  const setKeywordId = usePromptStore((state) => state.setKeywordId);
+
   const title = useLocalSearchParams().keyword;
   const keyword_id = useLocalSearchParams().keyword_id;
   const [item, setItem] = useState<CustomImage>();
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-  const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
-  const setKeywordId = usePromptStore((state) => state.setKeywordId);
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
@@ -70,6 +70,8 @@ export default function CustomPage() {
   }, []);
   const getCustomList = async () => {
     const response = await listCustomKeywordImages(keyword_id as string);
+    console.log("rrrr", response.data);
+
     setItem(response.data);
   };
   if (!item) return null;
@@ -169,6 +171,7 @@ export default function CustomPage() {
             });
 
             if (!result.canceled) {
+              // 设置选中的照片
               const selectedPhotos = result.assets.map((asset, index) => ({
                 id: index,
                 uri: asset.uri,
@@ -176,8 +179,9 @@ export default function CustomPage() {
                 height: asset.height,
                 fileName: asset.fileName,
               }));
+
               setSelectedPhotos(selectedPhotos);
-              setKeywordId(keyword_id as string);
+              setKeywordId(keyword_id as string); 
               router.navigate({
                 pathname: "/beforePulish",
                 params: {

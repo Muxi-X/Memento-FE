@@ -248,9 +248,13 @@ export default function Signup() {
             {agreed ? <AgreeIcon /> : <View style={styles.unCheck} />}
           </Pressable>
           <Text style={styles.grayText}>已阅读并同意</Text>
-          <Text style={styles.blueText}>《隐私协议》</Text>
+          <Pressable onPress={() => navigation.navigate("privacyAgreement" as never)}>
+            <Text style={styles.blueText}>《隐私协议》</Text>
+          </Pressable>
           <Text style={styles.grayText}>和</Text>
-          <Text style={styles.blueText}>《用户协议》</Text>
+          <Pressable onPress={() => navigation.navigate("userAgreement" as never)}>
+            <Text style={styles.blueText}>《用户协议》</Text>
+          </Pressable>
         </View>
       </View>
     </LinearGradient>
