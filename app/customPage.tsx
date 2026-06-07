@@ -17,7 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
 import { listCustomKeywordImages } from "./api/custom";
 import { CustomImage, CustomImageItem } from "./api/interface";
-import { useImageStore } from "../app/stores/useImageStore";
+import { useImageStore } from "./stores/useImageStore";
 import usePromptStore from "./stores/usePromptStore";
 import Add from "../assets/images/add.svg";
 import CustomShow from "../components/customShow";
@@ -174,7 +174,6 @@ export default function CustomPage() {
                 height: asset.height,
                 fileName: asset.fileName,
               }));
-              console.log("选中的照片", selectedPhotos);
 
               setSelectedPhotos(selectedPhotos);
               setKeywordId(keyword_id as string); 
