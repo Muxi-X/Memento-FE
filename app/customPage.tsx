@@ -128,7 +128,12 @@ export default function CustomPage() {
                     horizontal
                     data={images}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <CustomShow item={item} />}
+                    renderItem={({ item }) => (
+                      <CustomShow
+                        item={item}
+                        allImageIds={images.map((img) => img.id)}
+                      />
+                    )}
                     showsHorizontalScrollIndicator={false}
                   />
                 </View>

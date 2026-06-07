@@ -166,20 +166,22 @@ export interface CustomImageItem {
 }
 export interface CustomImageDetail {
   id: string;
-  title: string;
-  note: string;
-
-  created_at: string;
-
+  custom_keyword_id: string;
   image: {
+    id: string;
     variants: {
       detail_large: {
         url: string;
+        width: number;
+        height: number;
       };
     };
   };
-
+  display_order: number;
+  title: string | null;
+  note: string | null;
   has_audio: boolean;
-  audio_duration_ms: number;
-  audio_play_url: string;
+  audio_duration_ms: number | null;
+  audio_play_url: string | null;
+  created_at: string;
 }

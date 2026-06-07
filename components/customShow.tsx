@@ -5,11 +5,12 @@ import { useRouter } from "expo-router";
 
 interface CustomShowProps {
   item: CustomImageItem;
+  allImageIds: string[];
 }
 
 export default function CustomShow(props: CustomShowProps) {
 
-  const { item } = props;
+  const { item, allImageIds } = props;
   const router = useRouter();
 
   console.log(item);
@@ -22,7 +23,8 @@ export default function CustomShow(props: CustomShowProps) {
           router.push({
             pathname: "/customImageDetail",
             params: {
-              image_id: item.id
+              image_ids: JSON.stringify(allImageIds),
+              initial_image_id: item.id,
             }
           });
         }}
