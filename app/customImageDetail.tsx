@@ -22,7 +22,8 @@ import Arrow from "../assets/images/arrow-bottom.svg";
 import Arrowback from "../assets/images/goback.svg";
 import VoiceIcon from "../assets/images/sound2.svg";
 import { getCustomImageDetail } from "./api/custom";
-
+import Modal from "react-native-modal";
+import ImageViewer from "react-native-image-zoom-viewer";
 import type { CustomImageDetail } from "./api/interface";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -42,6 +43,9 @@ export default function CustomImageDetailPage() {
   const [details, setDetails] = useState<CustomImageDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showImageView, setShowImageView] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   const params = useLocalSearchParams();
   const router = useRouter();
 
@@ -145,7 +149,7 @@ export default function CustomImageDetailPage() {
         })}
         decelerationRate="fast"
         pagingEnabled
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const noteText = item.note ?? "";
 
           return (
@@ -161,7 +165,11 @@ export default function CustomImageDetailPage() {
                   style={StyleSheet.absoluteFill}
                 >
                   <View style={styles.contentContainer}>
-                    <View style={styles.imagelist}>
+                    <Pressable style={styles.imagelist}
+                     onPress={() => {
+                      setCurrentImageIndex(index);
+                      setShowImageView(true);
+                    }}>
                       <Image
                         source={{
                           uri: item.image?.variants?.detail_large?.url || "",
@@ -176,7 +184,7 @@ export default function CustomImageDetailPage() {
                         }}
                         resizeMode="cover"
                       />
-                    </View>
+                    </Pressable>
                <View style={styles.wenanContainter}>
                    <View
                     style={{
@@ -257,6 +265,28 @@ export default function CustomImageDetailPage() {
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1 }}
       />
+             <Modal
+               isVisible={showImageView}
+               onBackdropPress={() => setShowImageView(false)}
+               onSwipeComplete={() => setShowImageView(false)}
+               onBackButtonPress={() => setShowImageView(false)}
+               swipeDirection={["up"]}
+               style={{ margin: 0 }}
+               statusBarTranslucent
+             >
+               <ImageViewer
+                 imageUrls={details.map((d) => ({
+                   url: d.image?.variants?.detail_large?.url || "",
+                 }))}
+                 index={currentImageIndex}
+                 onCancel={() => setShowImageView(false)}
+                 enableSwipeDown
+                 onSwipeDown={() => setShowImageView(false)}
+                 saveToLocalByLongPress={false}
+                 enablePreload
+                 backgroundColor="rgba(0,0,0,0.9)"
+               />
+             </Modal>
     </>
   );
 }
