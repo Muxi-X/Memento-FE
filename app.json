@@ -7,6 +7,11 @@
     "scheme": "memento",
     "userInterfaceStyle": "light",
     "icon": "./assets/images/Rectangle.png",
+    "splash": {
+      "image": "./assets/images/Rectangle.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kazjj.memento",

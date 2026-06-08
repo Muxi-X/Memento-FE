@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { View, StyleSheet, Text, Image } from 'react-native';
-import * as SplashScreen from 'expo-splash-screen';
 import { useRouter } from 'expo-router';
 import Mmexport from '../assets/images/mmexport.svg';
 import Cixing from '../assets/images/cixing.svg';
@@ -21,15 +20,13 @@ export default function SplashScreenPage() {
   const [svgLoaded, setSvgLoaded] = useState(false);
 
   
-  const handleAnimationEnd = useCallback(async () => {
-    await SplashScreen.hideAsync();
+  const handleAnimationEnd = useCallback(() => {
     router.replace('/(tabs)/today');
   }, [router]);
 
   useEffect(() => {
     async function prepare() {
       try {
-        await SplashScreen.preventAutoHideAsync();
         const waitForSvg = async () => {
           await new Promise(resolve => setTimeout(resolve, 100));
           setSvgLoaded(true);
