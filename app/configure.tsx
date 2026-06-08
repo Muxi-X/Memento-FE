@@ -146,11 +146,15 @@ export default function Configure() {
         <View style={styles.kuang}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={styles.font}>用户协议</Text>
-            <Text>点击查看</Text>
+            <Pressable onPress={()=>{router.navigate("/userAgreement")}}>
+              <Text>点击查看</Text>
+              </Pressable>
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={styles.font}>隐私政策</Text>
-            <Text>点击查看</Text>
+            <Pressable onPress={()=>{router.navigate("/privacyAgreement")}}>
+              <Text>点击查看</Text>
+            </Pressable>
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={styles.font}>版本号</Text>
@@ -158,7 +162,7 @@ export default function Configure() {
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={styles.font}>联系我们</Text>
-            <Text>xxxxxxxxxx</Text>
+            <Text>1091335954</Text>
           </View>
         </View>
 

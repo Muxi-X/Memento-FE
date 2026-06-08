@@ -3,21 +3,17 @@ import {
   StyleSheet,
   Pressable,
   Text,
-  Image,
   TextInput,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
-import { useRouter } from "expo-router";
-import ArrowRight from "../assets/images/arrow-auth.svg";
-import { use, useEffect, useState } from "react";
+import { useRouter,useNavigation } from "expo-router";
+import {  useEffect, useState } from "react";
 import { updateMeNickname } from "./api/me";
 import { useMyStore } from "./stores/authstore";
-import { useNavigation } from "expo-router";
-export default function updateName() {
+export default function UpdateName() {
   const [name, setName] = useState("");
   const setNickname = useMyStore((state) => state.setNickname);
-  const setAvater = useMyStore((state) => state.setAvater);
   const router = useRouter();
   const navigation = useNavigation();
   useEffect(() => {

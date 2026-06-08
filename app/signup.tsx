@@ -17,6 +17,7 @@ import Warning from "../assets/images/warning.svg";
 import Mmeyes from "../assets/images/Mmeyes.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { sendCode, signupComplete, verifyCode } from "./api/user";
+import { clearCachedToken } from "./api/request";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -40,6 +41,17 @@ export default function Signup() {
   const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const countdownTimer = useRef<NodeJS.Timeout | null>(null);
   const lastVerifiedCode = useRef(""); // 记录上次验证成功的代码，避免重复请求
+
+  // 邮箱格式校验
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // 密码强度校验
+  const validatePassword = (pwd: string) => {
+    return pwd.length >= 8;
+  };
 
   useEffect(()=>{
    navigation.setOptions({
@@ -77,8 +89,12 @@ export default function Signup() {
       } else {
         setVerifyResult(<Warning />);
       }
-    } catch (err) {
+    } catch (err: any) {
       setVerifyResult(<Warning />);
+      // 只有验证码错误时才提示，其他错误静默处理
+      if (err.status === 400 || err.data?.code === "invalid_code") {
+        console.log("验证码验证失败");
+      }
     }
   };
 
@@ -92,7 +108,11 @@ export default function Signup() {
 
   // 发送验证码
   const handleSendCode = async () => {
-    if (!email || !email.includes("@")) {
+    if (!email.trim()) {
+      Alert.alert("提示", "请输入邮箱地址");
+      return;
+    }
+    if (!validateEmail(email)) {
       Alert.alert("提示", "请输入有效的邮箱地址");
       return;
     }
@@ -101,6 +121,7 @@ export default function Signup() {
       const res = await sendCode(email);
       if (res.status === 204) {
         setCountdown(60);
+        Alert.alert("成功", "验证码已发送，请注意查收");
         if (countdownTimer.current) clearInterval(countdownTimer.current);
         countdownTimer.current = setInterval(() => {
           setCountdown((prev) => {
@@ -112,28 +133,77 @@ export default function Signup() {
             return prev - 1;
           });
         }, 1000);
-      } else {
-        setIsDisabled(false);
-        Alert.alert("错误", "发送失败，请检查邮箱是否正确");
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsDisabled(false);
-      console.error(error);
+      const errorMsg = error.userMessage || "发送失败，请稍后重试";
+      if (error.status === 429) {
+        Alert.alert("提示", "发送过于频繁，请稍后再试");
+      } else if (error.status === 400 && error.data?.code === "email_invalid") {
+        Alert.alert("错误", "邮箱格式不正确");
+      } else if (error.status === 409 || error.data?.code === "user_exists") {
+        Alert.alert("提示", "该邮箱已注册，请直接登录", [
+          { text: "取消", style: "cancel" },
+          { text: "去登录", onPress: () => navigation.navigate("signin" as never) }
+        ]);
+      } else {
+        Alert.alert("错误", errorMsg);
+      }
     }
   };
 
   // 注册提交
   const handleRegister = async () => {
-    if (!agreed) return Alert.alert("提示", "请阅读并同意协议");
-    if (password.length < 8) return Alert.alert("提示", "密码长度需 ≥8 位");
-    if (password !== confirmPwd) return Alert.alert("提示", "两次密码不一致");
+    if (!agreed) {
+      Alert.alert("提示", "请先阅读并同意《隐私协议》和《用户协议》");
+      return;
+    }
+    if (!email.trim()) {
+      Alert.alert("提示", "请输入邮箱地址");
+      return;
+    }
+    if (!validateEmail(email)) {
+      Alert.alert("提示", "请输入有效的邮箱地址");
+      return;
+    }
+    if (!sendCodeText) {
+      Alert.alert("提示", "请输入验证码");
+      return;
+    }
+    if (sendCodeText.length !== 6) {
+      Alert.alert("提示", "验证码必须是6位数字");
+      return;
+    }
+    if (!password) {
+      Alert.alert("提示", "请设置密码");
+      return;
+    }
+    if (!validatePassword(password)) {
+      Alert.alert("提示", "密码长度需 ≥8 位");
+      return;
+    }
+    if (!confirmPwd) {
+      Alert.alert("提示", "请确认密码");
+      return;
+    }
+    if (password !== confirmPwd) {
+      Alert.alert("提示", "两次输入的密码不一致");
+      return;
+    }
 
     const signup_token = await SecureStore.getItemAsync("signup_token");
-    if (!signup_token) return Alert.alert("提示", "请先完成验证码校验");
+    if (!signup_token) {
+      Alert.alert("提示", "请先完成验证码校验");
+      return;
+    }
 
     try {
+      // 清除可能的旧 token 缓存
+      clearCachedToken();
+      
       const res = await signupComplete({ signup_token, password });
       if (res.status === 200) {
+        Alert.alert("成功", "注册成功！");
         if (res.data.access_token) {
           await SecureStore.setItemAsync("access_token", res.data.access_token);
           navigation.navigate("index" as never);
@@ -141,8 +211,22 @@ export default function Signup() {
           navigation.navigate("signin" as never);
         }
       }
-    } catch (error) {
-      Alert.alert("注册失败", "请稍后重试");
+    } catch (error: any) {
+      const errorMsg = error.userMessage || "注册失败，请稍后重试";
+      if (error.status === 400 && error.data?.code === "invalid_token") {
+        Alert.alert("错误", "验证码已过期，请重新获取");
+        setVerifyResult(<Warning />);
+        lastVerifiedCode.current = "";
+      } else if (error.status === 409 || error.data?.code === "user_exists") {
+        Alert.alert("提示", "该邮箱已注册，请直接登录", [
+          { text: "取消", style: "cancel" },
+          { text: "去登录", onPress: () => navigation.navigate("signin" as never) }
+        ]);
+      } else if (error.status === 422 && error.data?.code === "password_too_weak") {
+        Alert.alert("错误", "密码强度不足，请设置更复杂的密码");
+      } else {
+        Alert.alert("注册失败", errorMsg);
+      }
     }
   };
 
@@ -248,9 +332,13 @@ export default function Signup() {
             {agreed ? <AgreeIcon /> : <View style={styles.unCheck} />}
           </Pressable>
           <Text style={styles.grayText}>已阅读并同意</Text>
-          <Text style={styles.blueText}>《隐私协议》</Text>
+          <Pressable onPress={() => navigation.navigate("privacyAgreement" as never)}>
+            <Text style={styles.blueText}>《隐私协议》</Text>
+          </Pressable>
           <Text style={styles.grayText}>和</Text>
-          <Text style={styles.blueText}>《用户协议》</Text>
+          <Pressable onPress={() => navigation.navigate("userAgreement" as never)}>
+            <Text style={styles.blueText}>《用户协议》</Text>
+          </Pressable>
         </View>
       </View>
     </LinearGradient>

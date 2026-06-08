@@ -45,6 +45,10 @@ export default function RootLayout() {
           name="yesterdayfind"
           options={{ headerShown: false }}
         ></Stack.Screen>
+        <Stack.Screen
+          name="updateName"
+          options={{ headerShown: false }}
+        ></Stack.Screen>
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

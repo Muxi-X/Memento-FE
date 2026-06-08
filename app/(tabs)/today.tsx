@@ -30,6 +30,8 @@ export default function TabTwoScreen() {
   const [keyWords_text, setKeyWords_text] = useState(" 关键词");
   const [participant_user_count, setParticipant_user_count] = useState(0);
   const [yesterday_user_count, setYesterday_user_count] = useState(0);
+  const [isLoading, setIsLoading] = useState(false); // 添加加载状态
+  const dataFetchedRef = useRef(false); // 添加标志防止重复请求
 
   const date = usePromptStore((state) => state.biz_date);
   const setDate = usePromptStore((state) => state.setdate);
@@ -107,6 +109,14 @@ export default function TabTwoScreen() {
   useEffect(() => {
     setDailysentence(getRandomSentence());
     const initPage = async () => {
+      // 防止重复请求
+      if (dataFetchedRef.current || isLoading) {
+        return;
+      }
+      
+      dataFetchedRef.current = true;
+      setIsLoading(true);
+      
       try {
         const res = await getoffcialHome();
         const { today, yesterday } = res.data;
@@ -127,6 +137,9 @@ export default function TabTwoScreen() {
         }
       } catch (err) {
         console.log(err);
+        dataFetchedRef.current = false; // 失败时重置，允许重试
+      } finally {
+        setIsLoading(false);
       }
     };
     initPage();

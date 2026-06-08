@@ -10,20 +10,24 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
 import { listCustomKeywordImages } from "./api/custom";
 import { CustomImage, CustomImageItem } from "./api/interface";
-
+import { useImageStore } from "./stores/useImageStore";
+import usePromptStore from "./stores/usePromptStore";
 import Add from "../assets/images/add.svg";
 import CustomShow from "../components/customShow";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function CustomPage() {
+  const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
+  const setKeywordId = usePromptStore((state) => state.setKeywordId);
+
   const title = useLocalSearchParams().keyword;
   const keyword_id = useLocalSearchParams().keyword_id;
   const [item, setItem] = useState<CustomImage>();
@@ -66,6 +70,8 @@ export default function CustomPage() {
   }, []);
   const getCustomList = async () => {
     const response = await listCustomKeywordImages(keyword_id as string);
+    console.log("rrrr", response.data);
+
     setItem(response.data);
   };
   if (!item) return null;
@@ -122,7 +128,12 @@ export default function CustomPage() {
                     horizontal
                     data={images}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => <CustomShow item={item} />}
+                    renderItem={({ item }) => (
+                      <CustomShow
+                        item={item}
+                        allImageIds={images.map((img) => img.id)}
+                      />
+                    )}
                     showsHorizontalScrollIndicator={false}
                   />
                 </View>
@@ -160,6 +171,7 @@ export default function CustomPage() {
             });
 
             if (!result.canceled) {
+              // 设置选中的照片
               const selectedPhotos = result.assets.map((asset, index) => ({
                 id: index,
                 uri: asset.uri,
@@ -167,12 +179,13 @@ export default function CustomPage() {
                 height: asset.height,
                 fileName: asset.fileName,
               }));
-              console.log("子组件选中的照片列表:", selectedPhotos);
+
+              setSelectedPhotos(selectedPhotos);
+              setKeywordId(keyword_id as string); 
               router.navigate({
                 pathname: "/beforePulish",
                 params: {
                   type: "custom_keyword",
-                  photos: JSON.stringify(selectedPhotos),
                   keyword_id: keyword_id,
                 },
               });
