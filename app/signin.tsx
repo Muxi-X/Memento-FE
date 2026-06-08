@@ -16,6 +16,7 @@ import Agree from "../assets/images/agree.svg";
 import Mmeyes from "../assets/images/Mmeyes.svg";
 import Mmnoeyes from "../assets/images/Mmnoeyes.svg";
 import { loginPhone, loginPwd, sendlogincode } from "./api/user";
+import { clearCachedToken } from "./api/request";
 
 type LoginType = "phone" | "password";
 export default function SignIn() {
@@ -35,65 +36,157 @@ export default function SignIn() {
       headerShown: false,
     });
   }, []);
+  // 邮箱格式校验
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleloginByPwd = async () => {
     if (!agree) {
-      alert("请阅读并同意《隐私协议》和《用户协议》");
+      Alert.alert("提示", "请阅读并同意《隐私协议》和《用户协议》");
       return;
     }
-    const res = await loginPwd(email, password);
-    console.log(res.data);
-    if (res.status === 200) {
-      const { access_token, expires_in, token_type } = res.data;
-      await SecureStore.setItemAsync("access_token", access_token);
-      await SecureStore.setItemAsync("expires_in", expires_in.toString());
-      await SecureStore.setItemAsync("token_type", token_type);
-      navigation.navigate("index" as never);
-    } else {
-      if (res.data.code === "not_found") {
-        Alert.alert("用户不存在，请注册");
-      }
+    if (!email.trim()) {
+      Alert.alert("提示", "请输入邮箱地址");
+      return;
     }
+    if (!validateEmail(email)) {
+      Alert.alert("提示", "请输入有效的邮箱地址");
+      return;
+    }
+    if (!password) {
+      Alert.alert("提示", "请输入密码");
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert("提示", "密码长度至少6位");
+      return;
+    }
+    try {
+        // 清除可能的旧 token 缓存
+        clearCachedToken();
+        
+        const res = await loginPwd(email, password);
+        console.log(res.data);
+        if (res.status === 200) {
+          const { access_token, expires_in, token_type } = res.data;
+          await SecureStore.setItemAsync("access_token", access_token);
+          await SecureStore.setItemAsync("expires_in", expires_in.toString());
+          await SecureStore.setItemAsync("token_type", token_type);
+          Alert.alert("成功", "登录成功！");
+          navigation.navigate("index" as never);
+        } else {
+          if (res.data?.code === "not_found") {
+            Alert.alert("提示", "用户不存在，请先注册", [
+              { text: "取消", style: "cancel" },
+              { text: "去注册", onPress: () => navigation.navigate("signup" as never) }
+            ]);
+          } else if (res.data?.code === "invalid_password") {
+            Alert.alert("错误", "密码错误，请重新输入");
+          } else {
+            Alert.alert("错误", res.data?.message || "登录失败，请稍后重试");
+          }
+        }
+      } catch (error: any) {
+        const errorMsg = error.userMessage || "登录失败，请稍后重试";
+        if (error.status === 401 || error.data?.code === "invalid_credentials") {
+          Alert.alert("错误", "邮箱或密码错误");
+        } else if (error.status === 404 || error.data?.code === "not_found") {
+          Alert.alert("提示", "用户不存在，请先注册", [
+            { text: "取消", style: "cancel" },
+            { text: "去注册", onPress: () => navigation.navigate("signup" as never) }
+          ]);
+        } else {
+          Alert.alert("错误", errorMsg);
+        }
+      }
   };
   const handleSendCode = async () => {
-    if (!email) {
-      alert("请输入邮箱");
+    if (!email.trim()) {
+      Alert.alert("提示", "请输入邮箱地址");
       return;
     }
-    const res = await sendlogincode(email);
-    if (res.status === 204) {
-      setCountdown(60);
-      setIsDisabled(true);
-      alert("验证码已发送，请注意查收");
-      if (countdownTimer.current) clearInterval(countdownTimer.current);
-      countdownTimer.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(countdownTimer.current!);
-            setIsDisabled(false);
-            return 0;
-          } else {
-            return prev - 1;
-          }
-        });
-      }, 1000);
-    } else {
-      alert("验证码发送失败，请稍后再试");
+    if (!validateEmail(email)) {
+      Alert.alert("提示", "请输入有效的邮箱地址");
+      return;
+    }
+    try {
+      const res = await sendlogincode(email);
+      if (res.status === 204) {
+        setCountdown(60);
+        setIsDisabled(true);
+        Alert.alert("成功", "验证码已发送，请注意查收");
+        if (countdownTimer.current) clearInterval(countdownTimer.current);
+        countdownTimer.current = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(countdownTimer.current!);
+              setIsDisabled(false);
+              return 0;
+            } else {
+              return prev - 1;
+            }
+          });
+        }, 1000);
+      }
+    } catch (error: any) {
+      const errorMsg = error.userMessage || "验证码发送失败，请稍后再试";
+      if (error.status === 429) {
+        Alert.alert("提示", "发送过于频繁，请稍后再试");
+      } else if (error.status === 400 && error.data?.code === "email_invalid") {
+        Alert.alert("错误", "邮箱格式不正确");
+      } else {
+        Alert.alert("错误", errorMsg);
+      }
     }
   };
   const handldeloginByPhone = async () => {
     if (!agree) {
-      alert("请阅读并同意《隐私协议》和《用户协议》");
+      Alert.alert("提示", "请阅读并同意《隐私协议》和《用户协议》");
       return;
     }
-    const res = await loginPhone(email, code);
-    if (res.status === 200) {
-      const { access_token, expires_in, token_type } = res.data;
-      await SecureStore.setItemAsync("access_token", access_token);
-      await SecureStore.setItemAsync("expires_in", expires_in.toString());
-      await SecureStore.setItemAsync("token_type", token_type);
-      navigation.navigate("index" as never);
-    } else {
-      alert("登录失败，请检查邮箱和验证码");
+    if (!email.trim()) {
+      Alert.alert("提示", "请输入邮箱地址");
+      return;
+    }
+    if (!validateEmail(email)) {
+      Alert.alert("提示", "请输入有效的邮箱地址");
+      return;
+    }
+    if (!code) {
+      Alert.alert("提示", "请输入验证码");
+      return;
+    }
+    if (code.length !== 6) {
+      Alert.alert("提示", "验证码必须是6位数字");
+      return;
+    }
+    try {
+      // 清除可能的旧 token 缓存
+      clearCachedToken();
+      
+      const res = await loginPhone(email, code);
+      if (res.status === 200) {
+        const { access_token, expires_in, token_type } = res.data;
+        await SecureStore.setItemAsync("access_token", access_token);
+        await SecureStore.setItemAsync("expires_in", expires_in.toString());
+        await SecureStore.setItemAsync("token_type", token_type);
+        Alert.alert("成功", "登录成功！");
+        navigation.navigate("index" as never);
+      }
+    } catch (error: any) {
+      const errorMsg = error.userMessage || "登录失败，请稍后重试";
+      if (error.status === 400 || error.data?.code === "invalid_code") {
+        Alert.alert("错误", "验证码错误或已过期，请重新获取");
+      } else if (error.status === 404 || error.data?.code === "not_found") {
+        Alert.alert("提示", "用户不存在，请先注册", [
+          { text: "取消", style: "cancel" },
+          { text: "去注册", onPress: () => navigation.navigate("signup" as never) }
+        ]);
+      } else {
+        Alert.alert("错误", errorMsg);
+      }
     }
   };
 
