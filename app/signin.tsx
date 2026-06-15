@@ -1,30 +1,22 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { Link, useNavigation } from "expo-router";
-import * as SecureStore from "expo-secure-store";
-import { useEffect, useState, useRef } from "react";
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  Dimensions,
-  View,
-} from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import Agree from "../assets/images/agree.svg";
-import Mmeyes from "../assets/images/Mmeyes.svg";
-import Mmnoeyes from "../assets/images/Mmnoeyes.svg";
-import { loginPhone, loginPwd, sendlogincode } from "./api/user";
-import { clearCachedToken } from "./api/request";
+import { LinearGradient } from 'expo-linear-gradient';
+import { Link, useNavigation } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState, useRef } from 'react';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Agree from '../assets/images/agree.svg';
+import Mmeyes from '../assets/images/Mmeyes.svg';
+import Mmnoeyes from '../assets/images/Mmnoeyes.svg';
+import { loginPhone, loginPwd, sendlogincode } from './api/user';
+import { clearCachedToken } from './api/request';
 
-type LoginType = "phone" | "password";
+type LoginType = 'phone' | 'password';
 export default function SignIn() {
-  const [loginway, setLoginway] = useState<LoginType>("password");
+  const [loginway, setLoginway] = useState<LoginType>('password');
   const [agree, setAgree] = useState(false);
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [Mm, setMm] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -35,7 +27,7 @@ export default function SignIn() {
     navigation.setOptions({
       headerShown: false,
     });
-  }, []);
+  }, [navigation]);
   // 邮箱格式校验
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,71 +36,71 @@ export default function SignIn() {
 
   const handleloginByPwd = async () => {
     if (!agree) {
-      Alert.alert("提示", "请阅读并同意《隐私协议》和《用户协议》");
+      Alert.alert('提示', '请阅读并同意《隐私协议》和《用户协议》');
       return;
     }
     if (!email.trim()) {
-      Alert.alert("提示", "请输入邮箱地址");
+      Alert.alert('提示', '请输入邮箱地址');
       return;
     }
     if (!validateEmail(email)) {
-      Alert.alert("提示", "请输入有效的邮箱地址");
+      Alert.alert('提示', '请输入有效的邮箱地址');
       return;
     }
     if (!password) {
-      Alert.alert("提示", "请输入密码");
+      Alert.alert('提示', '请输入密码');
       return;
     }
     if (password.length < 6) {
-      Alert.alert("提示", "密码长度至少6位");
+      Alert.alert('提示', '密码长度至少6位');
       return;
     }
     try {
-        // 清除可能的旧 token 缓存
-        clearCachedToken();
-        
-        const res = await loginPwd(email, password);
-        console.log(res.data);
-        if (res.status === 200) {
-          const { access_token, expires_in, token_type } = res.data;
-          await SecureStore.setItemAsync("access_token", access_token);
-          await SecureStore.setItemAsync("expires_in", expires_in.toString());
-          await SecureStore.setItemAsync("token_type", token_type);
-          Alert.alert("成功", "登录成功！");
-          navigation.navigate("index" as never);
-        } else {
-          if (res.data?.code === "not_found") {
-            Alert.alert("提示", "用户不存在，请先注册", [
-              { text: "取消", style: "cancel" },
-              { text: "去注册", onPress: () => navigation.navigate("signup" as never) }
-            ]);
-          } else if (res.data?.code === "invalid_password") {
-            Alert.alert("错误", "密码错误，请重新输入");
-          } else {
-            Alert.alert("错误", res.data?.message || "登录失败，请稍后重试");
-          }
-        }
-      } catch (error: any) {
-        const errorMsg = error.userMessage || "登录失败，请稍后重试";
-        if (error.status === 401 || error.data?.code === "invalid_credentials") {
-          Alert.alert("错误", "邮箱或密码错误");
-        } else if (error.status === 404 || error.data?.code === "not_found") {
-          Alert.alert("提示", "用户不存在，请先注册", [
-            { text: "取消", style: "cancel" },
-            { text: "去注册", onPress: () => navigation.navigate("signup" as never) }
+      // 清除可能的旧 token 缓存
+      clearCachedToken();
+
+      const res = await loginPwd(email, password);
+      console.log(res.data);
+      if (res.status === 200) {
+        const { access_token, expires_in, token_type } = res.data;
+        await SecureStore.setItemAsync('access_token', access_token);
+        await SecureStore.setItemAsync('expires_in', expires_in.toString());
+        await SecureStore.setItemAsync('token_type', token_type);
+        Alert.alert('成功', '登录成功！');
+        navigation.navigate('index' as never);
+      } else {
+        if (res.data?.code === 'not_found') {
+          Alert.alert('提示', '用户不存在，请先注册', [
+            { text: '取消', style: 'cancel' },
+            { text: '去注册', onPress: () => navigation.navigate('signup' as never) },
           ]);
+        } else if (res.data?.code === 'invalid_password') {
+          Alert.alert('错误', '密码错误，请重新输入');
         } else {
-          Alert.alert("错误", errorMsg);
+          Alert.alert('错误', res.data?.message || '登录失败，请稍后重试');
         }
       }
+    } catch (error: any) {
+      const errorMsg = error.userMessage || '登录失败，请稍后重试';
+      if (error.status === 401 || error.data?.code === 'invalid_credentials') {
+        Alert.alert('错误', '邮箱或密码错误');
+      } else if (error.status === 404 || error.data?.code === 'not_found') {
+        Alert.alert('提示', '用户不存在，请先注册', [
+          { text: '取消', style: 'cancel' },
+          { text: '去注册', onPress: () => navigation.navigate('signup' as never) },
+        ]);
+      } else {
+        Alert.alert('错误', errorMsg);
+      }
+    }
   };
   const handleSendCode = async () => {
     if (!email.trim()) {
-      Alert.alert("提示", "请输入邮箱地址");
+      Alert.alert('提示', '请输入邮箱地址');
       return;
     }
     if (!validateEmail(email)) {
-      Alert.alert("提示", "请输入有效的邮箱地址");
+      Alert.alert('提示', '请输入有效的邮箱地址');
       return;
     }
     try {
@@ -116,7 +108,7 @@ export default function SignIn() {
       if (res.status === 204) {
         setCountdown(60);
         setIsDisabled(true);
-        Alert.alert("成功", "验证码已发送，请注意查收");
+        Alert.alert('成功', '验证码已发送，请注意查收');
         if (countdownTimer.current) clearInterval(countdownTimer.current);
         countdownTimer.current = setInterval(() => {
           setCountdown((prev) => {
@@ -131,61 +123,61 @@ export default function SignIn() {
         }, 1000);
       }
     } catch (error: any) {
-      const errorMsg = error.userMessage || "验证码发送失败，请稍后再试";
+      const errorMsg = error.userMessage || '验证码发送失败，请稍后再试';
       if (error.status === 429) {
-        Alert.alert("提示", "发送过于频繁，请稍后再试");
-      } else if (error.status === 400 && error.data?.code === "email_invalid") {
-        Alert.alert("错误", "邮箱格式不正确");
+        Alert.alert('提示', '发送过于频繁，请稍后再试');
+      } else if (error.status === 400 && error.data?.code === 'email_invalid') {
+        Alert.alert('错误', '邮箱格式不正确');
       } else {
-        Alert.alert("错误", errorMsg);
+        Alert.alert('错误', errorMsg);
       }
     }
   };
   const handldeloginByPhone = async () => {
     if (!agree) {
-      Alert.alert("提示", "请阅读并同意《隐私协议》和《用户协议》");
+      Alert.alert('提示', '请阅读并同意《隐私协议》和《用户协议》');
       return;
     }
     if (!email.trim()) {
-      Alert.alert("提示", "请输入邮箱地址");
+      Alert.alert('提示', '请输入邮箱地址');
       return;
     }
     if (!validateEmail(email)) {
-      Alert.alert("提示", "请输入有效的邮箱地址");
+      Alert.alert('提示', '请输入有效的邮箱地址');
       return;
     }
     if (!code) {
-      Alert.alert("提示", "请输入验证码");
+      Alert.alert('提示', '请输入验证码');
       return;
     }
     if (code.length !== 6) {
-      Alert.alert("提示", "验证码必须是6位数字");
+      Alert.alert('提示', '验证码必须是6位数字');
       return;
     }
     try {
       // 清除可能的旧 token 缓存
       clearCachedToken();
-      
+
       const res = await loginPhone(email, code);
       if (res.status === 200) {
         const { access_token, expires_in, token_type } = res.data;
-        await SecureStore.setItemAsync("access_token", access_token);
-        await SecureStore.setItemAsync("expires_in", expires_in.toString());
-        await SecureStore.setItemAsync("token_type", token_type);
-        Alert.alert("成功", "登录成功！");
-        navigation.navigate("index" as never);
+        await SecureStore.setItemAsync('access_token', access_token);
+        await SecureStore.setItemAsync('expires_in', expires_in.toString());
+        await SecureStore.setItemAsync('token_type', token_type);
+        Alert.alert('成功', '登录成功！');
+        navigation.navigate('index' as never);
       }
     } catch (error: any) {
-      const errorMsg = error.userMessage || "登录失败，请稍后重试";
-      if (error.status === 400 || error.data?.code === "invalid_code") {
-        Alert.alert("错误", "验证码错误或已过期，请重新获取");
-      } else if (error.status === 404 || error.data?.code === "not_found") {
-        Alert.alert("提示", "用户不存在，请先注册", [
-          { text: "取消", style: "cancel" },
-          { text: "去注册", onPress: () => navigation.navigate("signup" as never) }
+      const errorMsg = error.userMessage || '登录失败，请稍后重试';
+      if (error.status === 400 || error.data?.code === 'invalid_code') {
+        Alert.alert('错误', '验证码错误或已过期，请重新获取');
+      } else if (error.status === 404 || error.data?.code === 'not_found') {
+        Alert.alert('提示', '用户不存在，请先注册', [
+          { text: '取消', style: 'cancel' },
+          { text: '去注册', onPress: () => navigation.navigate('signup' as never) },
         ]);
       } else {
-        Alert.alert("错误", errorMsg);
+        Alert.alert('错误', errorMsg);
       }
     }
   };
@@ -195,217 +187,192 @@ export default function SignIn() {
       <LinearGradient
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
+        colors={['#BCDBFF', '#EFF7FF', '#FFFFFF']}
         locations={[0, 0.48, 1]}
         style={[styles.gradientBackground]}
       >
         <View>
-        {Mm ? (
-          <Mmnoeyes style={[styles.Mm, { pointerEvents: "none" }]}></Mmnoeyes>
-        ) : (
-          <Mmeyes style={[styles.Mm, { pointerEvents: "none" }]}></Mmeyes>
-        )}
-        <View>
-          <View style={styles.tabcontainer}>
-            <Pressable
-              onPress={() => setLoginway("password")}
-              style={[
-                styles.way,
-                loginway === "password"
-                  ? { backgroundColor: "#FFFFFF" }
-                  : { backgroundColor: "transparent" },
-              ]}
-            >
+          {Mm ? (
+            <Mmnoeyes style={[styles.Mm, { pointerEvents: 'none' }]}></Mmnoeyes>
+          ) : (
+            <Mmeyes style={[styles.Mm, { pointerEvents: 'none' }]}></Mmeyes>
+          )}
+          <View>
+            <View style={styles.tabcontainer}>
               <Pressable
-                onPress={() => setLoginway("password")}
-                style={{ zIndex: 1 }}
+                onPress={() => setLoginway('password')}
+                style={[
+                  styles.way,
+                  loginway === 'password'
+                    ? { backgroundColor: '#FFFFFF' }
+                    : { backgroundColor: 'transparent' },
+                ]}
               >
-                <Text style={loginway === "password" && styles.wayText}>
-                  密码登录
-                </Text>
+                <Pressable onPress={() => setLoginway('password')} style={{ zIndex: 1 }}>
+                  <Text style={loginway === 'password' && styles.wayText}>密码登录</Text>
+                </Pressable>
+                {loginway === 'password' && <View style={styles.line}></View>}
               </Pressable>
-              {loginway === "password" && <View style={styles.line}></View>}
-            </Pressable>
+              <View
+                style={[
+                  styles.way,
+                  loginway === 'phone'
+                    ? { backgroundColor: '#ffffff' }
+                    : { backgroundColor: 'transparent' },
+                ]}
+              >
+                <Pressable onPress={() => setLoginway('phone')} style={{ zIndex: 2 }}>
+                  <Text style={loginway === 'phone' && styles.wayText}>验证码登陆</Text>
+                </Pressable>
+                {loginway === 'phone' && <View style={styles.line}></View>}
+              </View>
+            </View>
             <View
               style={[
-                styles.way,
-                loginway === "phone"
-                  ? { backgroundColor: "#ffffff" }
-                  : { backgroundColor: "transparent" },
+                styles.cardcontainer,
+                loginway === 'phone' ? { borderTopLeftRadius: 24 } : { borderTopRightRadius: 24 },
               ]}
             >
-              <Pressable
-                onPress={() => setLoginway("phone")}
-                style={{ zIndex: 2 }}
-              >
-                <Text style={loginway === "phone" && styles.wayText}>
-                  验证码登陆
-                </Text>
-              </Pressable>
-              {loginway === "phone" && <View style={styles.line}></View>}
-            </View>
-          </View>
-          <View
-            style={[
-              styles.cardcontainer,
-              loginway === "phone"
-                ? { borderTopLeftRadius: 24 }
-                : { borderTopRightRadius: 24 },
-            ]}
-          >
-            {loginway === "password" ? (
-              <View>
-                <View style={styles.passwordlist}>
-                  <View style={styles.smalllist}>
-                    <Text style={styles.titletext}>邮箱</Text>
-                    <TextInput
-                      style={styles.Inputkuang}
-                      placeholder="请输入邮箱"
-                      placeholderTextColor="#999"
-                      value={email}
-                      onChangeText={(text) => setEmail(text)}
-                    ></TextInput>
+              {loginway === 'password' ? (
+                <View>
+                  <View style={styles.passwordlist}>
+                    <View style={styles.smalllist}>
+                      <Text style={styles.titletext}>邮箱</Text>
+                      <TextInput
+                        style={styles.Inputkuang}
+                        placeholder="请输入邮箱"
+                        placeholderTextColor="#999"
+                        value={email}
+                        onChangeText={(text) => setEmail(text)}
+                      ></TextInput>
+                    </View>
+                    <View>
+                      <Text style={styles.titletext}>密码</Text>
+                      <TextInput
+                        style={styles.Inputkuang}
+                        placeholder="请输入密码"
+                        onChangeText={(text) => setPassword(text)}
+                        secureTextEntry={true}
+                        value={password}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        placeholderTextColor="#999"
+                        onFocus={() => {
+                          setMm(true);
+                        }}
+                        onBlur={() => {
+                          setMm(false);
+                        }}
+                      ></TextInput>
+                      <Link style={styles.getcode} href="/forgotpassword" asChild>
+                        <Text style={styles.getcodeText}>忘记密码</Text>
+                      </Link>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={styles.titletext}>密码</Text>
-                    <TextInput
-                      style={styles.Inputkuang}
-                      placeholder="请输入密码"
-                      onChangeText={(text) => setPassword(text)}
-                      secureTextEntry={true}
-                      value={password}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      placeholderTextColor="#999"
-                      onFocus={() => {
-                        setMm(true);
-                      }}
-                      onBlur={() => {
-                        setMm(false);
-                      }}
-                    ></TextInput>
-                    <Link style={styles.getcode} href="/forgotpassword" asChild>
-                      <Text style={styles.getcodeText}>忘记密码</Text>
+                  <Pressable style={styles.loginBtn} onPress={handleloginByPwd}>
+                    <Text style={styles.loginText}>登录</Text>
+                  </Pressable>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: 8,
+                    }}
+                  >
+                    <Link href={'/signup'} asChild>
+                      <Text style={styles.registerText}>注册新用户</Text>
                     </Link>
                   </View>
-                </View>
-                <Pressable style={styles.loginBtn} onPress={handleloginByPwd}>
-                  <Text style={styles.loginText}>登录</Text>
-                </Pressable>
-                <View
-                  style={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: 8,
-                  }}
-                >
-                  <Link href={"/signup"} asChild>
-                    <Text style={styles.registerText}>注册新用户</Text>
-                  </Link>
-                </View>
-                <View style={styles.agree}>
-          <Pressable
-            style={[
-              styles.agreeIcon,
-              agree
-                ? { borderColor: "#72B6FF" }
-                : { borderColor: "#999" },
-            ]}
-            onPress={() => setAgree(!agree)}
-          >
-            {agree ? <Agree></Agree> : <></>}
-          </Pressable>
-          <Text style={{ color: "#999999", fontSize: 12 }}>
-            已阅读并同意
-          </Text>
-          <Pressable onPress={() => navigation.navigate("privacyAgreement" as never)}>
-            <Text style={{ color: "#72B6FF", fontSize: 12 }}>
-              《隐私协议》
-            </Text>
-          </Pressable>
-          <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
-          <Pressable onPress={() => navigation.navigate("userAgreement" as never)}>
-            <Text style={{ color: "#72B6FF", fontSize: 12 }}>
-              《用户协议》
-            </Text>
-          </Pressable>
-        </View>
-              </View>
-            ) : (
-              <View>
-                <View style={styles.passwordlist}>
-                  <View style={styles.smalllist}>
-                    <Text style={styles.titletext}>邮箱</Text>
-                    <TextInput
-                      style={styles.Inputkuang}
-                      placeholder="请输入邮箱"
-                      placeholderTextColor="#999"
-                      value={email}
-                      onChangeText={(text) => setEmail(text)}
-                    ></TextInput>
-                  </View>
-                  <View style={{ position: "relative" }}>
-                    <Text style={styles.titletext}>验证码</Text>
-                    <TextInput
-                      style={styles.Inputkuang}
-                      placeholder="请输入邮箱"
-                      placeholderTextColor="#999"
-                      value={code}
-                      onChangeText={(text) => setCode(text)}
-                    ></TextInput>
+                  <View style={styles.agree}>
                     <Pressable
-                      style={styles.getcode}
-                      onPress={handleSendCode}
-                      disabled={isDisabled}
+                      style={[
+                        styles.agreeIcon,
+                        agree ? { borderColor: '#72B6FF' } : { borderColor: '#999' },
+                      ]}
+                      onPress={() => setAgree(!agree)}
                     >
-                      <Text style={styles.getcodeText}>
-                        {countdown > 0 ? `${countdown}秒后重发` : "获取验证码"}
-                      </Text>
+                      {agree ? <Agree></Agree> : <></>}
+                    </Pressable>
+                    <Text style={{ color: '#999999', fontSize: 12 }}>已阅读并同意</Text>
+                    <Pressable onPress={() => navigation.navigate('privacyAgreement' as never)}>
+                      <Text style={{ color: '#72B6FF', fontSize: 12 }}>《隐私协议》</Text>
+                    </Pressable>
+                    <Text style={{ color: '#999999', fontSize: 12 }}>和</Text>
+                    <Pressable onPress={() => navigation.navigate('userAgreement' as never)}>
+                      <Text style={{ color: '#72B6FF', fontSize: 12 }}>《用户协议》</Text>
                     </Pressable>
                   </View>
                 </View>
-                <Pressable
-                  style={styles.loginBtn}
-                  onPress={handldeloginByPhone}
-                >
-                  <Text style={styles.loginText}>登录</Text>
-                </Pressable>
-                <View
-                  style={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: 8,
-                  }}
-                >
-                  <Link href={"/signup"} asChild>
-                    <Text style={styles.registerText}>注册新用户</Text>
-                  </Link>
+              ) : (
+                <View>
+                  <View style={styles.passwordlist}>
+                    <View style={styles.smalllist}>
+                      <Text style={styles.titletext}>邮箱</Text>
+                      <TextInput
+                        style={styles.Inputkuang}
+                        placeholder="请输入邮箱"
+                        placeholderTextColor="#999"
+                        value={email}
+                        onChangeText={(text) => setEmail(text)}
+                      ></TextInput>
+                    </View>
+                    <View style={{ position: 'relative' }}>
+                      <Text style={styles.titletext}>验证码</Text>
+                      <TextInput
+                        style={styles.Inputkuang}
+                        placeholder="请输入邮箱"
+                        placeholderTextColor="#999"
+                        value={code}
+                        onChangeText={(text) => setCode(text)}
+                      ></TextInput>
+                      <Pressable
+                        style={styles.getcode}
+                        onPress={handleSendCode}
+                        disabled={isDisabled}
+                      >
+                        <Text style={styles.getcodeText}>
+                          {countdown > 0 ? `${countdown}秒后重发` : '获取验证码'}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Pressable style={styles.loginBtn} onPress={handldeloginByPhone}>
+                    <Text style={styles.loginText}>登录</Text>
+                  </Pressable>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: 8,
+                    }}
+                  >
+                    <Link href={'/signup'} asChild>
+                      <Text style={styles.registerText}>注册新用户</Text>
+                    </Link>
+                  </View>
+                  <View style={styles.agree}>
+                    <Pressable
+                      style={[
+                        styles.agreeIcon,
+                        agree ? { borderColor: '#72B6FF' } : { borderColor: '#999' },
+                      ]}
+                      onPress={() => setAgree(!agree)}
+                    >
+                      {agree ? <Agree></Agree> : <></>}
+                    </Pressable>
+                    <Text style={{ color: '#999999', fontSize: 12 }}>已阅读并同意</Text>
+                    <Pressable onPress={() => navigation.navigate('privacyAgreement' as never)}>
+                      <Text style={{ color: '#72B6FF', fontSize: 12 }}>《隐私协议》</Text>
+                    </Pressable>
+                    <Text style={{ color: '#999999', fontSize: 12 }}>和</Text>
+                    <Pressable onPress={() => navigation.navigate('userAgreement' as never)}>
+                      <Text style={{ color: '#72B6FF', fontSize: 12 }}>《用户协议》</Text>
+                    </Pressable>
+                  </View>
                 </View>
-                <View style={styles.agree}>
-          <Pressable
-            style={[
-              styles.agreeIcon,
-              agree
-                ? { borderColor: "#72B6FF" }
-                : { borderColor: "#999" },
-            ]}
-            onPress={() => setAgree(!agree)}
-          >
-            {agree ? <Agree></Agree> : <></>}
-          </Pressable>
-          <Text style={{ color: "#999999", fontSize: 12 }}>已阅读并同意</Text>
-          <Pressable onPress={() => navigation.navigate("privacyAgreement" as never)}>
-            <Text style={{ color: "#72B6FF", fontSize: 12 }}>《隐私协议》</Text>
-          </Pressable>
-          <Text style={{ color: "#999999", fontSize: 12 }}>和</Text>
-          <Pressable onPress={() => navigation.navigate("userAgreement" as never)}>
-            <Text style={{ color: "#72B6FF", fontSize: 12 }}>《用户协议》</Text>
-          </Pressable>
-        </View>
-              </View>
-            )}
+              )}
+            </View>
           </View>
-        </View>
         </View>
       </LinearGradient>
     </SafeAreaProvider>
@@ -414,40 +381,40 @@ export default function SignIn() {
 const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,
-    width: "100%",
-    alignItems: "center",
-    position: "relative",
+    width: '100%',
+    alignItems: 'center',
+    position: 'relative',
   },
   Mm: {
-    position: "absolute",
+    position: 'absolute',
     left: 56,
     top: 59,
     zIndex: 1,
   },
   cardcontainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
     width: 327,
     height: 380,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     paddingTop: 30,
     marginTop: -20,
   },
   tabcontainer: {
-    display: "flex",
-    flexDirection: "row",
+    display: 'flex',
+    flexDirection: 'row',
     width: 327,
-    justifyContent: "space-between",
-    backgroundColor: "#EFF7FF",
+    justifyContent: 'space-between',
+    backgroundColor: '#EFF7FF',
     borderTopRightRadius: 24,
     borderTopLeftRadius: 24,
     marginTop: 184,
   },
   way: {
-    width: "50%",
+    width: '50%',
     height: 60,
     paddingTop: 12,
     paddingLeft: 46,
@@ -455,22 +422,22 @@ const styles = StyleSheet.create({
   },
   wayText: {
     fontSize: 16,
-    color: "#333333",
-    fontWeight: "700",
+    color: '#333333',
+    fontWeight: '700',
   },
   line: {
     width: 28,
     height: 2.4,
-    backgroundColor: "#72B6FF",
+    backgroundColor: '#72B6FF',
     marginLeft: 23,
     marginTop: 3,
     borderRadius: 1,
   },
   passwordlist: {
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
     gap: 7,
-    alignItems: "center",
+    alignItems: 'center',
   },
   iphonelist: {
     paddingTop: 36,
@@ -479,7 +446,7 @@ const styles = StyleSheet.create({
     marginBottom: 17,
   },
   Inputkuang: {
-    backgroundColor: "#EEEEEE",
+    backgroundColor: '#EEEEEE',
     width: 296,
     height: 47,
     borderRadius: 20,
@@ -488,41 +455,41 @@ const styles = StyleSheet.create({
     marginTop: 7,
   },
   titletext: {
-    fontFamily: "Source Han Sans",
+    fontFamily: 'Source Han Sans',
     fontSize: 14,
-    color: "#666666",
+    color: '#666666',
     left: 10,
   },
   getcode: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 13,
     right: 19,
   },
   getcodeText: {
-    color: "#72B6FF",
+    color: '#72B6FF',
     fontSize: 14,
   },
   loginBtn: {
-    backgroundColor: "#72B6FF",
+    backgroundColor: '#72B6FF',
     width: 296,
     height: 47,
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 33,
   },
   loginText: {
-    color: "#ffffff",
+    color: '#ffffff',
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   registerText: {
-    color: "#A9D1FF",
+    color: '#A9D1FF',
   },
   agree: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 32,
     paddingLeft: 10,
     gap: 8,
@@ -532,7 +499,7 @@ const styles = StyleSheet.create({
     height: 14,
     width: 14,
     borderRadius: 7,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

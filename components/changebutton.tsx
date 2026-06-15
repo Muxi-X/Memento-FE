@@ -1,30 +1,28 @@
-import { useNavigation } from "expo-router";
-import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useFindStore } from "../app/stores/usePromptStore";
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFindStore } from '../app/stores/usePromptStore';
 export default function ChangeButton() {
   const setsort = useFindStore((state) => state.setsort);
   const sort = useFindStore((state) => state.sort);
-  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() => setsort("random")}
+        onPress={() => setsort('random')}
         style={[
           styles.smallbutton,
           {
-            backgroundColor: sort === "random" ? "#EEEEEE" : "#ffffff",
+            backgroundColor: sort === 'random' ? '#EEEEEE' : '#ffffff',
           },
         ]}
       >
         <Text style={styles.smallbuttonText}>随机</Text>
       </Pressable>
       <Pressable
-        onPress={() => setsort("latest")}
+        onPress={() => setsort('latest')}
         style={[
           styles.smallbutton,
           {
-            backgroundColor: sort === "latest" ? "#EEEEEE" : "#ffffff",
+            backgroundColor: sort === 'latest' ? '#EEEEEE' : '#ffffff',
           },
         ]}
       >
@@ -35,14 +33,14 @@ export default function ChangeButton() {
 }
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: 'row',
     width: 80,
     height: 30,
     borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    shadowColor: "#000000",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 5,
     shadowOpacity: 0.2,
@@ -51,14 +49,14 @@ const styles = StyleSheet.create({
   smallbutton: {
     width: 36,
     height: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 6,
-    backgroundColor: "#EFEFEF",
+    backgroundColor: '#EFEFEF',
   },
   smallbuttonText: {
     fontSize: 12,
-    color: "#666666",
+    color: '#666666',
     borderRadius: 6,
   },
 });
@@ -68,22 +66,22 @@ export function ChangeButton2() {
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() => setsort2("me")}
+        onPress={() => setsort2('me')}
         style={[
           styles.smallbutton,
           {
-            backgroundColor: sort2 === "me" ? "#EEEEEE" : "#ffffff",
+            backgroundColor: sort2 === 'me' ? '#EEEEEE' : '#ffffff',
           },
         ]}
       >
         <Text style={styles.smallbuttonText}>自己</Text>
       </Pressable>
       <Pressable
-        onPress={() => setsort2("all")}
+        onPress={() => setsort2('all')}
         style={[
           styles.smallbutton,
           {
-            backgroundColor: sort2 === "all" ? "#EEEEEE" : "#ffffff",
+            backgroundColor: sort2 === 'all' ? '#EEEEEE' : '#ffffff',
           },
         ]}
       >

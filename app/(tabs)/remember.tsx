@@ -1,7 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Pressable,
   RefreshControl,
@@ -10,74 +10,67 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ReviewDatesResponse, ReviewkeywordItem } from "../api/interface";
-import { listReviewDates, listReviewKeywords } from "../api/review";
+} from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ReviewDatesResponse, ReviewkeywordItem } from '../api/interface';
+import { listReviewDates, listReviewKeywords } from '../api/review';
 
-const keywordColors = [
-  "#B7E0FE",
-  "#CFE9DC",
-  "#FBEDCA",
-  "#FFDCA4",
-  "#FEDEE1",
-  "#B7E0FE",
-];
+const keywordColors = ['#B7E0FE', '#CFE9DC', '#FBEDCA', '#FFDCA4', '#FEDEE1', '#B7E0FE'];
 
 export default function FindScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
-  const [activeTab, setActiveTab] = useState("keyword");
+  const [activeTab, setActiveTab] = useState('keyword');
   const [reviewData, setReviewData] = useState<ReviewDatesResponse>();
   const [keywordData, setKeywordData] = useState<ReviewkeywordItem[]>([]);
   const handleChange = (tab: string) => {
     setActiveTab(tab);
   };
   const formatDate = (dateStr: string) => {
-    if (!dateStr || !dateStr.includes("-")) {
+    if (!dateStr || !dateStr.includes('-')) {
       return dateStr;
     }
-    const [year, month, day] = dateStr.split("-");
+    const [year, month, day] = dateStr.split('-');
     const formattedMonth = Number(month).toString();
     const formattedDay = Number(day).toString();
     return `${year}/${formattedMonth}/${formattedDay}`;
   };
-  const getReviewdateList = async () => {
+  const getReviewdateList = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync("access_token");
+      const token = await SecureStore.getItemAsync('access_token');
       console.log(token);
       if (token !== null) {
         const res = await listReviewDates();
         setReviewData(res.data);
       } else {
-        router.navigate("/signin");
+        router.navigate('/signin');
       }
     } catch (error) {
       console.log(error);
     }
-  };
-  const getReviewKeywordList = async () => {
+  }, [router]);
+  const getReviewKeywordList = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync("access_token");
+      const token = await SecureStore.getItemAsync('access_token');
       console.log(token);
       if (token !== null) {
         const res = await listReviewKeywords();
         setKeywordData(res.data.items);
         console.log(res.data.items);
       } else {
-        router.navigate("/signin");
+        router.navigate('/signin');
       }
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     getReviewdateList();
     getReviewKeywordList();
-  }, []);
+  }, [getReviewKeywordList, getReviewdateList]);
   const onRefresh = async () => {
     setRefreshing(true);
     await getReviewdateList();
@@ -91,43 +84,17 @@ export default function FindScreen() {
             <Text style={styles.title}>回顾</Text>
           </View>
           <View style={styles.changekuang}>
-            <TouchableOpacity
-              onPress={() => handleChange("keyword")}
-              style={styles.tabItem}
-            >
-              <Text
-                style={[
-                  styles.changetext,
-                  activeTab === "keyword" && styles.activeText,
-                ]}
-              >
+            <TouchableOpacity onPress={() => handleChange('keyword')} style={styles.tabItem}>
+              <Text style={[styles.changetext, activeTab === 'keyword' && styles.activeText]}>
                 关键词
               </Text>
-              <View
-                style={[
-                  styles.tabLine,
-                  activeTab === "keyword" && styles.activeLine,
-                ]}
-              />
+              <View style={[styles.tabLine, activeTab === 'keyword' && styles.activeLine]} />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleChange("date")}
-              style={styles.tabItem}
-            >
-              <Text
-                style={[
-                  styles.changetext,
-                  activeTab === "date" && styles.activeText,
-                ]}
-              >
+            <TouchableOpacity onPress={() => handleChange('date')} style={styles.tabItem}>
+              <Text style={[styles.changetext, activeTab === 'date' && styles.activeText]}>
                 日期
               </Text>
-              <View
-                style={[
-                  styles.tabLine,
-                  activeTab === "date" && styles.activeLine,
-                ]}
-              />
+              <View style={[styles.tabLine, activeTab === 'date' && styles.activeLine]} />
             </TouchableOpacity>
           </View>
         </View>
@@ -141,49 +108,21 @@ export default function FindScreen() {
           <Text style={styles.title}>回顾</Text>
         </View>
         <View style={styles.changekuang}>
-          <TouchableOpacity
-            onPress={() => handleChange("keyword")}
-            style={styles.tabItem}
-          >
-            <Text
-              style={[
-                styles.changetext,
-                activeTab === "keyword" && styles.activeText,
-              ]}
-            >
+          <TouchableOpacity onPress={() => handleChange('keyword')} style={styles.tabItem}>
+            <Text style={[styles.changetext, activeTab === 'keyword' && styles.activeText]}>
               关键词
             </Text>
-            <View
-              style={[
-                styles.tabLine,
-                activeTab === "keyword" && styles.activeLine,
-              ]}
-            />
+            <View style={[styles.tabLine, activeTab === 'keyword' && styles.activeLine]} />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleChange("date")}
-            style={styles.tabItem}
-          >
-            <Text
-              style={[
-                styles.changetext,
-                activeTab === "date" && styles.activeText,
-              ]}
-            >
-              日期
-            </Text>
-            <View
-              style={[
-                styles.tabLine,
-                activeTab === "date" && styles.activeLine,
-              ]}
-            />
+          <TouchableOpacity onPress={() => handleChange('date')} style={styles.tabItem}>
+            <Text style={[styles.changetext, activeTab === 'date' && styles.activeText]}>日期</Text>
+            <View style={[styles.tabLine, activeTab === 'date' && styles.activeLine]} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 关键词卡片列表区域 */}
-      {activeTab === "keyword" ? (
+      {activeTab === 'keyword' ? (
         <ScrollView
           style={styles.cardList}
           showsVerticalScrollIndicator={false}
@@ -193,7 +132,7 @@ export default function FindScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={["#72B6FF"]}
+              colors={['#72B6FF']}
               tintColor="#72B6FF"
               title="正在刷新..."
               titleColor="#999"
@@ -206,7 +145,7 @@ export default function FindScreen() {
               style={[
                 styles.cardItem,
                 {
-                  backgroundColor: keywordColors[index % 5] || "#E0E0E0",
+                  backgroundColor: keywordColors[index % 5] || '#E0E0E0',
                   marginTop: index > 0 ? -44 : 0,
                   zIndex: keywordData.length + index,
                 },
@@ -218,7 +157,7 @@ export default function FindScreen() {
                   style={styles.detailArrowmore}
                   onPress={() => {
                     router.navigate({
-                      pathname: "/reviewFind/keywordsClass",
+                      pathname: '/reviewFind/keywordsClass',
                       params: {
                         keyword_id: item.keyword.id,
                         keywordtext: item.keyword.text,
@@ -230,9 +169,7 @@ export default function FindScreen() {
                 </Pressable>
               </View>
               <View style={styles.cardSubtitle}>
-                <Text style={{ color: "#999", fontSize: 12 }}>
-                  {item.my_upload_count}张作品
-                </Text>
+                <Text style={{ color: '#999', fontSize: 12 }}>{item.my_upload_count}张作品</Text>
               </View>
             </View>
           ))}
@@ -241,8 +178,8 @@ export default function FindScreen() {
             <View
               style={{
                 marginTop: 20,
-                alignItems: "center",
-                justifyContent: "center",
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Text>已经浏览完全部创作过的关键词</Text>
@@ -259,7 +196,7 @@ export default function FindScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={["#72B6FF"]}
+              colors={['#72B6FF']}
               tintColor="#72B6FF"
               title="正在刷新..."
               titleColor="#999"
@@ -268,21 +205,17 @@ export default function FindScreen() {
         >
           <View style={styles.cardheader}>
             <View>
-              <Text style={{ color: "#999", fontSize: 14 }}>累计参与</Text>
+              <Text style={{ color: '#999', fontSize: 14 }}>累计参与</Text>
               <View style={styles.cardheaderdata}>
-                <Text style={{ fontSize: 36 }}>
-                  {reviewData?.total_participation_days}
-                </Text>
-                <Text style={{ fontSize: 16, color: "#999" }}>天</Text>
+                <Text style={{ fontSize: 36 }}>{reviewData?.total_participation_days}</Text>
+                <Text style={{ fontSize: 16, color: '#999' }}>天</Text>
               </View>
             </View>
             <View>
-              <Text style={{ color: "#999", fontSize: 14 }}>作品总数</Text>
+              <Text style={{ color: '#999', fontSize: 14 }}>作品总数</Text>
               <View style={styles.cardheaderdata}>
-                <Text style={{ fontSize: 36 }}>
-                  {reviewData?.total_image_count}
-                </Text>
-                <Text style={{ fontSize: 16, color: "#999" }}>张</Text>
+                <Text style={{ fontSize: 36 }}>{reviewData?.total_image_count}</Text>
+                <Text style={{ fontSize: 16, color: '#999' }}>张</Text>
               </View>
             </View>
           </View>
@@ -294,7 +227,7 @@ export default function FindScreen() {
                 style={[styles.detailArrowmore, { top: 62 }]}
                 onPress={() => {
                   router.navigate({
-                    pathname: "/reviewFind/dateClass",
+                    pathname: '/reviewFind/dateClass',
                     params: {
                       biz_date: item.biz_date,
                       keywordtext: item.keyword.text,
@@ -305,21 +238,21 @@ export default function FindScreen() {
                 <Ionicons name="arrow-forward" size={20} color="#666" />
               </Pressable>
               <View style={styles.cardnumber}>
-                <Text style={{ color: "#666", fontSize: 12 }}>
-                  {item.my_image_count === null ? "0" : item.my_image_count}
+                <Text style={{ color: '#666', fontSize: 12 }}>
+                  {item.my_image_count === null ? '0' : item.my_image_count}
                   张作品
                 </Text>
               </View>
               <Text style={styles.carddate}>{formatDate(item.biz_date)}</Text>
             </View>
           ))}
-           {/* 需要上划时显示 */}
+          {/* 需要上划时显示 */}
           {contentHeight > scrollViewHeight && (
             <View
               style={{
                 marginTop: 20,
-                alignItems: "center",
-                justifyContent: "center",
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Text>已经回到最早的一天</Text>
@@ -334,56 +267,56 @@ export default function FindScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-    position: "relative",
+    backgroundColor: '#F5F5F5',
+    position: 'relative',
   },
   header: {
-    width: "100%",
+    width: '100%',
     height: 128,
-    flexDirection: "column",
-    backgroundColor: "#fff",
+    flexDirection: 'column',
+    backgroundColor: '#fff',
   },
   headertitle: {
     marginTop: 44,
-    width: "100%",
+    width: '100%',
     height: 44,
     paddingLeft: 26,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333',
   },
   changekuang: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
     height: 40,
     gap: 69,
   },
   tabItem: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   changetext: {
     fontSize: 16,
     fontWeight: 500,
-    color: "#333",
+    color: '#333',
   },
   activeText: {
-    color: "#72B6FF",
+    color: '#72B6FF',
   },
   tabLine: {
     width: 28,
     height: 2.5,
     borderRadius: 2.4,
     marginTop: 2,
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
   },
   activeLine: {
-    backgroundColor: "#72B6FF",
+    backgroundColor: '#72B6FF',
   },
   cardList: {
     flex: 1,
@@ -393,10 +326,10 @@ const styles = StyleSheet.create({
   cardItem: {
     borderRadius: 30,
     height: 144,
-    position: "relative",
+    position: 'relative',
   },
   cardContent: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 200,
     paddingLeft: 27,
     paddingTop: 16,
@@ -404,64 +337,64 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 22,
     fontWeight: 500,
-    color: "#666666",
+    color: '#666666',
   },
   cardSubtitle: {
-    position: "absolute",
+    position: 'absolute',
     top: 59,
     left: 28,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     minWidth: 72,
     paddingHorizontal: 12,
     height: 22,
     borderRadius: 10,
-    borderColor: " rgba(102, 102, 102, 0.5)",
+    borderColor: ' rgba(102, 102, 102, 0.5)',
     borderWidth: 1,
   },
   cardheader: {
     height: 100,
     borderRadius: 20,
     padding: 20,
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    justifyContent: "space-evenly",
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    justifyContent: 'space-evenly',
     gap: 56,
   },
   cardheaderdata: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 8,
-    alignItems: "flex-end",
-    justifyContent: "flex-start",
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
     height: 52,
   },
   carddate_Item: {
-    position: "relative",
+    position: 'relative',
     height: 110,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 20,
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 20,
     paddingTop: 56,
     paddingLeft: 26,
   },
   carddate: {
-    position: "absolute",
+    position: 'absolute',
     top: 24,
     left: 26,
     fontSize: 14,
-    color: "#666",
+    color: '#666',
   },
   cardnumber: {
-    position: "absolute",
+    position: 'absolute',
     minWidth: 72,
     height: 22,
     top: 24,
     right: 23,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 6,
-    borderColor: "rgba(102, 102, 102, 0.5)",
+    borderColor: 'rgba(102, 102, 102, 0.5)',
     borderWidth: 1,
     borderRadius: 999,
   },
@@ -469,14 +402,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   detailArrowmore: {
-    position: "absolute",
+    position: 'absolute',
     top: 18,
     right: 27.28,
     borderRadius: 14,
     width: 28,
     height: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#EFEFEF",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#EFEFEF',
   },
 });

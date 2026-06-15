@@ -1,7 +1,7 @@
-import ChangeButton from "@/components/changebutton";
-import { PostCard } from "@/components/postcard";
-import { useNavigation } from "expo-router";
-import React, { useEffect, useState } from "react";
+import ChangeButton from '@/components/changebutton';
+import { PostCard } from '@/components/postcard';
+import { useNavigation } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -10,13 +10,13 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import Arrowback from "../assets/images/arrow-back.svg";
-import Post from "./api/interface";
-import { listOfficialDateUploads } from "./api/keywords";
-import usePromptStore, { useFindStore } from "./stores/usePromptStore";
-const { width: screenWidth } = Dimensions.get("window");
+} from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Arrowback from '../assets/images/arrow-back.svg';
+import Post from './api/interface';
+import { listOfficialDateUploads } from './api/keywords';
+import usePromptStore, { useFindStore } from './stores/usePromptStore';
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function KeywordTodayScreen() {
   const sort = useFindStore((state) => state.sort);
@@ -25,20 +25,20 @@ export default function KeywordTodayScreen() {
   // 新增：刷新状态管理
   const [refreshing, setRefreshing] = useState(false);
 
-  const getPublicList = async () => {
+  const getPublicList = useCallback(async () => {
     try {
       console.log(date, sort);
       const res = await listOfficialDateUploads(date, sort);
       setItem(res.data.items || []);
       console.log(res.data.items);
     } catch (error) {
-      console.error("获取数据失败：", error);
+      console.error('获取数据失败：', error);
     }
-  };
+  }, [date, sort]);
 
   useEffect(() => {
     getPublicList();
-  }, [sort, date]);
+  }, [getPublicList]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -57,7 +57,7 @@ export default function KeywordTodayScreen() {
     navigation.setOptions({
       headerShown: false,
     });
-  }, []);
+  }, [navigation]);
 
   return (
     <SafeAreaProvider>
@@ -83,7 +83,7 @@ export default function KeywordTodayScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={["#72B6FF"]}
+              colors={['#72B6FF']}
               tintColor="#72B6FF"
               title="正在刷新..."
               titleColor="#999"
@@ -98,27 +98,27 @@ export default function KeywordTodayScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
     height: 179,
-    position: "relative",
+    position: 'relative',
     paddingTop: 59,
     gap: 11,
   },
   buttonGroup: {
-    position: "absolute",
+    position: 'absolute',
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 5, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -128,29 +128,29 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 14,
-    fontWeight: "500",
-    color: "#999999",
+    fontWeight: '500',
+    color: '#999999',
   },
   keywordText: {
     fontSize: 36,
-    fontWeight: "400",
-    color: "#333",
+    fontWeight: '400',
+    color: '#333',
     marginBottom: 8,
   },
   keywordEnglish: {
     fontSize: 16,
-    fontWeight: "400",
-    color: "#666666",
+    fontWeight: '400',
+    color: '#666666',
     marginBottom: 16,
   },
   changebutton: {
-    position: "absolute",
+    position: 'absolute',
     top: 134,
     right: 34,
   },
   postList: {
     paddingHorizontal: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -159,65 +159,65 @@ const styles = StyleSheet.create({
   postCard: {
     marginBottom: 24,
     borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#FFFFFF",
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
   },
   postImage: {
     width: screenWidth - 32,
     height: 240,
-    resizeMode: "cover",
+    resizeMode: 'cover',
   },
   imageIndicatorContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 12,
-    alignSelf: "center",
-    flexDirection: "row",
+    alignSelf: 'center',
+    flexDirection: 'row',
     gap: 6,
   },
   imageIndicator: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.5)",
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
   activeIndicator: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   avatarButton: {
-    position: "absolute",
+    position: 'absolute',
     right: 12,
     bottom: 60,
     width: 48,
     height: 48,
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: "#FFFFFF",
-    overflow: "hidden",
+    borderColor: '#FFFFFF',
+    overflow: 'hidden',
   },
   avatar: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   postCaption: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
-    color: "#333",
+    color: '#333',
   },
   interactionRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingHorizontal: 12,
     paddingBottom: 12,
     gap: 16,
   },
   interactionButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   interactionText: {
     fontSize: 12,
-    color: "#999",
+    color: '#999',
   },
 });

@@ -1,16 +1,16 @@
-import { PromptWords } from "../app/api/interface";
-import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Modal, View,Platform,StatusBar } from "react-native";
-import IdeaIcon from "../assets/images/idea.svg";
-import Smalltip from "./tipsmall";
-import { GuideOverlay } from "./guideOverlay";
+import { PromptWords } from '../app/api/interface';
+import React, { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Modal, Platform, StatusBar } from 'react-native';
+import IdeaIcon from '../assets/images/idea.svg';
+import Smalltip from './tipsmall';
+import { GuideOverlay } from './guideOverlay';
 
 interface IdeaProps {
-  isGuideMode?: boolean;   
-  step?: number;           
-  onNext?: () => void;    
-  innerRef?: any;         
-  targetLayout?: any;     
+  isGuideMode?: boolean;
+  step?: number;
+  onNext?: () => void;
+  innerRef?: any;
+  targetLayout?: any;
   setTargetLayout?: (layout: any) => void; // 用于回传测量结果的方法
 }
 
@@ -24,26 +24,26 @@ export const Idea = ({
 }: IdeaProps) => {
   const [tipstate, setTipstate] = useState(false);
   const measureContent = () => {
-    
     if (innerRef?.current && setTargetLayout) {
       setTimeout(() => {
         innerRef.current?.measureInWindow((x: number, y: number, w: number, h: number) => {
-          let  finalY=y
-          if(Platform.OS==="android")
-          {const statusBarHeight = StatusBar.currentHeight || 0;
-          finalY = y + statusBarHeight;}
+          let finalY = y;
+          if (Platform.OS === 'android') {
+            const statusBarHeight = StatusBar.currentHeight || 0;
+            finalY = y + statusBarHeight;
+          }
           setTargetLayout({ x, y: finalY, w, h });
         });
       }, 100);
     }
   };
-useEffect(() => {
-  if (isGuideMode) {
-    setTipstate(true); 
-  } else if (step === 0 && tipstate) {
-    setTipstate(false);
-  }
-}, [isGuideMode, step]);
+  useEffect(() => {
+    if (isGuideMode) {
+      setTipstate(true);
+    } else if (step === 0 && tipstate) {
+      setTipstate(false);
+    }
+  }, [isGuideMode, step, tipstate]);
   const handleClose = () => {
     if (isGuideMode) return;
     setTipstate(false);
@@ -68,7 +68,7 @@ useEffect(() => {
       >
         <Pressable style={styles.modalMask} onPress={handleClose}>
           <Pressable
-            ref={innerRef} 
+            ref={innerRef}
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
@@ -102,12 +102,7 @@ useEffect(() => {
         </Pressable>
 
         {isGuideMode && (
-          <GuideOverlay
-            visible={true}
-            target={targetLayout}
-            step={step}
-            onNext={onNext!}
-          />
+          <GuideOverlay visible={true} target={targetLayout} step={step} onNext={onNext!} />
         )}
       </Modal>
     </>
@@ -116,23 +111,23 @@ useEffect(() => {
 
 const styles = StyleSheet.create({
   findIcon: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     width: 26,
     height: 26,
   },
   modalMask: {
     flex: 1,
-    backgroundColor: "rgba(21, 24, 30, 0.2)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(21, 24, 30, 0.2)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
     height: 429,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,

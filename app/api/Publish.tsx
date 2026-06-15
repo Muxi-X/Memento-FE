@@ -1,4 +1,4 @@
-import request from "./request";
+import request from './request';
 export interface Createtype {
   context: {
     type: string;
@@ -31,15 +31,15 @@ export interface CompleteItem {
 }
 export const CreateSession = (data: Createtype) => {
   return request({
-    url: "/v1/uploads/publish-sessions",
-    method: "POST",
+    url: '/v1/uploads/publish-sessions',
+    method: 'POST',
     data: data,
   });
 };
 export const presignUpload = (session_id: string, data: PresignItem[]) => {
   return request({
     url: `/v1/uploads/publish-sessions/${session_id}/assets/presign-batch`,
-    method: "POST",
+    method: 'POST',
     data: {
       items: data,
     },
@@ -49,7 +49,7 @@ export const presignUpload = (session_id: string, data: PresignItem[]) => {
 export const completeUpload = (session_id: string, data: CompleteItem[]) => {
   return request({
     url: `/v1/uploads/publish-sessions/${session_id}/assets/complete-batch`,
-    method: "POST",
+    method: 'POST',
     data: {
       items: data,
     },
@@ -58,13 +58,12 @@ export const completeUpload = (session_id: string, data: CompleteItem[]) => {
 export const commitUpload = (session_id: string) => {
   return request({
     url: `/v1/uploads/publish-sessions/${session_id}/commit`,
-    method: "POST",
+    method: 'POST',
   });
 };
 export const concelSession = (session_id: string) => {
   return request({
     url: `/v1/uploads/publish-sessions/${session_id}`,
-    method: "DELETE",
+    method: 'DELETE',
   });
 };
-

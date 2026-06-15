@@ -1,29 +1,19 @@
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect } from "react";
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import Arrowback from "../assets/images/arrow-back.svg";
-import { setCustomKeywordCover } from "./api/custom";
-import { CustomImageItem } from "./api/interface";
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { Dimensions, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Arrowback from '../assets/images/arrow-back.svg';
+import { setCustomKeywordCover } from './api/custom';
+import { CustomImageItem } from './api/interface';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 const itemSize = (width - 30) / 3;
 
 export default function ChooseCover() {
   const router = useRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams();
-  const images: CustomImageItem[] = params.images
-    ? JSON.parse(params.images as string)
-    : [];
+  const images: CustomImageItem[] = params.images ? JSON.parse(params.images as string) : [];
   const handeleChangecover = async (keyword_id: string, item_id: string) => {
     await setCustomKeywordCover(keyword_id, item_id);
   };
@@ -31,13 +21,13 @@ export default function ChooseCover() {
     navigation.setOptions({
       headerShown: false,
     });
-  }, []);
+  }, [navigation]);
   const renderItem = ({ item }: { item: CustomImageItem }) => {
     return (
       <Pressable
         style={styles.imageItem}
         onPress={() => {
-          console.log("选中封面：", item.id);
+          console.log('选中封面：', item.id);
           handeleChangecover(params.keyword_id as string, item.id);
           router.back();
         }}
@@ -79,37 +69,37 @@ export default function ChooseCover() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   header: {
-    width: "100%",
+    width: '100%',
     marginTop: 41,
     height: 47,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingTop: 10,
     paddingHorizontal: 20,
   },
   backBtn: {
     width: 40,
     height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 1,
   },
   headertext: {
     fontSize: 16,
-    position: "absolute",
-    alignSelf: "center",
+    position: 'absolute',
+    alignSelf: 'center',
     left: 0,
     right: 0,
-    textAlign: "center",
+    textAlign: 'center',
   },
   list: {
     padding: 10,
   },
   row: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
   imageItem: {
@@ -117,7 +107,7 @@ const styles = StyleSheet.create({
     height: itemSize,
   },
   image: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
 });
