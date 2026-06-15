@@ -1,12 +1,12 @@
-import { Link, useRouter, useFocusEffect } from "expo-router";
-import { View, StyleSheet, Pressable, Text } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import * as SecureStore from "expo-secure-store";
-import Arrowback from "../assets/images/arrow-back.svg";
-import ArrowRight from "../assets/images/arrow-auth.svg";
-import { useSettingStore } from "./stores/authstore";
-import { useEffect, useRef, useCallback } from "react";
-import { getMeSetting, updateMeNotificationSettings, updatePublicable } from "./api/me";
+import { useRouter } from 'expo-router';
+import { View, StyleSheet, Pressable, Text } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
+import Arrowback from '../assets/images/arrow-back.svg';
+import ArrowRight from '../assets/images/arrow-auth.svg';
+import { useSettingStore } from './stores/authstore';
+import { useEffect, useRef, useCallback } from 'react';
+import { getMeSetting } from './api/me';
 
 export default function Configure() {
   // 状态获取
@@ -25,27 +25,33 @@ export default function Configure() {
   });
 
   const getSetting = useCallback(async () => {
-    const token =  await SecureStore.getItemAsync("access_token");
-    if(token!==null)
-    {    const res = await getMeSetting();
-    const data = res.data;
-}else{
-  router.navigate("/signin");
-}
+    const token = await SecureStore.getItemAsync('access_token');
+    if (token !== null) {
+      const res = await getMeSetting();
+      const data = res.data;
+      setPublicPoolEnabled(data.public_pool_enabled);
+      setReactionEnabled(data.reaction_enabled);
+      setCreationReminderEnabled(data.creation_reminder_enabled);
+      initialSettings.current = {
+        public_pool_enabled: data.public_pool_enabled,
+        reaction_enabled: data.reaction_enabled,
+        creation_reminder_enabled: data.creation_reminder_enabled,
+      };
+    } else {
+      router.navigate('/signin');
+    }
 
     // 更新状态
-  //   setPublicPoolEnabled(data.public_pool_enabled);
-  //   setReactionEnabled(data.reaction_enabled);
-  //   setCreationReminderEnabled(data.creation_reminder_enabled);
-  //   initialSettings.current = {
-  //     public_pool_enabled: data.public_pool_enabled,
-  //     reaction_enabled: data.reaction_enabled,
-  //     creation_reminder_enabled: data.creation_reminder_enabled,
-  //   };
-  // 
-  }, 
-  []
-);
+    //   setPublicPoolEnabled(data.public_pool_enabled);
+    //   setReactionEnabled(data.reaction_enabled);
+    //   setCreationReminderEnabled(data.creation_reminder_enabled);
+    //   initialSettings.current = {
+    //     public_pool_enabled: data.public_pool_enabled,
+    //     reaction_enabled: data.reaction_enabled,
+    //     creation_reminder_enabled: data.creation_reminder_enabled,
+    //   };
+    //
+  }, [router, setCreationReminderEnabled, setPublicPoolEnabled, setReactionEnabled]);
 
   useEffect(() => {
     getSetting();
@@ -70,42 +76,45 @@ export default function Configure() {
 
   // 退出登录
   const handleout = async () => {
-    await SecureStore.deleteItemAsync("access_token");
-    await SecureStore.deleteItemAsync("user_id");
-    await SecureStore.deleteItemAsync("user_name");
+    await SecureStore.deleteItemAsync('access_token');
+    await SecureStore.deleteItemAsync('user_id');
+    await SecureStore.deleteItemAsync('user_name');
     router.dismissAll();
-    router.replace("/signin");
+    router.replace('/signin');
   };
 
   return (
     <SafeAreaProvider style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}
-          style={styles.arrowback}>
-          <Arrowback  />
+        <Pressable onPress={() => router.back()} style={styles.arrowback}>
+          <Arrowback />
         </Pressable>
-                  <Text style={styles.headertext}>设置</Text>
+        <Text style={styles.headertext}>设置</Text>
       </View>
 
-      <View style={{ paddingHorizontal: 24, width: "100%", backgroundColor: "#F9F9F9" }}>
+      <View style={{ paddingHorizontal: 24, width: '100%', backgroundColor: '#F9F9F9' }}>
         <Text style={styles.titletext}>账号</Text>
-        <View style={[styles.kuang, { flexDirection: "row" }]}>
+        <View style={[styles.kuang, { flexDirection: 'row' }]}>
           <Text>个人资料</Text>
           <Pressable
-            style={{ position: "absolute", top: 25, right: 22 }}
-            onPress={() => router.navigate("/setAuthdata")}
+            style={{ position: 'absolute', top: 25, right: 22 }}
+            onPress={() => router.navigate('/setAuthdata')}
           >
             <ArrowRight style={{ width: 5, height: 10 }} />
           </Pressable>
         </View>
 
         <Text style={styles.titletext}>隐私权限</Text>
-        <View style={[styles.kuang, { flexDirection: "row", justifyContent: "space-between" }]}>
+        <View style={[styles.kuang, { flexDirection: 'row', justifyContent: 'space-between' }]}>
           <Text>是否公开官方关键词下上传的照片</Text>
           <Pressable
             style={[
               styles.changebtn,
-              public_pool_enabled && { backgroundColor: "#72B6FF", alignItems: "flex-end", paddingRight: 1 },
+              public_pool_enabled && {
+                backgroundColor: '#72B6FF',
+                alignItems: 'flex-end',
+                paddingRight: 1,
+              },
             ]}
             onPress={() => setPublicPoolEnabled(!public_pool_enabled)}
           >
@@ -115,12 +124,16 @@ export default function Configure() {
 
         <Text style={styles.titletext}>通知设置</Text>
         <View style={styles.kuang}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.font}>互动通知</Text>
             <Pressable
               style={[
                 styles.changebtn,
-                reaction_enabled && { backgroundColor: "#72B6FF", alignItems: "flex-end", paddingRight: 1 },
+                reaction_enabled && {
+                  backgroundColor: '#72B6FF',
+                  alignItems: 'flex-end',
+                  paddingRight: 1,
+                },
               ]}
               onPress={() => setReactionEnabled(!reaction_enabled)}
             >
@@ -128,12 +141,16 @@ export default function Configure() {
             </Pressable>
           </View>
 
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.font}>创作提醒</Text>
             <Pressable
               style={[
                 styles.changebtn,
-                creation_reminder_enabled && { backgroundColor: "#72B6FF", alignItems: "flex-end", paddingRight: 1 },
+                creation_reminder_enabled && {
+                  backgroundColor: '#72B6FF',
+                  alignItems: 'flex-end',
+                  paddingRight: 1,
+                },
               ]}
               onPress={() => setCreationReminderEnabled(!creation_reminder_enabled)}
             >
@@ -144,30 +161,38 @@ export default function Configure() {
 
         <Text style={styles.titletext}>关于</Text>
         <View style={styles.kuang}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.font}>用户协议</Text>
-            <Pressable onPress={()=>{router.navigate("/userAgreement")}}>
-              <Text>点击查看</Text>
-              </Pressable>
-          </View>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={styles.font}>隐私政策</Text>
-            <Pressable onPress={()=>{router.navigate("/privacyAgreement")}}>
+            <Pressable
+              onPress={() => {
+                router.navigate('/userAgreement');
+              }}
+            >
               <Text>点击查看</Text>
             </Pressable>
           </View>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={styles.font}>隐私政策</Text>
+            <Pressable
+              onPress={() => {
+                router.navigate('/privacyAgreement');
+              }}
+            >
+              <Text>点击查看</Text>
+            </Pressable>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.font}>版本号</Text>
             <Text>xxxxxxxxxxxxx</Text>
           </View>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.font}>联系我们</Text>
             <Text>1091335954</Text>
           </View>
         </View>
 
         <Pressable
-          style={[styles.kuang, { marginTop: 20, alignItems: "center" }]}
+          style={[styles.kuang, { marginTop: 20, alignItems: 'center' }]}
           onPress={handleout}
         >
           <Text>退出登录</Text>
@@ -179,61 +204,61 @@ export default function Configure() {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    position: "relative",
+    flexDirection: 'column',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    position: 'relative',
   },
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     height: 44,
-    width: "100%",
+    width: '100%',
     marginTop: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    backgroundColor: '#fff',
   },
   arrowback: {
     left: 26,
-    position: "absolute",
+    position: 'absolute',
   },
   headertext: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   titletext: {
-    color: "#999999",
-    fontWeight: "400",
+    color: '#999999',
+    fontWeight: '400',
     marginBottom: 10,
     marginTop: 20,
     marginLeft: 11,
   },
   kuang: {
-    width: "100%",
-    backgroundColor: "#ffffff",
-    flexDirection: "column",
+    width: '100%',
+    backgroundColor: '#ffffff',
+    flexDirection: 'column',
     gap: 16,
     paddingHorizontal: 23,
     paddingVertical: 22,
     borderRadius: 20,
   },
   font: {
-    color: "#333333",
+    color: '#333333',
     fontSize: 14,
   },
   changebtn: {
     height: 20,
     width: 42,
-    backgroundColor: "#EEEEEE",
+    backgroundColor: '#EEEEEE',
     borderRadius: 99,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingLeft: 1,
   },
   circle: {
     width: 18,
     height: 18,
     borderRadius: 999,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
 });

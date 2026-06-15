@@ -1,32 +1,31 @@
-import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
-import * as SecureStore from "expo-secure-store";
-import { useRouter,Tabs } from "expo-router";
+import React from 'react';
+import { StyleSheet } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { useRouter, Tabs } from 'expo-router';
 
-import Icon3 from "../../assets/images/mine b.svg"
-import Icon3_1 from "../../assets/images/mine a.svg"
-import Icon1 from "../../assets/images/review b.svg"
-import Icon1_1 from "../../assets/images/review a.svg"
-import Icon2 from "../../assets/images/today b.svg"
-import Icon2_1 from "../../assets/images/today a.svg"
-
+import Icon3 from '../../assets/images/mine b.svg';
+import Icon3_1 from '../../assets/images/mine a.svg';
+import Icon1 from '../../assets/images/review b.svg';
+import Icon1_1 from '../../assets/images/review a.svg';
+import Icon2 from '../../assets/images/today b.svg';
+import Icon2_1 from '../../assets/images/today a.svg';
 
 type TabParamList = {
   today: undefined;
   remember: undefined;
   home: undefined;
-}
+};
 export default function TabLayout() {
- const router=useRouter();
+  const router = useRouter();
 
   const handleTabPress = async (name: keyof TabParamList) => {
-    if (name === "home"||name==="remember") {
-      const access_token = await SecureStore.getItemAsync("access_token");
+    if (name === 'home' || name === 'remember') {
+      const access_token = await SecureStore.getItemAsync('access_token');
       if (!access_token) {
-      router.replace("/signin");
-      return false;
-    } else {
-      router.navigate(`/${name}`);
+        router.replace('/signin');
+        return false;
+      } else {
+        router.navigate(`/${name}`);
       }
     }
     return true;
@@ -37,11 +36,11 @@ export default function TabLayout() {
       initialRouteName="today"
       screenOptions={{
         tabBarStyle: styles.tabbarstyle,
-        tabBarActiveTintColor: "#72B6FF"
+        tabBarActiveTintColor: '#72B6FF',
       }}
       screenListeners={{
         tabPress: (e) => {
-          const route = e.target?.split("-")[0];
+          const route = e.target?.split('-')[0];
           if (route && !handleTabPress(route as keyof TabParamList)) {
             e.preventDefault();
           }
@@ -51,27 +50,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="today"
         options={{
-          title: "今日",
+          title: '今日',
           headerShown: false,
-          tabBarIcon:({focused})=>( focused?<Icon1_1 />:<Icon1/>)
+          tabBarIcon: ({ focused }) => (focused ? <Icon1_1 /> : <Icon1 />),
         }}
-
       />
       <Tabs.Screen
         name="remember"
-        
         options={{
-          title: "回顾",
+          title: '回顾',
           headerShown: false,
-          tabBarIcon:({focused})=>( focused?<Icon2_1 />:<Icon2/>)
+          tabBarIcon: ({ focused }) => (focused ? <Icon2_1 /> : <Icon2 />),
         }}
       />
       <Tabs.Screen
         name="home"
         options={{
-          title: "我的",
+          title: '我的',
           headerShown: false,
-          tabBarIcon:({focused})=>( focused?<Icon3_1 />:<Icon3/>)
+          tabBarIcon: ({ focused }) => (focused ? <Icon3_1 /> : <Icon3 />),
         }}
       />
     </Tabs>
@@ -81,6 +78,6 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabbarstyle: {
     height: 80,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
   },
 });

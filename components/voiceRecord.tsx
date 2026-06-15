@@ -1,23 +1,15 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Alert,
-  Modal,
-  Pressable,
-  Dimensions,
-} from "react-native";
-import Voice from "../assets/images/voice.svg";
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { View, StyleSheet, Text, Alert, Modal, Pressable, Dimensions } from 'react-native';
+import Voice from '../assets/images/voice.svg';
 import {
   useAudioRecorder,
   AudioModule,
   RecordingPresets,
   setAudioModeAsync,
   useAudioRecorderState,
-} from "expo-audio";
+} from 'expo-audio';
 
-const { height: screenHeight } = Dimensions.get("window");
+const { height: screenHeight } = Dimensions.get('window');
 const CANCEL_AREA_TOP = screenHeight * 0.7;
 
 interface VoiceRecorderProps {
@@ -48,7 +40,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
     if (hasPermission.current) return true;
     const status = await AudioModule.requestRecordingPermissionsAsync();
     if (!status.granted) {
-      Alert.alert("权限不足", "请先开启麦克风权限才能录制语音");
+      Alert.alert('权限不足', '请先开启麦克风权限才能录制语音');
       return false;
     }
     hasPermission.current = true;
@@ -76,10 +68,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
         audioRecorder.record();
 
         timerRef.current = setInterval(() => {
-          setRecordingTime(prev => prev + 1);
+          setRecordingTime((prev) => prev + 1);
         }, 1000);
       } catch (err) {
-        console.error("开始录音失败:", err);
+        console.error('开始录音失败:', err);
         setIsRecording(false);
         setShowCancelModal(false);
         if (timerRef.current) clearInterval(timerRef.current);
@@ -101,8 +93,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
 
     if (shouldCancel) {
       await audioRecorder.stop();
-      setRecordingTime(0); 
-      Alert.alert("已取消录音");
+      setRecordingTime(0);
+      Alert.alert('已取消录音');
     } else {
       try {
         await audioRecorder.stop();
@@ -112,11 +104,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
         if (recordingUri && onRecordingSaved) {
           onRecordingSaved(recordingUri, finalDuration);
         }
-        console.log("录音已保存:", recordingUri, "时长:", finalDuration);
-        setRecordingTime(0); 
+        console.log('录音已保存:', recordingUri, '时长:', finalDuration);
+        setRecordingTime(0);
       } catch (err) {
-        console.error("保存录音失败:", err);
-        Alert.alert("保存失败", "无法保存录音，请重试");
+        console.error('保存录音失败:', err);
+        Alert.alert('保存失败', '无法保存录音，请重试');
         setRecordingTime(0);
       }
     }
@@ -145,12 +137,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
   return (
     <View style={styles.container}>
       {/* 取消弹窗 Modal */}
-      <Modal
-        visible={showCancelModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => {}}
-      >
+      <Modal visible={showCancelModal} transparent animationType="slide" onRequestClose={() => {}}>
         <Pressable
           style={styles.cancelButton}
           onPress={() => {
@@ -162,9 +149,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
         </Pressable>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {shouldCancel ? "松开取消" : "松手保存"}
-            </Text>
+            <Text style={styles.modalTitle}>{shouldCancel ? '松开取消' : '松手保存'}</Text>
           </View>
         </View>
       </Modal>
@@ -175,11 +160,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
         onPressIn={handleStartRecording}
         onPressOut={handleStopRecording}
         onResponderMove={handleMove}
-        disabled={isRecording} 
+        disabled={isRecording}
       >
         <Voice />
         <Text style={isRecording ? styles.recordingText : styles.buttonText}>
-          {isRecording ? `录制中... ${recordingTime}秒` : "按住这里留下你的声音"}
+          {isRecording ? `录制中... ${recordingTime}秒` : '按住这里留下你的声音'}
         </Text>
       </Pressable>
     </View>
@@ -188,76 +173,75 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingSaved }) => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignItems: 'center',
     padding: 16,
   },
   voiceButton: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 6,
     width: 191,
     height: 38,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "rgba(0, 0, 0, 0.1)",
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 4,
   },
   recordingButton: {
-    backgroundColor: "#FFF5F5",
+    backgroundColor: '#FFF5F5',
   },
   buttonText: {
     fontSize: 14,
-    color: "#999999",
+    color: '#999999',
   },
   recordingText: {
     fontSize: 14,
-    
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-    position: "relative",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    position: 'relative',
   },
   modalContent: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 999,
     padding: 20,
-    alignItems: "center",
+    alignItems: 'center',
     height: 200,
-    width: "100%",
-    position: "absolute",
+    width: '100%',
+    position: 'absolute',
     bottom: -100,
   },
   modalTitle: {
     fontSize: 18,
-    color: "#666666",
+    color: '#666666',
     marginBottom: 20,
   },
   recordingTimer: {
     fontSize: 24,
-    color: "#333",
-    fontWeight: "bold",
+    color: '#333',
+    fontWeight: 'bold',
   },
   cancelButton: {
-    position: "absolute",
+    position: 'absolute',
     left: 123,
     bottom: 124,
     width: 126,
     height: 48,
-    backgroundColor: " rgba(255, 255, 255, 0.2)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: ' rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 1,
     borderRadius: 999,
   },
   cancelButtonText: {
     fontSize: 16,
-    color: "#FFFFFF",
+    color: '#FFFFFF',
   },
 });
 

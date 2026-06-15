@@ -1,7 +1,7 @@
-import * as ImagePicker from "expo-image-picker";
+import * as ImagePicker from 'expo-image-picker';
 
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -11,18 +11,18 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
+} from 'react-native';
 
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import Arrowback from "../assets/images/arrow-back.svg";
-import { listCustomKeywordImages } from "./api/custom";
-import { CustomImage, CustomImageItem } from "./api/interface";
-import { useImageStore } from "./stores/useImageStore";
-import usePromptStore from "./stores/usePromptStore";
-import Add from "../assets/images/add.svg";
-import CustomShow from "../components/customShow";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Arrowback from '../assets/images/arrow-back.svg';
+import { listCustomKeywordImages } from './api/custom';
+import { CustomImage, CustomImageItem } from './api/interface';
+import { useImageStore } from './stores/useImageStore';
+import usePromptStore from './stores/usePromptStore';
+import Add from '../assets/images/add.svg';
+import CustomShow from '../components/customShow';
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function CustomPage() {
   const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
@@ -36,15 +36,16 @@ export default function CustomPage() {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}年${month}月${day}日`;
   };
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await getCustomList();
-    setRefreshing(false);
-  };
+  const getCustomList = useCallback(async () => {
+    const response = await listCustomKeywordImages(keyword_id as string);
+    console.log('rrrr', response.data);
+
+    setItem(response.data);
+  }, [keyword_id]);
   const groupByTime = (items: CustomImageItem[]) => {
     return items.reduce(
       (acc, item) => {
@@ -67,19 +68,18 @@ export default function CustomPage() {
       headerShown: false,
     });
     getCustomList();
-  }, []);
-  const getCustomList = async () => {
-    const response = await listCustomKeywordImages(keyword_id as string);
-    console.log("rrrr", response.data);
-
-    setItem(response.data);
+  }, [getCustomList, navigation]);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getCustomList();
+    setRefreshing(false);
   };
   if (!item) return null;
   const grouped = groupByTime(item.items);
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        <View style={[styles.header, { backgroundColor: "#777676" }]}>
+        <View style={[styles.header, { backgroundColor: '#777676' }]}>
           {item?.cover_image && (
             <ImageBackground
               source={{ uri: item.cover_image.variants.detail_large.url }}
@@ -94,7 +94,7 @@ export default function CustomPage() {
           <Pressable
             onPress={() => {
               router.navigate({
-                pathname: "/chooseCover",
+                pathname: '/chooseCover',
                 params: {
                   images: JSON.stringify(item.items),
                   keyword_id: keyword_id,
@@ -103,7 +103,7 @@ export default function CustomPage() {
             }}
             style={styles.changeCover}
           >
-            <Text style={{ color: "#FFFFFF", fontSize: 14 }}>修改封面</Text>
+            <Text style={{ color: '#FFFFFF', fontSize: 14 }}>修改封面</Text>
           </Pressable>
         </View>
         {item && (
@@ -117,7 +117,7 @@ export default function CustomPage() {
                   <Text
                     style={{
                       fontSize: 16,
-                      color: "#333",
+                      color: '#333',
                       paddingHorizontal: 16,
                       marginBottom: 8,
                     }}
@@ -129,10 +129,7 @@ export default function CustomPage() {
                     data={images}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                      <CustomShow
-                        item={item}
-                        allImageIds={images.map((img) => img.id)}
-                      />
+                      <CustomShow item={item} allImageIds={images.map((img) => img.id)} />
                     )}
                     showsHorizontalScrollIndicator={false}
                   />
@@ -144,7 +141,7 @@ export default function CustomPage() {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                colors={["#72B6FF"]}
+                colors={['#72B6FF']}
                 tintColor="#72B6FF"
               />
             }
@@ -156,17 +153,16 @@ export default function CustomPage() {
         onPress={() => {
           const handleOpenGallery = async () => {
             // 申请相册权限
-            const { status } =
-              await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== "granted") {
-              alert("需要相册权限才能选择照片");
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              alert('需要相册权限才能选择照片');
               return;
             }
             // 打开相册
             const result = await ImagePicker.launchImageLibraryAsync({
               quality: 0.8,
               allowsMultipleSelection: true,
-              mediaTypes: "images",
+              mediaTypes: 'images',
               allowsEditing: false,
             });
 
@@ -181,11 +177,11 @@ export default function CustomPage() {
               }));
 
               setSelectedPhotos(selectedPhotos);
-              setKeywordId(keyword_id as string); 
+              setKeywordId(keyword_id as string);
               router.navigate({
-                pathname: "/beforePulish",
+                pathname: '/beforePulish',
                 params: {
-                  type: "custom_keyword",
+                  type: 'custom_keyword',
                   keyword_id: keyword_id,
                 },
               });
@@ -203,42 +199,42 @@ export default function CustomPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    position: "relative",
+    backgroundColor: '#FFFFFF',
+    position: 'relative',
   },
   header: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
     height: 281,
-    position: "relative",
+    position: 'relative',
     gap: 11,
   },
   headerBg: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   headertitle: {
     fontSize: 24,
     fontWeight: 700,
-    color: "#FFFFFF",
+    color: '#FFFFFF',
   },
   buttonGroup: {
-    position: "absolute",
+    position: 'absolute',
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 5, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -247,8 +243,8 @@ const styles = StyleSheet.create({
     top: 56,
   },
   postList: {
-    shadowColor: "#000",
-    backgroundColor: "#ffffff",
+    shadowColor: '#000',
+    backgroundColor: '#ffffff',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -256,31 +252,31 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     zIndex: 999,
-    position: "absolute",
+    position: 'absolute',
     top: 264,
     paddingTop: 17,
     width: screenWidth,
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   changeCover: {
     width: 95,
     height: 32,
     borderRadius: 999,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "absolute",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
     top: 56,
     right: 19,
   },
   add: {
     width: 54,
     height: 54,
-    backgroundColor: "#72B6FF",
+    backgroundColor: '#72B6FF',
     borderRadius: 27,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "absolute",
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
     bottom: 74,
     right: 24,
   },

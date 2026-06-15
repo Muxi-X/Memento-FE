@@ -1,58 +1,48 @@
-import Arrowleft from "@/assets/images/arrow-left.svg";
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState, useRef } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  Dimensions,
-  Alert
-} from "react-native";
-import * as SecureStore from "expo-secure-store";
-import { LinearGradient } from "expo-linear-gradient";
-import Mmeyes from "../assets/images/Mmeyes.svg";
-import AgreeIcon from "../assets/images/agreeIcon.svg";
-import Pass from "../assets/images/pass.svg";
-import Warning from "../assets/images/warning.svg";
-import { resetSendcode,verifyResetEmailCode,resetComplete } from "./api/user";
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+import Arrowleft from '@/assets/images/arrow-left.svg';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View, Dimensions, Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { LinearGradient } from 'expo-linear-gradient';
+import Mmeyes from '../assets/images/Mmeyes.svg';
+import Pass from '../assets/images/pass.svg';
+import Warning from '../assets/images/warning.svg';
+import { resetSendcode, verifyResetEmailCode, resetComplete } from './api/user';
+const { width: screenWidth } = Dimensions.get('window');
 export default function Signup() {
   const navigation = useNavigation();
 
   // --- 状态管理 ---
-  const [email, setEmail] = useState("");
-  const [sendCodeText, setSendCodeText] = useState("");
-  const [new_password, setNew_password] = useState("");
-  const [confirmPwd, setConfirmPwd] = useState("");
-  
-  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(<Warning/>);
-  const [verifypasswordResult, setVerifypasswordResult] = useState<React.ReactNode>(<Warning/>);
-  
+  const [email, setEmail] = useState('');
+  const [sendCodeText, setSendCodeText] = useState('');
+  const [new_password, setNew_password] = useState('');
+  const [confirmPwd, setConfirmPwd] = useState('');
+
+  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(<Warning />);
+  const [verifypasswordResult, setVerifypasswordResult] = useState<React.ReactNode>(<Warning />);
+
   const [countdown, setCountdown] = useState(0);
-  const [agreed, setAgreed] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
   // --- 引用管理 ---
   const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const countdownTimer = useRef<NodeJS.Timeout | null>(null);
-  const lastVerifiedCode = useRef(""); // 记录上次验证成功的代码，避免重复请求
+  const lastVerifiedCode = useRef(''); // 记录上次验证成功的代码，避免重复请求
 
-  useEffect(()=>{
-   navigation.setOptions({
+  useEffect(() => {
+    navigation.setOptions({
       headerShown: false,
     });
-  },[])
+  }, [navigation]);
   // 密码实时比对逻辑
   useEffect(() => {
     if (pwdDebounceTimer.current) clearTimeout(pwdDebounceTimer.current);
-    
+
     pwdDebounceTimer.current = setTimeout(() => {
       if (new_password && confirmPwd) {
         setVerifypasswordResult(new_password === confirmPwd ? <Pass /> : <Warning />);
       } else {
-        setVerifypasswordResult(<Warning/>);
+        setVerifypasswordResult(<Warning />);
       }
     }, 500);
 
@@ -62,36 +52,39 @@ export default function Signup() {
   }, [new_password, confirmPwd]);
 
   //  验证码校验 (独立于倒计时)
-  const handleVerify = async (code: string) => {
-    if (!email || code.length !== 6) return;
-    if (code === lastVerifiedCode.current) return; // 已验证过则跳过
+  const handleVerify = useCallback(
+    async (code: string) => {
+      if (!email || code.length !== 6) return;
+      if (code === lastVerifiedCode.current) return; // 已验证过则跳过
 
-    try {
-      const res = await verifyResetEmailCode( email, code );
-      if (res.status === 200 && res.data.valid === true) {
-        setVerifyResult(<Pass />);
-        lastVerifiedCode.current = code; 
-        await SecureStore.setItemAsync("reset_token", res.data.reset_token);
-      } else {
+      try {
+        const res = await verifyResetEmailCode(email, code);
+        if (res.status === 200 && res.data.valid === true) {
+          setVerifyResult(<Pass />);
+          lastVerifiedCode.current = code;
+          await SecureStore.setItemAsync('reset_token', res.data.reset_token);
+        } else {
+          setVerifyResult(<Warning />);
+        }
+      } catch {
         setVerifyResult(<Warning />);
       }
-    } catch (err) {
-      setVerifyResult(<Warning />);
-    }
-  };
+    },
+    [email],
+  );
 
   useEffect(() => {
     if (sendCodeText.length === 6) {
       handleVerify(sendCodeText);
     } else {
-      setVerifyResult(<Warning/>); 
+      setVerifyResult(<Warning />);
     }
-  }, [sendCodeText]);
+  }, [handleVerify, sendCodeText]);
 
   // 发送验证码
   const handleSendCode = async () => {
-    if (!email || !email.includes("@")) {
-      Alert.alert("提示", "请输入有效的邮箱地址");
+    if (!email || !email.includes('@')) {
+      Alert.alert('提示', '请输入有效的邮箱地址');
       return;
     }
     try {
@@ -112,7 +105,7 @@ export default function Signup() {
         }, 1000);
       } else {
         setIsDisabled(false);
-        Alert.alert("错误", "发送失败，请检查邮箱是否正确");
+        Alert.alert('错误', '发送失败，请检查邮箱是否正确');
       }
     } catch (error) {
       setIsDisabled(false);
@@ -122,25 +115,24 @@ export default function Signup() {
 
   // 注册提交
   const handleRegister = async () => {
-    if (!agreed) return Alert.alert("提示", "请阅读并同意协议");
-    if (new_password.length < 8) return Alert.alert("提示", "密码长度需 ≥8 位");
-    if (new_password !== confirmPwd) return Alert.alert("提示", "两次密码不一致");
+    if (new_password.length < 8) return Alert.alert('提示', '密码长度需 ≥8 位');
+    if (new_password !== confirmPwd) return Alert.alert('提示', '两次密码不一致');
 
-    const reset_token = await SecureStore.getItemAsync("signup_token");
-    if (!reset_token) return Alert.alert("提示", "请先完成验证码校验");
+    const reset_token = await SecureStore.getItemAsync('signup_token');
+    if (!reset_token) return Alert.alert('提示', '请先完成验证码校验');
 
     try {
       const res = await resetComplete({ reset_token, new_password });
       if (res.status === 200) {
         if (res.data.access_token) {
-          await SecureStore.setItemAsync("access_token", res.data.access_token);
-          navigation.navigate("index" as never);
+          await SecureStore.setItemAsync('access_token', res.data.access_token);
+          navigation.navigate('index' as never);
         } else {
-          navigation.navigate("signin" as never);
+          navigation.navigate('signin' as never);
         }
       }
-    } catch (error) {
-      Alert.alert("注册失败", "请稍后重试");
+    } catch {
+      Alert.alert('注册失败', '请稍后重试');
     }
   };
 
@@ -154,12 +146,12 @@ export default function Signup() {
 
   return (
     <LinearGradient
-      colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
+      colors={['#BCDBFF', '#EFF7FF', '#FFFFFF']}
       locations={[0, 0.48, 1]}
       style={styles.gradientBackground}
     >
       <Mmeyes style={styles.eyeIcon} />
-      
+
       <View style={styles.forgetcard}>
         {/* 头部 */}
         <View style={styles.header}>
@@ -195,13 +187,9 @@ export default function Signup() {
               maxLength={6}
               keyboardType="numeric"
             />
-            <Pressable 
-              onPress={handleSendCode} 
-              disabled={isDisabled}
-              style={styles.innerSendBtn}
-            >
-              <Text style={{ fontSize: 13, color: isDisabled ? "#999" : "#72B6FF" }}>
-                {countdown > 0 ? `${countdown}s` : "获取验证码"}
+            <Pressable onPress={handleSendCode} disabled={isDisabled} style={styles.innerSendBtn}>
+              <Text style={{ fontSize: 13, color: isDisabled ? '#999' : '#72B6FF' }}>
+                {countdown > 0 ? `${countdown}s` : '获取验证码'}
               </Text>
             </Pressable>
           </View>
@@ -233,13 +221,9 @@ export default function Signup() {
         </View>
 
         {/* 提交按钮 */}
-        <Pressable 
-          style={[styles.loginBtn, !agreed && { opacity: 0.7 }]} 
-          onPress={handleRegister}
-        >
+        <Pressable style={styles.loginBtn} onPress={handleRegister}>
           <Text style={styles.loginText}>立即注册</Text>
         </Pressable>
-
       </View>
     </LinearGradient>
   );
@@ -314,79 +298,78 @@ export default function Signup() {
 const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   eyeIcon: {
     zIndex: 1,
-    position: "absolute",
+    position: 'absolute',
     top: 59,
   },
   forgetcard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     width: screenWidth - 48,
     borderRadius: 24,
     padding: 20,
     marginTop: 184,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
   },
   backBtn: {
-    position: "absolute",
+    position: 'absolute',
     left: 0,
     padding: 5,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   body: {
     marginVertical: 10,
     gap: 8,
   },
   labelRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 5,
     marginTop: 5,
   },
   inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    position: "relative",
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
   },
   innerSendBtn: {
-    position: "absolute",
+    position: 'absolute',
     right: 15,
   },
   tiptext: {
     marginLeft: 7,
     fontSize: 13,
-    color: "#666666",
+    color: '#666666',
   },
   inputKuang: {
-    backgroundColor: "#EEEEEE",
+    backgroundColor: '#EEEEEE',
     height: 47,
     borderRadius: 20,
     paddingHorizontal: 15,
     fontSize: 14,
   },
   loginBtn: {
-    backgroundColor: "#72B6FF",
+    backgroundColor: '#72B6FF',
     height: 47,
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 15,
     marginBottom: 15,
   },
   loginText: {
-    color: "#ffffff",
+    color: '#ffffff',
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
   },
-
 });

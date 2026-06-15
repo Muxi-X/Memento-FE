@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import { View, StyleSheet, Image, Pressable } from 'react-native';
 import { CustomImageItem } from '../app/api/interface';
-import { useRouter } from "expo-router";
+import { useRouter } from 'expo-router';
 
 interface CustomShowProps {
   item: CustomImageItem;
@@ -9,7 +9,6 @@ interface CustomShowProps {
 }
 
 export default function CustomShow(props: CustomShowProps) {
-
   const { item, allImageIds } = props;
   const router = useRouter();
 
@@ -21,11 +20,11 @@ export default function CustomShow(props: CustomShowProps) {
         style={styles.photoshow}
         onPress={() => {
           router.push({
-            pathname: "/customImageDetail",
+            pathname: '/customImageDetail',
             params: {
               image_ids: JSON.stringify(allImageIds),
               initial_image_id: item.id,
-            }
+            },
           });
         }}
       >
@@ -42,6 +41,6 @@ const styles = StyleSheet.create({
   title: {},
   photoshow: {
     marginLeft: 3,
-    marginTop: 3
-  }
+    marginTop: 3,
+  },
 });

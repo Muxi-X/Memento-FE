@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import Mmexport from '../assets/images/mmexport.svg';
 import Cixing from '../assets/images/cixing.svg';
@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  Easing
+  Easing,
 } from 'react-native-reanimated';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -16,10 +16,9 @@ const AnimatedView = Animated.createAnimatedComponent(View);
 export default function SplashScreenPage() {
   const router = useRouter();
   const fadeAnim = useSharedValue(0);
-  const scaleAnim = useSharedValue(0.8); 
+  const scaleAnim = useSharedValue(0.8);
   const [svgLoaded, setSvgLoaded] = useState(false);
 
-  
   const handleAnimationEnd = useCallback(() => {
     router.replace('/(tabs)/today');
   }, [router]);
@@ -28,7 +27,7 @@ export default function SplashScreenPage() {
     async function prepare() {
       try {
         const waitForSvg = async () => {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           setSvgLoaded(true);
         };
         await waitForSvg();
@@ -36,11 +35,11 @@ export default function SplashScreenPage() {
         if (svgLoaded) {
           fadeAnim.value = withTiming(1, {
             duration: 1000,
-            easing: Easing.ease 
+            easing: Easing.ease,
           });
           scaleAnim.value = withTiming(1, {
             duration: 1000,
-            easing: Easing.ease
+            easing: Easing.ease,
           });
           const timer = setTimeout(() => {
             handleAnimationEnd();
@@ -53,21 +52,19 @@ export default function SplashScreenPage() {
     }
 
     prepare();
-  }, [router, handleAnimationEnd, svgLoaded]);
+  }, [fadeAnim, handleAnimationEnd, scaleAnim, svgLoaded]);
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: fadeAnim.value,
-      transform: [{ scale: scaleAnim.value }]
+      transform: [{ scale: scaleAnim.value }],
     };
   });
 
   return (
     <SafeAreaProvider style={styles.container}>
       <AnimatedView style={[styles.logonContainer, containerAnimatedStyle]}>
-        <Mmexport 
-          style={styles.logo} 
-        />
+        <Mmexport style={styles.logo} />
       </AnimatedView>
       <Cixing style={styles.cixing} />
       <Text style={styles.slogan}>看世界，从一个词开始</Text>
@@ -77,20 +74,19 @@ export default function SplashScreenPage() {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection:"column",
+    flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
   },
   logonContainer: {
-    width: '100%', 
+    width: '100%',
     height: 375,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 153,
-    marginTop:178,
-  
+    marginTop: 178,
   },
-  logo: {   
+  logo: {
     width: '100%',
     height: '100%',
     zIndex: 1,

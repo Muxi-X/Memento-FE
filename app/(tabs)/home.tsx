@@ -8,29 +8,28 @@ import {
   FlatList,
   RefreshControl,
   Dimensions,
-} from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
-import React, { useEffect, useState, useCallback } from "react";
-import Edit from "../../assets/images/edit.svg";
-import Message from "../../assets/images/message.svg";
-import Configure from "../../assets/images/configure.svg";
-import HomeCard from "../../components/homeCard";
-import Goodmm from "../../assets/images/goodmmm.svg";
-import { mydataItem } from "../api/interface";
-import { useMyStore } from "../stores/authstore";
-import NewCreate from "@/components/newCreate";
-import Touxiang from "../../assets/images/baseTouxiang.svg";
-import { getCustomKeywordList, getMedata } from "../api/me";
-import * as SecureStore from "expo-secure-store";
-const { width: screenWidth } = Dimensions.get("window");
+} from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import React, { useState, useCallback } from 'react';
+import Edit from '../../assets/images/edit.svg';
+import Message from '../../assets/images/message.svg';
+import Configure from '../../assets/images/configure.svg';
+import HomeCard from '../../components/homeCard';
+import { mydataItem } from '../api/interface';
+import { useMyStore } from '../stores/authstore';
+import NewCreate from '@/components/newCreate';
+import Touxiang from '../../assets/images/baseTouxiang.svg';
+import { getCustomKeywordList, getMedata } from '../api/me';
+import * as SecureStore from 'expo-secure-store';
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
   const [mydata, setMydata] = useState<mydataItem>({
-    nickname: "",
-    avatar_url: "",
+    nickname: '',
+    avatar_url: '',
     official_image_count: 0,
     custom_image_count: 0,
     unread_notification_count: 0,
@@ -41,9 +40,9 @@ export default function HomeScreen() {
   const setNickname = useMyStore((state) => state.setNickname);
   const setAvatar = useMyStore((state) => state.setAvatar);
 
-  const getMydata = async () => {
+  const getMydata = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync("access_token");
+      const token = await SecureStore.getItemAsync('access_token');
       if (token !== null) {
         const res = await getMedata();
         setMydata(res.data);
@@ -53,18 +52,18 @@ export default function HomeScreen() {
           setAvatar(res.data.avatar_url);
         }
       } else {
-        router.replace("/signin");
+        router.replace('/signin');
       }
     } catch (e) {
       console.log(e);
     }
-  };
+  }, [router, setAvatar, setNickname]);
 
   // 页面聚焦时刷新数据
   useFocusEffect(
     useCallback(() => {
       getMydata();
-    }, [])
+    }, [getMydata]),
   );
 
   // 优先使用 store 中的数据，如果没有则使用本地状态
@@ -75,12 +74,8 @@ export default function HomeScreen() {
     return null;
   }
 
-  const {
-    official_image_count,
-    custom_image_count,
-    unread_notification_count,
-    custom_keywords,
-  } = mydata;
+  const { official_image_count, custom_image_count, unread_notification_count, custom_keywords } =
+    mydata;
   const onRefresh = async () => {
     setRefreshing(true);
     await getCustomKeywordList();
@@ -92,7 +87,7 @@ export default function HomeScreen() {
         <Pressable
           style={[styles.ConfigureIcon, { right: 74 }]}
           onPress={() => {
-            router.navigate("/message");
+            router.navigate('/message');
           }}
         >
           <Message />
@@ -101,9 +96,7 @@ export default function HomeScreen() {
         {unread_notification_count > 0 && (
           <View style={styles.chatnum}>
             <Text style={styles.numtext}>
-              {unread_notification_count > 99
-                ? "99+"
-                : unread_notification_count}
+              {unread_notification_count > 99 ? '99+' : unread_notification_count}
             </Text>
           </View>
         )}
@@ -111,7 +104,7 @@ export default function HomeScreen() {
         <Pressable
           style={styles.ConfigureIcon}
           onPress={() => {
-            router.navigate("/configure");
+            router.navigate('/configure');
           }}
         >
           <Configure />
@@ -124,18 +117,18 @@ export default function HomeScreen() {
           <View style={styles.touxiang}>
             {displayAvatarUrl ? (
               <Image
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: '100%', height: '100%' }}
                 source={{ uri: displayAvatarUrl }}
               ></Image>
             ) : (
-              <Touxiang style={{ width: "100%", height: " 100%" }}></Touxiang>
+              <Touxiang style={{ width: '100%', height: ' 100%' }}></Touxiang>
             )}
           </View>
 
           <Text style={styles.username}>{displayNickname}</Text>
           <Pressable
             onPress={() => {
-              router.navigate("/setAuthdata")
+              router.navigate('/setAuthdata');
             }}
             style={styles.editkuang}
           >
@@ -177,7 +170,7 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={["#72B6FF"]}
+              colors={['#72B6FF']}
               tintColor="#72B6FF"
               title="正在刷新..."
               titleColor="#999"
@@ -192,21 +185,21 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    flexDirection: "column",
-    position: "relative",
+    alignItems: 'center',
+    flexDirection: 'column',
+    position: 'relative',
   },
   ConfigureIcon: {
     width: 36,
     height: 36,
-    backgroundColor: "#ffffff",
-    position: "absolute",
+    backgroundColor: '#ffffff',
+    position: 'absolute',
     top: 54,
     right: 26,
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
@@ -215,25 +208,25 @@ const styles = StyleSheet.create({
   chatnum: {
     width: 16,
     height: 16,
-    position: "absolute",
-    backgroundColor: "#FE585B",
+    position: 'absolute',
+    backgroundColor: '#FE585B',
     top: 53,
     right: 69,
-    borderRadius: "50%",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   numtext: {
     fontSize: 10,
-    color: "#FFFFFF",
+    color: '#FFFFFF',
     fontWeight: 700,
   },
   touxiangcontainer: {
-    position: "relative",
+    position: 'relative',
     height: 375,
-    width: "100%",
+    width: '100%',
     zIndex: -1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   backgroundImageStyle: {
     opacity: 0.25,
@@ -242,30 +235,30 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     top: 118,
-    borderRadius: "50%",
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
+    borderRadius: '50%',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   username: {
     top: 120,
     fontSize: 20,
-    color: "#3D3D3D",
-    fontWeight: "700",
+    color: '#3D3D3D',
+    fontWeight: '700',
     marginTop: 7,
   },
   editkuang: {
-    backgroundColor: "#72B6FF",
+    backgroundColor: '#72B6FF',
     width: 26,
     height: 26,
     borderRadius: 13,
     zIndex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginLeft: 60,
     marginTop: 60,
-    shadowColor:"#000",
+    shadowColor: '#000',
     elevation: 5,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -273,51 +266,51 @@ const styles = StyleSheet.create({
   goodmm: {
     width: 150,
     height: 150,
-    position: "absolute",
+    position: 'absolute',
     top: 198,
     right: 11,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
   },
   sumcontainer: {
     height: 100,
     width: screenWidth - 48,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "absolute",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
     top: 287,
     left: 24,
     zIndex: 2,
   },
   sumitem: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: "50%",
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '50%',
     height: 120,
   },
   fengeline: {
-    position: "absolute",
+    position: 'absolute',
     width: 46,
     height: 0,
-    transform: [{ rotate: "90deg" }],
-    borderColor: "#EFEFEF",
+    transform: [{ rotate: '90deg' }],
+    borderColor: '#EFEFEF',
     borderTopWidth: 1.4,
   },
   sumnumber: {
     fontSize: 36,
-    color: "#3D3D3D",
+    color: '#3D3D3D',
   },
   sumlable: {
     fontSize: 14,
-    color: "#3D3D3D",
+    color: '#3D3D3D',
   },
   listheader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
     marginTop: 39,
     paddingHorizontal: 37,
   },

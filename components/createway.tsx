@@ -1,20 +1,20 @@
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, Text, View, StyleSheet, Alert, Platform } from 'react-native';
 import Picture from '../assets/images/picture.svg';
 import Camera from '../assets/images/photogarph.svg';
 import { useRouter } from 'expo-router';
-import { useImageStore } from "@/app/stores/useImageStore";
+import { useImageStore } from '@/app/stores/useImageStore';
 
 const Createway = () => {
   const router = useRouter();
-  const settakenPhoto = useImageStore((state) => state.settakenPhoto); 
-      const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
+  const settakenPhoto = useImageStore((state) => state.settakenPhoto);
+  const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
 
   // 打开相机
   const handleOpenCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted' ) {
+    if (status !== 'granted') {
       Alert.alert('权限不足', '需要相机权限才能拍摄照片，请前往设置开启');
       return;
     }
@@ -45,7 +45,7 @@ const Createway = () => {
   // 打开相册
   const handleOpenGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted' ) {
+    if (status !== 'granted') {
       Alert.alert('权限不足', '需要相册权限才能选择照片，请前往设置开启');
       return;
     }
@@ -54,7 +54,7 @@ const Createway = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.8,
       allowsMultipleSelection: true,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
     });
 
@@ -64,12 +64,12 @@ const Createway = () => {
         uri: asset.uri,
         width: asset.width,
         height: asset.height,
-        fileName: asset.fileName || `photo_${index}`, 
+        fileName: asset.fileName || `photo_${index}`,
       }));
       setSelectedPhotos(selectedPhotos); // 更新选中的照片列表
       console.log('选中的照片列表:', selectedPhotos);
       Alert.alert('选择成功', `共选中 ${selectedPhotos.length} 张照片`);
-      
+
       // 跳转并传参
       router.navigate({
         pathname: '/beforePulish',
@@ -80,10 +80,10 @@ const Createway = () => {
   return (
     <>
       {/* 拍摄按钮 */}
-      <Pressable 
-        style={styles.optionItem} 
+      <Pressable
+        style={styles.optionItem}
         onPress={handleOpenCamera}
-        android_ripple={{ color: '#EFEFEF'}} 
+        android_ripple={{ color: '#EFEFEF' }}
       >
         <View style={styles.iconWrapper}>
           <Camera />
@@ -96,8 +96,8 @@ const Createway = () => {
       </Pressable>
 
       {/* 相册按钮 */}
-      <Pressable 
-        style={styles.optionItem} 
+      <Pressable
+        style={styles.optionItem}
         onPress={handleOpenGallery}
         android_ripple={{ color: '#EFEFEF' }}
       >
@@ -113,7 +113,6 @@ const Createway = () => {
     </>
   );
 };
-
 
 const styles = StyleSheet.create({
   optionItem: {
@@ -141,7 +140,7 @@ const styles = StyleSheet.create({
   iconWrapper: {
     width: 44,
     height: 44,
-    borderRadius: 22, 
+    borderRadius: 22,
     backgroundColor: '#EFF7FF',
     justifyContent: 'center',
     alignItems: 'center',

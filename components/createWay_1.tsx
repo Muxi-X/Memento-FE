@@ -1,19 +1,19 @@
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React from "react";
-import { Pressable, Text,  StyleSheet, Alert,Dimensions } from "react-native";
-import usePromptStore from "@/app/stores/usePromptStore";
-import { useImageStore } from "@/app/stores/useImageStore";
-const { width: screenWidth } = Dimensions.get("window");
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Pressable, Text, StyleSheet, Dimensions } from 'react-native';
+import usePromptStore from '@/app/stores/usePromptStore';
+import { useImageStore } from '@/app/stores/useImageStore';
+const { width: screenWidth } = Dimensions.get('window');
 export function TakePhotoWay() {
-  const settakenPhoto = useImageStore((state) => state.settakenPhoto); 
+  const settakenPhoto = useImageStore((state) => state.settakenPhoto);
   // 打开相机
-   const router=useRouter();
+  const router = useRouter();
   const handleOpenCamera = async () => {
     // 申请相机权限
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      alert("需要相机权限才能拍摄照片");
+    if (status !== 'granted') {
+      alert('需要相机权限才能拍摄照片');
       return;
     }
     // 打开相机
@@ -22,7 +22,7 @@ export function TakePhotoWay() {
       quality: 0.8,
     });
     if (!result.canceled) {
-       const photo = {
+      const photo = {
         id: Date.now().toString(),
         uri: result.assets[0].uri,
         width: result.assets[0].width,
@@ -30,12 +30,10 @@ export function TakePhotoWay() {
         fileName: result.assets[0].fileName,
       };
       settakenPhoto(photo);
-         router.navigate({
-      pathname: "/beforePulish",
-
-    });
+      router.navigate({
+        pathname: '/beforePulish',
+      });
     }
- 
   };
 
   return (
@@ -48,42 +46,41 @@ export function TakePhotoWay() {
 export function PhotoWay() {
   const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
 
-    const router=useRouter();
+  const router = useRouter();
   // 打开相册
-  const keyword_id=usePromptStore(state => state.keyword_id);
+  const keyword_id = usePromptStore((state) => state.keyword_id);
   const handleOpenGallery = async () => {
     // 申请相册权限
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("需要相册权限才能选择照片");
+    if (status !== 'granted') {
+      alert('需要相册权限才能选择照片');
       return;
     }
     // 打开相册
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.8,
-      allowsMultipleSelection: true, 
-      mediaTypes: "images", 
-      allowsEditing: false, 
+      allowsMultipleSelection: true,
+      mediaTypes: 'images',
+      allowsEditing: false,
     });
 
     if (!result.canceled) {
- // 设置选中的照片
+      // 设置选中的照片
       const selectedPhotos = result.assets.map((asset, index) => ({
-        id: index, 
+        id: index,
         uri: asset.uri,
-        width: asset.width, 
+        width: asset.width,
         height: asset.height,
-        fileName: asset.fileName, 
+        fileName: asset.fileName,
       }));
       setSelectedPhotos(selectedPhotos);
-    router.navigate({
-      pathname: "/beforePulish",
+      router.navigate({
+        pathname: '/beforePulish',
         params: {
-        type:"official_today",
-        keyword_id:keyword_id,
-      }
-    })
-      
+          type: 'official_today',
+          keyword_id: keyword_id,
+        },
+      });
     }
   };
 
@@ -96,25 +93,25 @@ export function PhotoWay() {
 }
 const styles = StyleSheet.create({
   optionItem: {
-    flexDirection: "column",
-    width: screenWidth*(158/375),
+    flexDirection: 'column',
+    width: screenWidth * (158 / 375),
     height: 80,
     borderRadius: 20,
-    borderColor: "#EEEEEE",
+    borderColor: '#EEEEEE',
     borderWidth: 2,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     paddingVertical: 19,
     paddingLeft: 20,
     gap: 2,
   },
   optionTitle: {
     fontSize: 16,
-    fontWeight: "500",
-    color: "#3D3D3D",
+    fontWeight: '500',
+    color: '#3D3D3D',
   },
   optionSubtitle: {
     fontSize: 12,
-    color: "#72B6FF",
+    color: '#72B6FF',
     marginTop: 2,
     lineHeight: 20,
   },

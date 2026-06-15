@@ -1,18 +1,11 @@
-import React from "react";
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  Pressable,
-  Text,
-  Modal,
-} from "react-native";
-import Svg, { Defs, Rect, Mask } from "react-native-svg";
-import Trancle from "../assets/images/sanjiao.svg";
-import Guide1 from "../assets/images/guide1.svg";
-import Guide3 from "../assets/images/guide3.svg";
+import React from 'react';
+import { View, StyleSheet, Dimensions, Pressable, Text, Modal } from 'react-native';
+import Svg, { Defs, Rect, Mask } from 'react-native-svg';
+import Trancle from '../assets/images/sanjiao.svg';
+import Guide1 from '../assets/images/guide1.svg';
+import Guide3 from '../assets/images/guide3.svg';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
+const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
 interface guideProps {
   visible: boolean;
@@ -69,7 +62,7 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
             style={{
               width: screenWidth,
               height: screenHeight,
-              position: "absolute",
+              position: 'absolute',
               top: 0,
               left: 0,
             }}
@@ -89,19 +82,14 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
               </Mask>
             </Defs>
 
-            <Rect
-              width="100%"
-              height="100%"
-              fill="rgba(0,0,0,0.65)"
-              mask="url(#guide-mask)"
-            />
+            <Rect width="100%" height="100%" fill="rgba(0,0,0,0.65)" mask="url(#guide-mask)" />
           </Svg>
 
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             {step === 1 && (
               <View
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   top: y - 106,
                   left: x - 210 + w,
                   width: 179,
@@ -111,7 +99,7 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
                   <Trancle style={styles.trancle} />
                   <Text style={styles.tipText}>
                     每一个词，都是一种
-                    <Text style={{ fontWeight: "bold" }}>看世界的方式。</Text>
+                    <Text style={{ fontWeight: 'bold' }}>看世界的方式。</Text>
                     今天，我们从这个词开始。
                   </Text>
                 </View>
@@ -124,7 +112,7 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
                 style={[
                   styles.tipContainer,
                   {
-                    position: "absolute",
+                    position: 'absolute',
                     top: y - 81,
                     left: x - 115,
                     width: 162,
@@ -133,26 +121,17 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
                 ]}
               >
                 <Trancle style={styles.trancle} />
-                <Text style={styles.tipText}>
-                  看看别人，是如何理解同一个词的。
-                </Text>
+                <Text style={styles.tipText}>看看别人，是如何理解同一个词的。</Text>
               </View>
             )}
 
             {step === 3 && (
-              <View
-                style={{ position: "absolute", top: y + 45, left: x - 156 }}
-              >
+              <View style={{ position: 'absolute', top: y + 45, left: x - 156 }}>
                 <View style={[styles.tipContainer, { width: 188, height: 60 }]}>
                   <Trancle
-                    style={[
-                      styles.trancle,
-                      { bottom: 50, transform: [{ rotate: "60deg" }] },
-                    ]}
+                    style={[styles.trancle, { bottom: 50, transform: [{ rotate: '60deg' }] }]}
                   />
-                  <Text style={styles.tipText}>
-                    当你不知道该拍什么，这里会给你一些可能的方向
-                  </Text>
+                  <Text style={styles.tipText}>当你不知道该拍什么，这里会给你一些可能的方向</Text>
                 </View>
                 <Guide3 style={{ marginTop: -70, marginLeft: -122 }} />
               </View>
@@ -161,19 +140,17 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
             {step === 4 && (
               <View
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   top: y - 88,
                   left: x + w / 2 - 134,
                 }}
               >
                 <View style={[styles.tipContainer, { width: 268, height: 66 }]}>
-                  <Trancle
-                    style={[styles.trancle, { right: "50%", marginRight: -10 }]}
-                  />
+                  <Trancle style={[styles.trancle, { right: '50%', marginRight: -10 }]} />
                   <Text style={styles.tipText}>
                     这里有不同的观察方向，每天
-                    <Text style={{ fontWeight: "500" }}>只能选一个</Text>
-                    {"\n"}你更想从哪个方向开始？
+                    <Text style={{ fontWeight: '500' }}>只能选一个</Text>
+                    {'\n'}你更想从哪个方向开始？
                   </Text>
                 </View>
               </View>
@@ -188,20 +165,20 @@ export const GuideOverlay = ({ visible, target, step, onNext }: guideProps) => {
 const styles = StyleSheet.create({
   tipContainer: {
     borderRadius: 20,
-    backgroundColor: "#CEE6FF",
-    justifyContent: "center",
+    backgroundColor: '#CEE6FF',
+    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   tipText: {
-    color: "#3D3D3D",
+    color: '#3D3D3D',
     fontSize: 12,
-    fontWeight: "400",
+    fontWeight: '400',
     lineHeight: 18,
   },
   trancle: {
     bottom: -11,
-    position: "absolute",
+    position: 'absolute',
     right: 10,
   },
 });

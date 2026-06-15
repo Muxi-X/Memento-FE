@@ -1,23 +1,14 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Modal,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
-import * as SecureStore from "expo-secure-store";
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable, Modal, StyleSheet, Dimensions } from 'react-native';
 
-import { addCustomKeyword } from "../app/api/me";
-const { width: screenWidth } = Dimensions.get("window");
+import { addCustomKeyword } from '../app/api/me';
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function NewCreate() {
   const [mask, setMask] = useState(false);
-  const [keyword, setKeyword] = useState("");
-  const [target, setTarget] = useState<number | string>("无");
-  const presetOptions = [7, 30, 52, 365, "无"];
+  const [keyword, setKeyword] = useState('');
+  const [target, setTarget] = useState<number | string>('无');
+  const presetOptions = [7, 30, 52, 365, '无'];
   const [currentIdx, setCurrentIdx] = useState(4); // 默认选中"无"
   const MAX_KEYWORD_LENGTH = 10; // 关键词最大字数
 
@@ -30,9 +21,9 @@ export default function NewCreate() {
   };
 
   const handleInputChange = (text: string) => {
-    const num = text.replace(/[^0-9]/g, "");
-    setTarget(num || "无");
-    const matchIdx = presetOptions.indexOf(num ? Number(num) : "无");
+    const num = text.replace(/[^0-9]/g, '');
+    setTarget(num || '无');
+    const matchIdx = presetOptions.indexOf(num ? Number(num) : '无');
     if (matchIdx !== -1) setCurrentIdx(matchIdx);
   };
 
@@ -49,20 +40,17 @@ export default function NewCreate() {
   };
 
   const handleConfirm = async () => {
-    if (keyword.trim() === "") {
-      alert("关键词不能为空");
+    if (keyword.trim() === '') {
+      alert('关键词不能为空');
       return;
     }
     try {
-      await addCustomKeyword(
-        keyword,
-        typeof target === "number" ? target : null,
-      );
-      alert("添加成功");
+      await addCustomKeyword(keyword, typeof target === 'number' ? target : null);
+      alert('添加成功');
       setMask(false);
     } catch (error) {
-      console.error("添加失败：", error);
-      alert("添加失败，请重试");
+      console.error('添加失败：', error);
+      alert('添加失败，请重试');
     }
   };
   const remainingLength = MAX_KEYWORD_LENGTH - keyword.length;
@@ -70,7 +58,7 @@ export default function NewCreate() {
   return (
     <>
       <Pressable onPress={() => setMask(true)}>
-        <Text style={{ fontSize: 12, color: "#999999" }}>+新建</Text>
+        <Text style={{ fontSize: 12, color: '#999999' }}>+新建</Text>
       </Pressable>
       <Modal
         animationType="slide"
@@ -79,17 +67,14 @@ export default function NewCreate() {
         onRequestClose={() => setMask(false)}
       >
         <Pressable style={styles.modalMask} onPress={() => setMask(false)}>
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
+          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
             <View
               style={{
                 width: screenWidth,
-                justifyContent: "space-between",
-                alignItems: "center",
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 paddingHorizontal: 24,
-                flexDirection:"row",
+                flexDirection: 'row',
                 paddingTop: 17,
               }}
             >
@@ -98,16 +83,16 @@ export default function NewCreate() {
                   setMask(false);
                 }}
               >
-                <Text style={{ color: "#333333", fontSize: 14 }}>取消</Text>
+                <Text style={{ color: '#333333', fontSize: 14 }}>取消</Text>
               </Pressable>
-              <Pressable  onPress={handleConfirm}>
-                <Text style={{ color: "#999999", fontSize: 14 }}>完成</Text>
+              <Pressable onPress={handleConfirm}>
+                <Text style={{ color: '#999999', fontSize: 14 }}>完成</Text>
               </Pressable>
             </View>
 
             <Text
               style={{
-                color: "#333333",
+                color: '#333333',
                 fontSize: 16,
                 fontWeight: 500,
                 marginTop: 15,
@@ -125,9 +110,9 @@ export default function NewCreate() {
               ></TextInput>
               <Text
                 style={{
-                  color: "#999999",
+                  color: '#999999',
                   fontSize: 14,
-                  position: "absolute",
+                  position: 'absolute',
                   right: 15,
                 }}
               >
@@ -138,27 +123,27 @@ export default function NewCreate() {
             <View style={styles.target}>
               <View
                 style={{
-                  flexDirection: "row",
+                  flexDirection: 'row',
                   marginTop: 24,
                   width: screenWidth - 48,
-                  justifyContent: "space-between",
+                  justifyContent: 'space-between',
                   paddingLeft: 12,
                 }}
               >
                 <Text>目标张数</Text>
 
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={{ color: "#72B6FF" }}>(可选)</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ color: '#72B6FF' }}>(可选)</Text>
                   <Pressable onPress={handleLeft}>
                     <Text>&lt;</Text>
                   </Pressable>
                   <View style={styles.targetInput}>
                     <TextInput
                       style={{
-                        color: "#999999",
+                        color: '#999999',
                         fontSize: 14,
                         minWidth: 24,
-                        alignItems: "center",
+                        alignItems: 'center',
                       }}
                       value={target.toString()}
                       onChangeText={handleInputChange}
@@ -183,45 +168,45 @@ export default function NewCreate() {
 const styles = StyleSheet.create({
   modalMask: {
     flex: 1,
-    backgroundColor: "rgba(21, 24, 30, 0.2)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(21, 24, 30, 0.2)',
+    justifyContent: 'flex-end',
   },
 
   modalContent: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
     height: 263,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
-    position: "relative",
+    position: 'relative',
   },
   keywords: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 24,
     width: screenWidth - 48,
     paddingLeft: 12,
-    position: "relative",
+    position: 'relative',
   },
   line: {
     width: screenWidth - 48,
     height: 0,
-    borderColor: "#D8D8D8",
+    borderColor: '#D8D8D8',
     borderTopWidth: 1,
     marginTop: 10,
   },
   target: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 33,
   },
   targetInput: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     height: 20,
     marginHorizontal: 5,
-    borderBottomColor: "#D8D8D8",
+    borderBottomColor: '#D8D8D8',
     borderBottomWidth: 1,
   },
 });

@@ -8,12 +8,12 @@ export default interface Post {
   cover_audio_duration_ms: number;
   image_count: number;
   reaction_counts: ReactionCounts | null;
-  my_reactions: Array<"inspired" | "resonated"> | null;
+  my_reactions: ('inspired' | 'resonated')[] | null;
   created_at: string;
 }
 export interface detaildataItem {
   post: Post;
-  images: Array<ImageObject>;
+  images: ImageObject[];
 }
 export interface ImageObject {
   id: string;
@@ -48,9 +48,9 @@ export interface PhotoObject {
   fileName: string | null | undefined;
 }
 export enum PromptWords {
-  intuition = "intuition",
-  structure = "structure",
-  concept = "concept",
+  intuition = 'intuition',
+  structure = 'structure',
+  concept = 'concept',
 }
 
 export interface ReviewDateItem {
