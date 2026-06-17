@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import * as SecureStore from 'expo-secure-store';
 import React from 'react';
 import { Pressable, Text, View, StyleSheet, Alert, Platform } from 'react-native';
 import Picture from '../assets/images/picture.svg';
@@ -11,8 +12,27 @@ const Createway = () => {
   const settakenPhoto = useImageStore((state) => state.settakenPhoto);
   const setSelectedPhotos = useImageStore((state) => state.setSelectedPhotos);
 
+  // 检查登录状态
+  const checkLogin = async (): Promise<boolean> => {
+    try {
+      const token = await SecureStore.getItemAsync('access_token');
+      if (!token) {
+        Alert.alert('登录后即可发布', '发布你的作品需要先完成登录', [
+          { text: '取消', style: 'cancel' },
+          { text: '去登录', onPress: () => router.navigate('/signin') },
+        ]);
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   // 打开相机
   const handleOpenCamera = async () => {
+    if (!(await checkLogin())) return;
+
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('权限不足', '需要相机权限才能拍摄照片，请前往设置开启');
@@ -44,6 +64,8 @@ const Createway = () => {
 
   // 打开相册
   const handleOpenGallery = async () => {
+    if (!(await checkLogin())) return;
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('权限不足', '需要相册权限才能选择照片，请前往设置开启');

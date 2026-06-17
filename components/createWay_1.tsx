@@ -1,7 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
+import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, Text, StyleSheet, Dimensions } from 'react-native';
+import { Pressable, Text, StyleSheet, Dimensions, Alert } from 'react-native';
 import usePromptStore from '@/app/stores/usePromptStore';
 import { useImageStore } from '@/app/stores/useImageStore';
 const { width: screenWidth } = Dimensions.get('window');
@@ -10,6 +11,19 @@ export function TakePhotoWay() {
   // 打开相机
   const router = useRouter();
   const handleOpenCamera = async () => {
+    // 检查登录状态
+    try {
+      const token = await SecureStore.getItemAsync('access_token');
+      if (!token) {
+        Alert.alert('登录后即可发布', '发布你的作品需要先完成登录', [
+          { text: '取消', style: 'cancel' },
+          { text: '去登录', onPress: () => router.navigate('/signin') },
+        ]);
+        return;
+      }
+    } catch {
+      return;
+    }
     // 申请相机权限
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
@@ -50,6 +64,19 @@ export function PhotoWay() {
   // 打开相册
   const keyword_id = usePromptStore((state) => state.keyword_id);
   const handleOpenGallery = async () => {
+    // 检查登录状态
+    try {
+      const token = await SecureStore.getItemAsync('access_token');
+      if (!token) {
+        Alert.alert('登录后即可发布', '发布你的作品需要先完成登录', [
+          { text: '取消', style: 'cancel' },
+          { text: '去登录', onPress: () => router.navigate('/signin') },
+        ]);
+        return;
+      }
+    } catch {
+      return;
+    }
     // 申请相册权限
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
