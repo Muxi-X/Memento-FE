@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import Arrow from '../assets/images/arrow-bottom.svg';
 import Arrowback from '../assets/images/goback.svg';
-import VoiceIcon from '../assets/images/sound2.svg';
+import VoiceWaves from '@/components/VoiceWaves';
 import { getCustomImageDetail } from './api/custom';
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -193,7 +193,7 @@ export default function CustomImageDetailPage() {
                         <Text style={styles.title}>{item.title || ''}</Text>
                         {item.has_audio && (
                           <Pressable style={styles.voice}>
-                            <VoiceIcon />
+                            <VoiceWaves color="#FFFFFF" width={14} height={12} />
                             <Text style={{ color: '#FFFFFF', fontSize: 12 }}>
                               {`${item.audio_duration_ms || 0}'`}
                             </Text>

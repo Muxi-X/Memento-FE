@@ -1,6 +1,7 @@
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { BlurView } from 'expo-blur';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -17,7 +18,7 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import Modal from 'react-native-modal';
 import Arrow from '../assets/images/arrow-bottom.svg';
 import Arrowback from '../assets/images/goback.svg';
-import VoiceIcon from '../assets/images/sound2.svg';
+import VoiceWaves from '@/components/VoiceWaves';
 import { detaildataItem } from './api/interface';
 import { getOfficialUploadDetail } from './api/keywords';
 
@@ -31,6 +32,9 @@ export default function PostCardDetail() {
   const [error, setError] = useState('');
   const [showImageView, setShowImageView] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [playingAudioIndex, setPlayingAudioIndex] = useState<number | null>(null);
+  const player = useAudioPlayer(null, { updateInterval: 200 });
+  const playerStatus = useAudioPlayerStatus(player);
   const params = useLocalSearchParams();
   const router = useRouter();
   const formatIsoDateToYMD = (isoDate: string) => {
@@ -52,6 +56,35 @@ export default function PostCardDetail() {
     if (Array.isArray(params.upload_id)) return params.upload_id[0] || '';
     return params.upload_id || '';
   })();
+
+  const handlePlayAudio = useCallback(
+    (index: number, url: string | null) => {
+      if (!url) return;
+      try {
+        // 正在播放同一段音频 → 停止
+        if (playerStatus.playing && playingAudioIndex === index) {
+          player.pause();
+          setPlayingAudioIndex(null);
+          return;
+        }
+        // 加载并播放新音频
+        player.replace(url);
+        player.play();
+        setPlayingAudioIndex(index);
+      } catch (err) {
+        console.error('音频播放失败:', err);
+      }
+    },
+    [playerStatus.playing, playingAudioIndex],
+  );
+
+  // 播放结束 → 清理状态
+  useEffect(() => {
+    if (playerStatus.didJustFinish) {
+      setPlayingAudioIndex(null);
+    }
+  }, [playerStatus.didJustFinish]);
+
   useEffect(() => {
     const getUploadDetail = async () => {
       if (!uploadId) {
@@ -161,9 +194,22 @@ export default function PostCardDetail() {
                       }}
                     >
                       <Text style={styles.title}>{item.title || ''}</Text>
-                      {item.has_audio && (
-                        <Pressable style={styles.voice}>
-                          <VoiceIcon />
+                      {item.has_audio && item.audio_play_url && (
+                        <Pressable
+                          style={[
+                            styles.voice,
+                            playerStatus.playing &&
+                              playingAudioIndex === index &&
+                              styles.voiceActive,
+                          ]}
+                          onPress={() => handlePlayAudio(index, item.audio_play_url)}
+                        >
+                          <VoiceWaves
+                            playing={playerStatus.playing && playingAudioIndex === index}
+                            color="#FFFFFF"
+                            width={14}
+                            height={12}
+                          />
                           <Text style={{ color: '#FFFFFF', fontSize: 12 }}>
                             {`${item.audio_duration_ms || 0}'`}
                           </Text>
@@ -321,6 +367,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 4,
     gap: 5,
+  },
+  voiceActive: {
+    backgroundColor: 'rgba(114, 182, 255, 0.4)',
+    borderColor: '#72B6FF',
   },
   date: {
     position: 'absolute',

@@ -2,6 +2,7 @@ import VoiceRecorder from '@/components/voiceRecord';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getInfoAsync } from 'expo-file-system/legacy';
 import {
@@ -19,7 +20,7 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import AddPhotos from '../assets/images/addphoto.svg';
 import Arrow_back from '../assets/images/arrow-back.svg';
-import Sound from '../assets/images/sound.svg';
+import VoiceWaves from '@/components/VoiceWaves';
 import Voicecocle from '../assets/images/voiceConcel.svg';
 import {
   commitUpload,
@@ -29,6 +30,7 @@ import {
   PresignItem,
   presignUpload,
 } from './api/Publish';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import usePromptStore from './stores/usePromptStore';
 import { useImageStore } from './stores/useImageStore';
 
@@ -82,6 +84,9 @@ const BeforePublish = () => {
   const [photoList, setPhotoList] = useState<PhotoItem[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
   const [currentActiveIndex, setCurrentActiveIndex] = useState(-1);
+  const [playingAudioUri, setPlayingAudioUri] = useState<string | null>(null);
+  const player = useAudioPlayer(null, { updateInterval: 200 });
+  const playerStatus = useAudioPlayerStatus(player);
 
   const keywordId = usePromptStore((state) => state.keyword_id);
   const bizDate = usePromptStore((state) => state.date);
@@ -295,6 +300,21 @@ const BeforePublish = () => {
   );
   const handlePublish = useCallback(async () => {
     if (photoList.length === 0 || isPublishing) return;
+
+    // 登录状态检查
+    try {
+      const token = await SecureStore.getItemAsync('access_token');
+      if (!token) {
+        Alert.alert('登录后即可发布', '发布你的作品需要先完成登录', [
+          { text: '取消', style: 'cancel' },
+          { text: '去登录', onPress: () => router.navigate('/signin') },
+        ]);
+        return;
+      }
+    } catch {
+      return;
+    }
+
     setIsPublishing(true);
     try {
       const sid = await createUploadSession();
@@ -331,9 +351,17 @@ const BeforePublish = () => {
       clearPhotos(); // 清除 store 中的照片
       setPhotoList([]);
       setCurrentActiveIndex(-1);
-    } catch (err) {
+    } catch (err: any) {
       console.error('发布整体失败', err);
-      Alert.alert('错误', '发布失败，请重试');
+      // 401 未授权 → 提示登录
+      if (err?.status === 401) {
+        Alert.alert('登录已过期', '请重新登录后再发布', [
+          { text: '取消', style: 'cancel' },
+          { text: '去登录', onPress: () => router.navigate('/signin') },
+        ]);
+      } else {
+        Alert.alert('错误', '发布失败，请重试');
+      }
     } finally {
       setIsPublishing(false);
     }
@@ -410,6 +438,31 @@ const BeforePublish = () => {
     },
     [currentActiveIndex],
   );
+
+  const handlePlayAudio = useCallback(
+    (uri: string) => {
+      try {
+        if (playerStatus.playing && playingAudioUri === uri) {
+          player.pause();
+          setPlayingAudioUri(null);
+          return;
+        }
+        player.replace(uri);
+        player.play();
+        setPlayingAudioUri(uri);
+      } catch (err) {
+        console.error('音频播放失败:', err);
+      }
+    },
+    [playerStatus.playing, playingAudioUri],
+  );
+
+  // 播放结束 → 清理状态
+  useEffect(() => {
+    if (playerStatus.didJustFinish) {
+      setPlayingAudioUri(null);
+    }
+  }, [playerStatus.didJustFinish]);
 
   const handleDeleteRecording = useCallback(() => {
     if (currentActiveIndex < 0) return;
@@ -681,10 +734,25 @@ const BeforePublish = () => {
               />
               {currentPhoto.recordingUri && (
                 <View style={styles.voice}>
-                  <View style={styles.voiceBar}>
-                    <Sound width={16} height={16} />
+                  <Pressable
+                    onPress={() => handlePlayAudio(currentPhoto.recordingUri!)}
+                    style={[
+                      styles.voiceBar,
+                      playerStatus.playing &&
+                        playingAudioUri === currentPhoto.recordingUri &&
+                        styles.voiceBarActive,
+                    ]}
+                  >
+                    <VoiceWaves
+                      playing={
+                        playerStatus.playing && playingAudioUri === currentPhoto.recordingUri
+                      }
+                      color="#333333"
+                      width={16}
+                      height={14}
+                    />
                     <Text style={styles.voiceDuration}>{currentPhoto.recordingDuration}&apos;</Text>
-                  </View>
+                  </Pressable>
                   <Pressable onPress={handleDeleteRecording} style={styles.deleteVoice}>
                     <Voicecocle />
                   </Pressable>
@@ -818,6 +886,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginTop: 8,
+  },
+  voiceBarActive: {
+    backgroundColor: 'rgba(114, 182, 255, 0.2)',
+    borderColor: '#72B6FF',
   },
   voiceDuration: { fontSize: 14, color: '#333' },
   deleteVoice: {
