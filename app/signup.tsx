@@ -30,8 +30,8 @@ export default function Signup() {
   const [isDisabled, setIsDisabled] = useState(false);
 
   // --- 引用管理 ---
-  const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const countdownTimer = useRef<NodeJS.Timeout | null>(null);
+  const pwdDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVerifiedCode = useRef(''); // 记录上次验证成功的代码，避免重复请求
 
   // 邮箱格式校验
@@ -75,15 +75,20 @@ export default function Signup() {
 
       try {
         const res = await verifyCode({ email, code });
-        if (res.status === 200 && res.data.valid === true) {
+        const token = res.data?.signup_token || res.data?.token || res.data?.data?.signup_token;
+        if (res.status >= 200 && res.status < 300 && token) {
           setVerifyResult(<Pass />);
           lastVerifiedCode.current = code;
-          await SecureStore.setItemAsync('signup_token', res.data.signup_token);
+          await SecureStore.setItemAsync('signup_token', token);
         } else {
           setVerifyResult(<Warning />);
+          lastVerifiedCode.current = '';
+          await SecureStore.deleteItemAsync('signup_token');
         }
       } catch (err: any) {
         setVerifyResult(<Warning />);
+        lastVerifiedCode.current = '';
+        await SecureStore.deleteItemAsync('signup_token');
         // 只有验证码错误时才提示，其他错误静默处理
         if (err.status === 400 || err.data?.code === 'invalid_code') {
           console.log('验证码验证失败');
@@ -93,6 +98,7 @@ export default function Signup() {
     [email],
   );
 
+  // 验证码长度到达 6 位自动校验
   useEffect(() => {
     if (sendCodeText.length === 6) {
       handleVerify(sendCodeText);
@@ -100,6 +106,13 @@ export default function Signup() {
       setVerifyResult(<Warning />);
     }
   }, [handleVerify, sendCodeText]);
+
+  // 邮箱变化时，重置已验证状态和 signup_token
+  useEffect(() => {
+    lastVerifiedCode.current = '';
+    setVerifyResult(<Warning />);
+    SecureStore.deleteItemAsync('signup_token').catch(() => {});
+  }, [email]);
 
   // 发送验证码
   const handleSendCode = async () => {
@@ -113,8 +126,13 @@ export default function Signup() {
     }
     try {
       setIsDisabled(true);
+      // 重新发送验证码 → 清空之前的验证状态
+      lastVerifiedCode.current = '';
+      setVerifyResult(<Warning />);
+      await SecureStore.deleteItemAsync('signup_token');
+
       const res = await sendCode(email);
-      if (res.status === 204) {
+      if (res.status >= 200 && res.status < 300) {
         setCountdown(60);
         Alert.alert('成功', '验证码已发送，请注意查收');
         if (countdownTimer.current) clearInterval(countdownTimer.current);
@@ -193,7 +211,6 @@ export default function Signup() {
     }
 
     try {
-      // 清除可能的旧 token 缓存
       clearCachedToken();
 
       const res = await signupComplete({ signup_token, password });
@@ -212,6 +229,7 @@ export default function Signup() {
         Alert.alert('错误', '验证码已过期，请重新获取');
         setVerifyResult(<Warning />);
         lastVerifiedCode.current = '';
+        SecureStore.deleteItemAsync('signup_token').catch(() => {});
       } else if (error.status === 409 || error.data?.code === 'user_exists') {
         Alert.alert('提示', '该邮箱已注册，请直接登录', [
           { text: '取消', style: 'cancel' },
