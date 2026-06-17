@@ -16,7 +16,11 @@ export default function MessageTip(props: notfiItem) {
     <View style={styles.tips}>
       <View style={styles.touxiang}>
         <ImageBackground
-          source={{ uri: props.actor_avatar_url }}
+          source={
+            props.actor_avatar_url
+              ? { uri: props.actor_avatar_url }
+              : require('../assets/images/baseTouxiang.svg')
+          }
           style={{
             width: 40,
             height: 40,
