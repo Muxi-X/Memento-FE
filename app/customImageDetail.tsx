@@ -4,8 +4,9 @@
  */
 
 import { BlurView } from 'expo-blur';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -45,6 +46,9 @@ export default function CustomImageDetailPage() {
   const [error, setError] = useState('');
   const [showImageView, setShowImageView] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [playingAudioIndex, setPlayingAudioIndex] = useState<number | null>(null);
+  const player = useAudioPlayer(null, { updateInterval: 200 });
+  const playerStatus = useAudioPlayerStatus(player);
 
   const params = useLocalSearchParams();
   const router = useRouter();
@@ -94,6 +98,35 @@ export default function CustomImageDetailPage() {
     };
     fetchAll();
   }, [imageIds]);
+
+  // 语音条点击播放
+  const handlePlayAudio = useCallback(
+    (index: number, url: string | null | undefined) => {
+      if (!url) return;
+      try {
+        // 正在播放同一段 → 停止
+        if (playerStatus.playing && playingAudioIndex === index) {
+          player.pause();
+          setPlayingAudioIndex(null);
+          return;
+        }
+        // 切换或新播放
+        player.replace(url);
+        player.play();
+        setPlayingAudioIndex(index);
+      } catch (err) {
+        console.error('音频播放失败：', err);
+      }
+    },
+    [playerStatus.playing, playingAudioIndex],
+  );
+
+  // 播放结束 → 清理状态
+  useEffect(() => {
+    if (playerStatus.didJustFinish) {
+      setPlayingAudioIndex(null);
+    }
+  }, [playerStatus.didJustFinish]);
 
   if (loading) {
     return (
@@ -192,8 +225,21 @@ export default function CustomImageDetailPage() {
                       >
                         <Text style={styles.title}>{item.title || ''}</Text>
                         {item.has_audio && (
-                          <Pressable style={styles.voice}>
-                            <VoiceWaves color="#FFFFFF" width={14} height={12} />
+                          <Pressable
+                            style={[
+                              styles.voice,
+                              playerStatus.playing &&
+                                playingAudioIndex === index &&
+                                styles.voiceActive,
+                            ]}
+                            onPress={() => handlePlayAudio(index, item.audio_play_url)}
+                          >
+                            <VoiceWaves
+                              playing={playerStatus.playing && playingAudioIndex === index}
+                              color="#FFFFFF"
+                              width={14}
+                              height={12}
+                            />
                             <Text style={{ color: '#FFFFFF', fontSize: 12 }}>
                               {`${item.audio_duration_ms || 0}'`}
                             </Text>
@@ -350,6 +396,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 4,
     gap: 5,
+  },
+  voiceActive: {
+    backgroundColor: 'rgba(114, 182, 255, 0.4)',
+    borderColor: '#72B6FF',
   },
   date: {
     position: 'absolute',
