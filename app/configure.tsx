@@ -94,15 +94,15 @@ export default function Configure() {
 
       <View style={{ paddingHorizontal: 24, width: '100%', backgroundColor: '#F9F9F9' }}>
         <Text style={styles.titletext}>账号</Text>
-        <View style={[styles.kuang, { flexDirection: 'row' }]}>
+        <Pressable
+          style={[styles.kuang, { flexDirection: 'row' }]}
+          onPress={() => router.navigate('/setAuthdata')}
+        >
           <Text>个人资料</Text>
-          <Pressable
-            style={{ position: 'absolute', top: 25, right: 22 }}
-            onPress={() => router.navigate('/setAuthdata')}
-          >
+          <Pressable style={{ position: 'absolute', top: 25, right: 22 }}>
             <ArrowRight style={{ width: 5, height: 10 }} />
           </Pressable>
-        </View>
+        </Pressable>
 
         <Text style={styles.titletext}>隐私权限</Text>
         <View style={[styles.kuang, { flexDirection: 'row', justifyContent: 'space-between' }]}>
