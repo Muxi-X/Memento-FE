@@ -20,7 +20,7 @@ export default function SignIn() {
   const [Mm, setMm] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
-  const countdownTimer = useRef<NodeJS.Timeout | null>(null); // 新增：清理倒计时
+  const countdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null); // 新增：清理倒计时
 
   const navigation = useNavigation();
   useEffect(() => {

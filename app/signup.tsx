@@ -68,13 +68,23 @@ export default function Signup() {
   }, [password, confirmPwd]);
 
   //  验证码校验 (独立于倒计时)
+  // 用 ref 保存最新 email，避免闭包捕获旧值
+  const emailRef = useRef(email);
+  useEffect(() => {
+    emailRef.current = email;
+  }, [email]);
+
+  const isVerifyingRef = useRef(false);
   const handleVerify = useCallback(
     async (code: string) => {
-      if (!email || code.length !== 6) return;
+      const currentEmail = emailRef.current.trim();
+      if (!currentEmail || code.length !== 6) return;
       if (code === lastVerifiedCode.current) return; // 已验证过则跳过
+      if (isVerifyingRef.current) return; // 正在验证中，避免重复请求
 
+      isVerifyingRef.current = true;
       try {
-        const res = await verifyCode({ email, code });
+        const res = await verifyCode({ email: currentEmail, code });
         const token = res.data?.signup_token || res.data?.token || res.data?.data?.signup_token;
         if (res.status >= 200 && res.status < 300 && token) {
           setVerifyResult(<Pass />);
@@ -84,28 +94,34 @@ export default function Signup() {
           setVerifyResult(<Warning />);
           lastVerifiedCode.current = '';
           await SecureStore.deleteItemAsync('signup_token');
+          Alert.alert('提示', '验证码不正确，请重新输入');
         }
       } catch (err: any) {
         setVerifyResult(<Warning />);
         lastVerifiedCode.current = '';
         await SecureStore.deleteItemAsync('signup_token');
-        // 只有验证码错误时才提示，其他错误静默处理
         if (err.status === 400 || err.data?.code === 'invalid_code') {
-          console.log('验证码验证失败');
+          Alert.alert('提示', '验证码不正确，请重新输入');
+        } else if (err.status === 404) {
+          Alert.alert('提示', '验证码已过期，请重新获取');
+        } else {
+          Alert.alert('提示', '验证码校验失败，请重试');
         }
+      } finally {
+        isVerifyingRef.current = false;
       }
     },
-    [email],
+    [], // 不依赖任何状态，内部通过 ref 获取最新 email
   );
 
-  // 验证码长度到达 6 位自动校验
+  // 验证码长度到达 6 位自动校验（只依赖 sendCodeText，避免 email 变化触发重复验证）
   useEffect(() => {
     if (sendCodeText.length === 6) {
       handleVerify(sendCodeText);
     } else {
       setVerifyResult(<Warning />);
     }
-  }, [handleVerify, sendCodeText]);
+  }, [sendCodeText]); // 只监听验证码文本变化
 
   // 邮箱变化时，重置已验证状态和 signup_token
   useEffect(() => {
@@ -289,10 +305,12 @@ export default function Signup() {
             <TextInput
               style={[styles.inputKuang, { flex: 1 }]}
               placeholder="请输入验证码"
-              onChangeText={setSendCodeText}
+              onChangeText={(text) => setSendCodeText(text.trim())}
               value={sendCodeText}
               maxLength={6}
-              keyboardType="numeric"
+              autoCapitalize="characters"
+              textContentType="oneTimeCode"
+              autoComplete="sms-otp"
             />
             <Pressable onPress={handleSendCode} disabled={isDisabled} style={styles.innerSendBtn}>
               <Text style={{ fontSize: 13, color: isDisabled ? '#999' : '#72B6FF' }}>
