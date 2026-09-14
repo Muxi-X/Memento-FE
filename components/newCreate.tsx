@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Modal, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Modal,
+  StyleSheet,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 
 import { addCustomKeyword } from '../app/api/me';
 const { width: screenWidth } = Dimensions.get('window');
@@ -21,10 +31,16 @@ export default function NewCreate() {
   };
 
   const handleInputChange = (text: string) => {
-    const num = text.replace(/[^0-9]/g, '');
-    setTarget(num || '无');
-    const matchIdx = presetOptions.indexOf(num ? Number(num) : '无');
-    if (matchIdx !== -1) setCurrentIdx(matchIdx);
+    const numStr = text.replace(/[^0-9]/g, '');
+    if (numStr === '') {
+      setTarget('无');
+      setCurrentIdx(4);
+    } else {
+      const n = Number(numStr);
+      setTarget(n);
+      const matchIdx = presetOptions.indexOf(n);
+      if (matchIdx !== -1) setCurrentIdx(matchIdx);
+    }
   };
 
   const handleLeft = () => {
@@ -67,98 +83,104 @@ export default function NewCreate() {
         onRequestClose={() => setMask(false)}
       >
         <Pressable style={styles.modalMask} onPress={() => setMask(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <View
-              style={{
-                width: screenWidth,
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingHorizontal: 24,
-                flexDirection: 'row',
-                paddingTop: 17,
-              }}
-            >
-              <Pressable
-                onPress={() => {
-                  setMask(false);
-                }}
-              >
-                <Text style={{ color: '#333333', fontSize: 14 }}>取消</Text>
-              </Pressable>
-              <Pressable onPress={handleConfirm}>
-                <Text style={{ color: '#999999', fontSize: 14 }}>完成</Text>
-              </Pressable>
-            </View>
-
-            <Text
-              style={{
-                color: '#333333',
-                fontSize: 16,
-                fontWeight: 500,
-                marginTop: 15,
-              }}
-            >
-              自定义关键词
-            </Text>
-            <View style={styles.keywords}>
-              <TextInput
-                placeholder="请输入关键词"
-                value={keyword}
-                onChangeText={handleKeywordChange}
-                maxLength={MAX_KEYWORD_LENGTH}
-                placeholderTextColor="#999999"
-              ></TextInput>
-              <Text
-                style={{
-                  color: '#999999',
-                  fontSize: 14,
-                  position: 'absolute',
-                  right: 15,
-                }}
-              >
-                {remainingLength}
-              </Text>
-            </View>
-            <View style={styles.line}></View>
-            <View style={styles.target}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoid}
+          >
+            <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
               <View
                 style={{
-                  flexDirection: 'row',
-                  marginTop: 24,
-                  width: screenWidth - 48,
+                  width: screenWidth,
                   justifyContent: 'space-between',
-                  paddingLeft: 12,
+                  alignItems: 'center',
+                  paddingHorizontal: 24,
+                  flexDirection: 'row',
+                  paddingTop: 17,
                 }}
               >
-                <Text>目标张数</Text>
+                <Pressable
+                  onPress={() => {
+                    setMask(false);
+                  }}
+                >
+                  <Text style={{ color: '#333333', fontSize: 14 }}>取消</Text>
+                </Pressable>
+                <Pressable onPress={handleConfirm}>
+                  <Text style={{ color: '#999999', fontSize: 14 }}>完成</Text>
+                </Pressable>
+              </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ color: '#72B6FF' }}>(可选)</Text>
-                  <Pressable onPress={handleLeft}>
-                    <Text>&lt;</Text>
-                  </Pressable>
-                  <View style={styles.targetInput}>
-                    <TextInput
-                      style={{
-                        color: '#999999',
-                        fontSize: 14,
-                        minWidth: 24,
-                        alignItems: 'center',
-                      }}
-                      value={target.toString()}
-                      onChangeText={handleInputChange}
-                      keyboardType="numeric"
-                      placeholder="无"
-                      placeholderTextColor="#999999"
-                    ></TextInput>
+              <Text
+                style={{
+                  color: '#333333',
+                  fontSize: 16,
+                  fontWeight: 500,
+                  marginTop: 15,
+                }}
+              >
+                自定义关键词
+              </Text>
+              <View style={styles.keywords}>
+                <TextInput
+                  placeholder="请输入关键词"
+                  value={keyword}
+                  onChangeText={handleKeywordChange}
+                  maxLength={MAX_KEYWORD_LENGTH}
+                  placeholderTextColor="#999999"
+                ></TextInput>
+                <Text
+                  style={{
+                    color: '#999999',
+                    fontSize: 14,
+                    position: 'absolute',
+                    right: 15,
+                  }}
+                >
+                  {remainingLength}
+                </Text>
+              </View>
+              <View style={styles.line}></View>
+              <View style={styles.target}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 24,
+                    width: screenWidth - 48,
+                    justifyContent: 'space-between',
+                    paddingLeft: 12,
+                  }}
+                >
+                  <Text>目标张数</Text>
+
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ color: '#72B6FF' }}>(可选)</Text>
+                    <Pressable onPress={handleLeft}>
+                      <Text>&lt;</Text>
+                    </Pressable>
+                    <View style={styles.targetInput}>
+                      <TextInput
+                        style={{
+                          color: '#333333',
+                          fontSize: 14,
+                          minWidth: 48,
+                          textAlign: 'center',
+                          paddingVertical: 0,
+                        }}
+                        value={target.toString()}
+                        onChangeText={handleInputChange}
+                        keyboardType="numeric"
+                        placeholder="无"
+                        placeholderTextColor="#999999"
+                      ></TextInput>
+                    </View>
+                    <Pressable onPress={handleRight}>
+                      <Text>&gt;</Text>
+                    </Pressable>
                   </View>
-                  <Pressable onPress={handleRight}>
-                    <Text>&gt;</Text>
-                  </Pressable>
                 </View>
               </View>
-            </View>
-          </Pressable>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </>
@@ -169,6 +191,10 @@ const styles = StyleSheet.create({
   modalMask: {
     flex: 1,
     backgroundColor: 'rgba(21, 24, 30, 0.2)',
+    justifyContent: 'flex-end',
+  },
+  keyboardAvoid: {
+    flex: 1,
     justifyContent: 'flex-end',
   },
 
@@ -204,8 +230,9 @@ const styles = StyleSheet.create({
   targetInput: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 20,
-    marginHorizontal: 5,
+    height: 28,
+    minWidth: 60,
+    marginHorizontal: 8,
     borderBottomColor: '#D8D8D8',
     borderBottomWidth: 1,
   },

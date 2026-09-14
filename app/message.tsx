@@ -13,6 +13,7 @@ export default function Message() {
   const getNotifications = useCallback(async () => {
     const res = await getNotificationslist();
     setNotifications(res.data.items);
+    console.log('消息list', res.data.items);
   }, []);
   const markRead = useCallback(async () => {
     try {

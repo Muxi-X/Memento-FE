@@ -5,7 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 let cachedToken: string | null = null;
 
 const service = create({
-  baseURL: 'https://test.memento.muxixyz.com',
+  baseURL: 'https://memento.muxistudio.com',
   timeout: 10000,
 });
 

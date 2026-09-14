@@ -1,5 +1,5 @@
 import { PromptWords } from '../app/api/interface';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Modal, Platform, StatusBar } from 'react-native';
 import IdeaIcon from '../assets/images/idea.svg';
 import Smalltip from './tipsmall';
@@ -11,7 +11,7 @@ interface IdeaProps {
   onNext?: () => void;
   innerRef?: any;
   targetLayout?: any;
-  setTargetLayout?: (layout: any) => void; // 用于回传测量结果的方法
+  setTargetLayout?: (layout: any) => void;
 }
 
 export const Idea = ({
@@ -23,6 +23,8 @@ export const Idea = ({
   setTargetLayout,
 }: IdeaProps) => {
   const [tipstate, setTipstate] = useState(false);
+  const wasGuidingRef = useRef(false);
+
   const measureContent = () => {
     if (innerRef?.current && setTargetLayout) {
       setTimeout(() => {
@@ -37,13 +39,20 @@ export const Idea = ({
       }, 100);
     }
   };
+
   useEffect(() => {
+    // 进入引导模式 → 自动打开
     if (isGuideMode) {
+      wasGuidingRef.current = true;
       setTipstate(true);
-    } else if (step === 0 && tipstate) {
+    }
+    // 只有当"之前处于引导中"且引导完成(step 回到 0)时 → 自动关闭
+    else if (wasGuidingRef.current && step === 0) {
+      wasGuidingRef.current = false;
       setTipstate(false);
     }
-  }, [isGuideMode, step, tipstate]);
+  }, [isGuideMode, step]);
+
   const handleClose = () => {
     if (isGuideMode) return;
     setTipstate(false);

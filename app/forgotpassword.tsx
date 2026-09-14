@@ -25,8 +25,8 @@ export default function Signup() {
   const [isDisabled, setIsDisabled] = useState(false);
 
   // --- 引用管理 ---
-  const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const countdownTimer = useRef<NodeJS.Timeout | null>(null);
+  const pwdDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastVerifiedCode = useRef(''); // 记录上次验证成功的代码，避免重复请求
 
   useEffect(() => {
@@ -59,15 +59,23 @@ export default function Signup() {
 
       try {
         const res = await verifyResetEmailCode(email, code);
-        if (res.status === 200 && res.data.valid === true) {
+        const token = res.data?.reset_token || res.data?.token || res.data?.data?.reset_token;
+        if (res.status >= 200 && res.status < 300 && token) {
           setVerifyResult(<Pass />);
           lastVerifiedCode.current = code;
-          await SecureStore.setItemAsync('reset_token', res.data.reset_token);
+          await SecureStore.setItemAsync('reset_token', token);
         } else {
           setVerifyResult(<Warning />);
+          lastVerifiedCode.current = '';
+          await SecureStore.deleteItemAsync('reset_token');
         }
-      } catch {
+      } catch (err: any) {
         setVerifyResult(<Warning />);
+        lastVerifiedCode.current = '';
+        await SecureStore.deleteItemAsync('reset_token');
+        if (err.status === 400 || err.data?.code === 'invalid_code') {
+          console.log('验证码验证失败');
+        }
       }
     },
     [email],
@@ -81,6 +89,13 @@ export default function Signup() {
     }
   }, [handleVerify, sendCodeText]);
 
+  // 邮箱变化时重置
+  useEffect(() => {
+    lastVerifiedCode.current = '';
+    setVerifyResult(<Warning />);
+    SecureStore.deleteItemAsync('reset_token').catch(() => {});
+  }, [email]);
+
   // 发送验证码
   const handleSendCode = async () => {
     if (!email || !email.includes('@')) {
@@ -89,9 +104,15 @@ export default function Signup() {
     }
     try {
       setIsDisabled(true);
+      // 重新发送验证码 → 清空之前的验证状态
+      lastVerifiedCode.current = '';
+      setVerifyResult(<Warning />);
+      await SecureStore.deleteItemAsync('reset_token');
+
       const res = await resetSendcode(email);
-      if (res.status === 204) {
+      if (res.status >= 200 && res.status < 300) {
         setCountdown(60);
+        Alert.alert('成功', '验证码已发送，请注意查收');
         if (countdownTimer.current) clearInterval(countdownTimer.current);
         countdownTimer.current = setInterval(() => {
           setCountdown((prev) => {
@@ -113,17 +134,18 @@ export default function Signup() {
     }
   };
 
-  // 注册提交
+  // 重置密码提交
   const handleRegister = async () => {
     if (new_password.length < 8) return Alert.alert('提示', '密码长度需 ≥8 位');
     if (new_password !== confirmPwd) return Alert.alert('提示', '两次密码不一致');
 
-    const reset_token = await SecureStore.getItemAsync('signup_token');
+    const reset_token = await SecureStore.getItemAsync('reset_token');
     if (!reset_token) return Alert.alert('提示', '请先完成验证码校验');
 
     try {
       const res = await resetComplete({ reset_token, new_password });
-      if (res.status === 200) {
+      if (res.status >= 200 && res.status < 300) {
+        Alert.alert('成功', '密码已重置！');
         if (res.data.access_token) {
           await SecureStore.setItemAsync('access_token', res.data.access_token);
           navigation.navigate('index' as never);
@@ -131,8 +153,16 @@ export default function Signup() {
           navigation.navigate('signin' as never);
         }
       }
-    } catch {
-      Alert.alert('注册失败', '请稍后重试');
+    } catch (err: any) {
+      const errorMsg = err?.userMessage || '重置失败，请稍后重试';
+      if (err?.status === 400 && err?.data?.code === 'invalid_token') {
+        Alert.alert('错误', '验证码已过期，请重新获取');
+        setVerifyResult(<Warning />);
+        lastVerifiedCode.current = '';
+        SecureStore.deleteItemAsync('reset_token').catch(() => {});
+      } else {
+        Alert.alert('重置失败', errorMsg);
+      }
     }
   };
 
@@ -222,78 +252,12 @@ export default function Signup() {
 
         {/* 提交按钮 */}
         <Pressable style={styles.loginBtn} onPress={handleRegister}>
-          <Text style={styles.loginText}>立即注册</Text>
+          <Text style={styles.loginText}>确认</Text>
         </Pressable>
       </View>
     </LinearGradient>
   );
 }
-// const styles = StyleSheet.create({
-//   gradientBackground: {
-//     flex: 1,
-//     width: "100%",
-//     alignItems: "center",
-//   },
-//   content: {
-//     flex: 1,
-//     position: "relative",
-//   },
-
-//   forgetcard: {
-//     backgroundColor: "#ffffff",
-//     width: screenWidth - 48,
-//     height: screenHeight * (500 / 812),
-//     borderRadius: 24,
-//     padding: 20,
-//     display: "flex",
-//     flexDirection: "column",
-//     position: "relative",
-//     marginTop: 184,
-//   },
-//   header: {
-//     display: "flex",
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   body: {
-//     marginVertical: 20,
-//     display: "flex",
-//     flexDirection: "column",
-//     gap: 7,
-//   },
-//   tiptext: {
-//     marginLeft: 7,
-//     fontSize: 14,
-//     color: "#666666",
-//   },
-//   inputKuang: {
-//     backgroundColor: "#EEEEEE",
-//     height: 47,
-//     borderRadius: 20,
-//     paddingHorizontal: 15,
-//     fontSize: 14,
-//   },
-//   loginBtn: {
-//     backgroundColor: "#72B6FF",
-//     height: 47,
-//     borderRadius: 20,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     marginBottom: 20,
-//   },
-//   loginText: {
-//     color: "#ffffff",
-//     fontSize: 14,
-//     fontWeight: "500",
-//   },
-//   sendCodeText: {
-//     position: "absolute",
-//     top: 177,
-//     right: 33,
-//     zIndex: 1,
-//   },
-// });
 
 const styles = StyleSheet.create({
   gradientBackground: {

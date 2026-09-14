@@ -28,10 +28,9 @@ export default function SetAuthdata() {
   const loadUserData = useCallback(async () => {
     try {
       const res = await getMedata();
-      setNickname(res.data.nickname);
-      if (res.data.avatar_url) {
-        setAvatar(res.data.avatar_url);
-      }
+      setNickname(res.data.nickname || '');
+      // 后端返回 null/空时，也需要把 store 清空，避免残留旧头像
+      setAvatar(res.data.avatar_url || '');
     } catch (e) {
       console.log(e);
     }
@@ -212,7 +211,7 @@ export default function SetAuthdata() {
                 {avatar_url ? (
                   <Image source={{ uri: avatar_url }} style={{ width: 24, height: 24 }} />
                 ) : (
-                  <BaseTouXiang />
+                  <BaseTouXiang width={24} height={24} />
                 )}
               </View>
               <Pressable style={styles.ArrowRight}>
@@ -270,7 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
     marginTop: 30,
-    paddingHorizontal: 23,
+    paddingLeft: 23,
     paddingTop: 16,
   },
   kuang: {
@@ -287,7 +286,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 10,
     position: 'absolute',
-    right: 0,
+    right: 24,
   },
   loadingOverlay: {
     position: 'absolute',

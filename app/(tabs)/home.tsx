@@ -46,11 +46,9 @@ export default function HomeScreen() {
       if (token !== null) {
         const res = await getMedata();
         setMydata(res.data);
-        // 同步更新 store
-        setNickname(res.data.nickname);
-        if (res.data.avatar_url) {
-          setAvatar(res.data.avatar_url);
-        }
+        // 同步更新 store；后端返回 null/空时也需要清空，避免残留旧头像
+        setNickname(res.data.nickname || '');
+        setAvatar(res.data.avatar_url || '');
       } else {
         router.replace('/signin');
       }
@@ -111,7 +109,7 @@ export default function HomeScreen() {
         </Pressable>
         <ImageBackground
           style={styles.touxiangcontainer}
-          source={{ uri: displayAvatarUrl }}
+          source={displayAvatarUrl ? { uri: displayAvatarUrl } : undefined}
           imageStyle={styles.backgroundImageStyle}
         >
           <View style={styles.touxiang}>

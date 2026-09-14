@@ -139,40 +139,49 @@ export default function FindScreen() {
             />
           }
         >
-          {keywordData.map((item, index) => (
-            <View
-              key={index}
-              style={[
-                styles.cardItem,
-                {
-                  backgroundColor: keywordColors[index % 5] || '#E0E0E0',
-                  marginTop: index > 0 ? -44 : 0,
-                  zIndex: keywordData.length + index,
-                },
-              ]}
-            >
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{item.keyword.text}</Text>
-                <Pressable
-                  style={styles.detailArrowmore}
-                  onPress={() => {
-                    router.navigate({
-                      pathname: '/reviewFind/keywordsClass',
-                      params: {
-                        keyword_id: item.keyword.id,
-                        keywordtext: item.keyword.text,
-                      },
-                    });
-                  }}
-                >
-                  <Ionicons name="arrow-forward" size={20} color="#666" />
-                </Pressable>
-              </View>
-              <View style={styles.cardSubtitle}>
-                <Text style={{ color: '#999', fontSize: 12 }}>{item.my_upload_count}张作品</Text>
-              </View>
+          {keywordData.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={{ color: '#999' }}>暂无关键词</Text>
             </View>
-          ))}
+          ) : (
+            keywordData.map((item, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.cardItem,
+                  {
+                    backgroundColor: keywordColors[index % 5] || '#E0E0E0',
+                    marginTop: index > 0 ? -44 : 0,
+                    zIndex: keywordData.length + index,
+                  },
+                ]}
+              >
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>{item.keyword.text}</Text>
+
+                  <Pressable
+                    style={styles.detailArrowmore}
+                    hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} // 👈 向外扩展 15 像素的可点击范围
+                    onPress={() => {
+                      router.navigate({
+                        pathname: '/reviewFind/keywordsClass',
+                        params: {
+                          keyword_id: item.keyword.id,
+                          keywordtext: item.keyword.text,
+                        },
+                      });
+                    }}
+                  >
+                    <Ionicons name="arrow-forward" size={20} color="#666" />
+                  </Pressable>
+                </View>
+
+                <View style={styles.cardSubtitle}>
+                  <Text style={{ color: '#999', fontSize: 12 }}>{item.my_image_count}张作品</Text>
+                </View>
+              </View>
+            ))
+          )}
           {/* 需要上划时显示 */}
           {contentHeight > scrollViewHeight && (
             <View
@@ -322,6 +331,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 24,
     marginTop: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardItem: {
     borderRadius: 30,

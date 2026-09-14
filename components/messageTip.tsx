@@ -1,8 +1,11 @@
 import { notfiItem } from '@/app/api/interface';
-import { View, StyleSheet, ImageBackground, Text, Image } from 'react-native';
+import { View, StyleSheet, Image, Text, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import Inspire from '../assets/images/inspiration.svg';
 import Empathy from '../assets/images/resonance.svg';
+import BaseTouXiang from '../assets/images/baseTouxiang.svg';
 export default function MessageTip(props: notfiItem) {
+  const router = useRouter();
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
@@ -12,18 +15,27 @@ export default function MessageTip(props: notfiItem) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${year}/${month}/${day} ${hours}:${minutes}`;
   };
+  const hasAvatar = !!(props.actor_avatar_url && props.actor_avatar_url.trim() !== '');
   return (
     <View style={styles.tips}>
       <View style={styles.touxiang}>
-        <ImageBackground
-          source={{ uri: props.actor_avatar_url }}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            overflow: 'hidden',
-          }}
-        />
+        {hasAvatar ? (
+          <Image
+            source={{ uri: props.actor_avatar_url }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+          />
+        ) : (
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              overflow: 'hidden',
+            }}
+          >
+            <BaseTouXiang width={40} height={40} />
+          </View>
+        )}
         {props.reaction_type === 'inspired' ? (
           <Inspire style={styles.Icon} />
         ) : (
@@ -38,14 +50,22 @@ export default function MessageTip(props: notfiItem) {
           <Text style={styles.Inpiretext}>和你有共鸣</Text>
         )}
       </View>
-      <View style={styles.zuopin}>
+      <Pressable
+        style={styles.zuopin}
+        onPress={() => {
+          router.push({
+            pathname: '/postCardDetail',
+            params: { upload_id: props.upload_id },
+          });
+        }}
+      >
         {props.cover_image && (
           <Image
             source={{ uri: props.cover_image.square_small.url }}
             style={{ width: '100%', height: '100%' }}
           ></Image>
         )}
-      </View>
+      </Pressable>
     </View>
   );
 }
