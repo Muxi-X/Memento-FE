@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 import { addCustomKeyword } from "../app/api/me";
 const { width: screenWidth } = Dimensions.get("window");
@@ -79,10 +80,11 @@ export default function NewCreate() {
         onRequestClose={() => setMask(false)}
       >
         <Pressable style={styles.modalMask} onPress={() => setMask(false)}>
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
+          <KeyboardAvoidingView behavior="padding">
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
             <View
               style={{
                 width: screenWidth,
@@ -173,7 +175,8 @@ export default function NewCreate() {
                 </View>
               </View>
             </View>
-          </Pressable>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </>
