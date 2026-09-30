@@ -7,6 +7,9 @@ import ArrowRight from '../assets/images/arrow-auth.svg';
 import { useSettingStore } from './stores/authstore';
 import { useEffect, useRef, useCallback } from 'react';
 import { getMeSetting } from './api/me';
+import { clearCachedToken } from './api/request';
+import { bumpAnalyticsSession } from './api/analytics';
+import useDailyPromptStore from './stores/useDailyPromptStore';
 
 export default function Configure() {
   // 状态获取
@@ -79,6 +82,10 @@ export default function Configure() {
     await SecureStore.deleteItemAsync('access_token');
     await SecureStore.deleteItemAsync('user_id');
     await SecureStore.deleteItemAsync('user_name');
+    // 清除 token 缓存、提示状态和待发事件队列
+    clearCachedToken();
+    useDailyPromptStore.getState().bumpSession();
+    bumpAnalyticsSession();
     router.dismissAll();
     router.replace('/signin');
   };

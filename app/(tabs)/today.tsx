@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   StyleSheet,
   Text,
   View,
@@ -11,6 +12,7 @@ import {
   LayoutAnimation,
   UIManager,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Memento from '../../assets/images/memento.svg';
 import { PhotoWay, TakePhotoWay } from '../../components/createWay_1';
@@ -18,6 +20,7 @@ import { Idea } from '@/components/Idea';
 import { useRouter } from 'expo-router';
 import { getoffcialHome } from '../api/keywords';
 import usePromptStore from '../stores/usePromptStore';
+import useDailyPromptStore from '../stores/useDailyPromptStore';
 import TalkKuang from '../../assets/images/talkkuang.svg';
 import * as SecureStore from 'expo-secure-store';
 import { GuideOverlay } from '../../components/guideOverlay';
@@ -52,7 +55,8 @@ export default function TabTwoScreen() {
   const [keyWords_text, setKeyWords_text] = useState(' 关键词');
   const [participant_user_count, setParticipant_user_count] = useState(0);
   const [yesterday_user_count, setYesterday_user_count] = useState(0);
-  const dataFetchedRef = useRef(false); // 添加标志防止重复请求
+  const dataFetchedRef = useRef(false);
+  const lastBizDateRef = useRef<string | null>(null);
 
   const date = usePromptStore((state) => state.biz_date);
   const setDate = usePromptStore((state) => state.setdate);
@@ -61,6 +65,11 @@ export default function TabTwoScreen() {
   const setTodayKeyword = usePromptStore((state) => state.setTodayKeyword);
   const setYesterdaysKeyword = usePromptStore((state) => state.setYesterdaysKeyword);
   const setYesterdaydate = usePromptStore((state) => state.setYesterdaydate);
+
+  const fetchDailyPrompt = useDailyPromptStore((s) => s.fetchDailyPrompt);
+  const invalidateCache = useDailyPromptStore((s) => s.invalidateCache);
+  const resets_at = useDailyPromptStore((s) => s.resets_at);
+
   const keywordRef = useRef<View>(null);
   const findRef = useRef<View>(null);
   const ideaRef = useRef<View>(null);
@@ -104,41 +113,49 @@ export default function TabTwoScreen() {
     });
   }, [step, steps]);
 
-  useEffect(() => {
-    setDailysentence(getRandomSentence());
-    const initPage = async () => {
-      // 防止重复请求
-      if (dataFetchedRef.current) {
-        return;
+  // 判断是否跨天或日期失效，需要刷新
+  const shouldRefresh = useCallback(() => {
+    // resets_at 已过 → 跨天
+    if (resets_at && new Date(resets_at).getTime() <= Date.now()) {
+      return true;
+    }
+    return false;
+  }, [resets_at]);
+
+  const loadHomeAndPrompt = useCallback(async () => {
+    try {
+      // 首页请求与今日提示预取并行，不等首页返回
+      const homePromise = getoffcialHome();
+      const promptPromise = fetchDailyPrompt({ silent: true });
+
+      const res = await homePromise;
+      const { today, yesterday } = res.data;
+
+      // 原始业务日期存入 date，展示值存入 biz_date
+      setDate(today.biz_date);
+      setBiz_date(formatDate(today.biz_date));
+      lastBizDateRef.current = today.biz_date;
+
+      setKeyWords_text(today.keyword.text);
+      setTodayKeyword(today.keyword.text);
+      setParticipant_user_count(today.participant_user_count);
+      setYesterday_user_count(yesterday.participant_user_count);
+      setKeywordId(today.keyword.id);
+      setYesterdaysKeyword(yesterday.keyword.text);
+      setYesterdaydate(yesterday.biz_date);
+
+      await promptPromise;
+
+      const hasGuided = await SecureStore.getItemAsync('has_guided_home');
+      if (!hasGuided) {
+        setTimeout(startGuide, 800);
       }
-
-      dataFetchedRef.current = true;
-
-      try {
-        const res = await getoffcialHome();
-        const { today, yesterday } = res.data;
-
-        setKeyWords_text(today.keyword.text);
-        setTodayKeyword(today.keyword.text);
-        setDate(today.biz_date);
-        setParticipant_user_count(today.participant_user_count);
-        setYesterday_user_count(yesterday.participant_user_count);
-        setKeywordId(today.keyword.id);
-        setBiz_date(formatDate(today.biz_date));
-        setYesterdaysKeyword(yesterday.keyword.text);
-        setYesterdaydate(yesterday.biz_date);
-
-        const hasGuided = await SecureStore.getItemAsync('has_guided_home');
-        if (!hasGuided) {
-          setTimeout(startGuide, 800);
-        }
-      } catch (err) {
-        console.log(err);
-        dataFetchedRef.current = false; // 失败时重置，允许重试
-      }
-    };
-    initPage();
+    } catch (err) {
+      console.log(err);
+      dataFetchedRef.current = false;
+    }
   }, [
+    fetchDailyPrompt,
     setBiz_date,
     setDate,
     setKeywordId,
@@ -147,6 +164,46 @@ export default function TabTwoScreen() {
     setYesterdaysKeyword,
     startGuide,
   ]);
+
+  useEffect(() => {
+    setDailysentence(getRandomSentence());
+    const initPage = async () => {
+      if (dataFetchedRef.current) {
+        return;
+      }
+      dataFetchedRef.current = true;
+      await loadHomeAndPrompt();
+    };
+    initPage();
+  }, [loadHomeAndPrompt]);
+
+  // 页面聚焦时刷新：跨天则失效缓存重拉，否则后台静默刷新提示状态
+  useFocusEffect(
+    useCallback(() => {
+      if (!dataFetchedRef.current) return;
+      if (shouldRefresh()) {
+        invalidateCache();
+        void loadHomeAndPrompt();
+      } else {
+        void fetchDailyPrompt({ silent: true });
+      }
+    }, [shouldRefresh, invalidateCache, loadHomeAndPrompt, fetchDailyPrompt]),
+  );
+
+  // 应用从后台恢复前台时刷新
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active' && dataFetchedRef.current) {
+        if (shouldRefresh()) {
+          invalidateCache();
+          void loadHomeAndPrompt();
+        } else {
+          void fetchDailyPrompt({ silent: true });
+        }
+      }
+    });
+    return () => subscription.remove();
+  }, [shouldRefresh, invalidateCache, loadHomeAndPrompt, fetchDailyPrompt]);
 
   return (
     <>

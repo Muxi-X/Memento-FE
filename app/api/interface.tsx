@@ -53,6 +53,59 @@ export enum PromptWords {
   concept = 'concept',
 }
 
+// 已选提示结果(来自领取记录快照)
+export interface SelectedPrompt {
+  id: string;
+  kind: PromptWords;
+  content: string;
+  selected_at: string;
+}
+
+// 每日提示状态(GET /v1/me/daily-prompt 返回)
+export interface DailyPromptState {
+  biz_date: string;
+  resets_at: string;
+  keyword_id: string | null;
+  selection: SelectedPrompt | null;
+}
+
+// 领取今日提示响应(POST /v1/official/keywords/{keyword_id}/prompts/draw)
+export interface DrawPromptResponse {
+  id: string;
+  kind: PromptWords;
+  content: string;
+  biz_date: string;
+  keyword_id: string;
+  selected_at: string;
+  resets_at: string;
+}
+
+// 埋点事件名称与选择状态枚举
+export type PromptEventName = 'prompt_entry_click' | 'prompt_kind_entry_click';
+export type SelectionState = 'unknown' | 'unselected' | 'selected';
+
+// 单个入口点击事件
+export interface AnalyticsEvent {
+  event_id: string;
+  event_name: PromptEventName;
+  kind: PromptWords | null;
+  source: string;
+  schema_version: number;
+  occurred_at: string;
+  context_biz_date: string | null;
+  keyword_id: string | null;
+  selection_state: SelectionState;
+}
+
+// 批量埋点请求与响应(POST /v1/analytics/events/batch)
+export interface BatchEventsRequest {
+  events: AnalyticsEvent[];
+}
+
+export interface BatchEventsResponse {
+  acknowledged_event_ids: string[];
+}
+
 export interface ReviewDateItem {
   biz_date: string;
   keyword: {

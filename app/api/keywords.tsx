@@ -1,9 +1,17 @@
-import { PromptWords } from './interface';
+import { AxiosResponse } from 'axios';
+import {
+  BatchEventsRequest,
+  BatchEventsResponse,
+  DailyPromptState,
+  DrawPromptResponse,
+  PromptWords,
+} from './interface';
 import request from './request';
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
   ? Acc[number]
   : Enumerate<N, [...Acc, Acc['length']]>;
 type Number1To50 = Exclude<Enumerate<51>, 0>;
+//today页
 export const getKeywords = (date?: string) => {
   return request({
     url: '/v1/keywords/today',
@@ -22,13 +30,35 @@ export const getoffcialHome = (date?: string) => {
     },
   });
 };
-export const drawOfficialPrompt = (keyword_id: string, kind: PromptWords) => {
+//领取今日
+export const drawOfficialPrompt = (
+  keyword_id: string,
+  kind: PromptWords,
+  biz_date: string,
+): Promise<AxiosResponse<DrawPromptResponse>> => {
   return request({
     url: `/v1/official/keywords/${keyword_id}/prompts/draw`,
     method: 'POST',
     data: {
       kind: kind,
+      biz_date: biz_date,
     },
+  });
+};
+export const getdailyPrompt = (): Promise<AxiosResponse<DailyPromptState>> => {
+  return request({
+    url: '/v1/me/daily-prompt',
+    method: 'GET',
+  });
+};
+//提示词埋点（批量上报）
+export const postPromptevents = (
+  data: BatchEventsRequest,
+): Promise<AxiosResponse<BatchEventsResponse>> => {
+  return request({
+    url: '/v1/analytics/events/batch',
+    method: 'POST',
+    data,
   });
 };
 //获取官方关键词作品列表
