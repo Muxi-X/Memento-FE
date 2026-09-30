@@ -34,6 +34,7 @@
     "expo-image-picker": "~55.0.20",
     "expo-linear-gradient": "~55.0.14",
     "expo-linking": "~55.0.15",
+    "expo-notifications": "^57.0.20",
     "expo-router": "~55.0.16",
     "expo-secure-store": "~55.0.14",
     "expo-status-bar": "~55.0.6",

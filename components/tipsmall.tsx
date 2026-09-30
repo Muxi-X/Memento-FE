@@ -1,10 +1,8 @@
 import { PromptWords } from '@/app/api/interface';
-import { drawOfficialPrompt } from '@/app/api/keywords';
-import usePromptStore from '@/app/stores/usePromptStore';
-import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
-import Createway from './createway';
+import { Pressable, StyleSheet, Text, Dimensions } from 'react-native';
+
 const { width: screenWidth } = Dimensions.get('window');
+
 interface SmalltipProps {
   borderColor: string;
   textColor: string;
@@ -12,7 +10,14 @@ interface SmalltipProps {
   tagColor: string;
   describeText: string;
   kind: PromptWords;
+  disabled?: boolean;
+  onPress?: (kind: PromptWords) => void;
 }
+
+/**
+ * 受控类型入口卡片。
+ * 不再各自维护详情弹窗和抽取，点击通过父级回调统一处理。
+ */
 export default function Smalltip({
   borderColor,
   textColor,
@@ -20,72 +25,29 @@ export default function Smalltip({
   tagColor,
   describeText,
   kind,
+  disabled = false,
+  onPress,
 }: SmalltipProps) {
-  const [detail, setDetail] = useState(false);
-  const [ideas, setIdeas] = useState('');
-  const id = usePromptStore((state) => state.keyword_id);
-  const getPromptWords = async () => {
-    console.log(id, kind);
-    const Words = await drawOfficialPrompt(id, kind);
-
-    setIdeas(Words.data.content);
-  };
   return (
-    <>
-      <Pressable
-        style={[
-          styles.findkuang,
-          {
-            borderColor: borderColor,
-            padding: 22,
-          },
-        ]}
-        onPress={() => {
-          setDetail(true);
-          getPromptWords();
-        }}
-      >
-        <Text style={[styles.findtext]}>{tagText}</Text>
-        <Text style={[styles.findsmalltext, { color: textColor }]}>{describeText}</Text>
-      </Pressable>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={detail}
-        onRequestClose={() => setDetail(false)}
-      >
-        <Pressable style={styles.modalMask} onPress={() => setDetail(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <View style={[styles.findkuang, { borderColor: borderColor }]}>
-              <Text style={[styles.ideatext, { color: textColor }]}>{ideas}</Text>
-              <Text style={[styles.smalltext, { color: borderColor }]}>{tagText}</Text>
-            </View>
-            <Text style={styles.modalTitle}>有灵感了？马上试试?</Text>
-            <Createway />
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </>
+    <Pressable
+      style={[
+        styles.findkuang,
+        {
+          borderColor: borderColor,
+          padding: 22,
+          opacity: disabled ? 0.5 : 1,
+        },
+      ]}
+      disabled={disabled}
+      onPress={() => onPress?.(kind)}
+    >
+      <Text style={[styles.findtext]}>{tagText}</Text>
+      <Text style={[styles.findsmalltext, { color: textColor }]}>{describeText}</Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  modalMask: {
-    flex: 1,
-    backgroundColor: 'rgba(21, 24, 30, 0.2)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '100%',
-    height: 429,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 24,
-  },
   findkuang: {
     display: 'flex',
     flexDirection: 'column',
@@ -96,25 +58,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     position: 'relative',
-  },
-  smalltext: {
-    fontSize: 16,
-    fontFamily: '思源黑体',
-    position: 'absolute',
-    right: 15,
-    top: 65,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  ideatext: {
-    fontSize: 22,
-    fontWeight: '400',
-    padding: 10,
   },
   findtext: {
     color: '#333333',

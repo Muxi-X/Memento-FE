@@ -9,6 +9,8 @@ import Mmeyes from '../assets/images/Mmeyes.svg';
 import Mmnoeyes from '../assets/images/Mmnoeyes.svg';
 import { loginPhone, loginPwd, sendlogincode } from './api/user';
 import { clearCachedToken } from './api/request';
+import { bumpAnalyticsSession } from './api/analytics';
+import useDailyPromptStore from './stores/useDailyPromptStore';
 
 type LoginType = 'phone' | 'password';
 export default function SignIn() {
@@ -66,6 +68,9 @@ export default function SignIn() {
         await SecureStore.setItemAsync('access_token', access_token);
         await SecureStore.setItemAsync('expires_in', expires_in.toString());
         await SecureStore.setItemAsync('token_type', token_type);
+        // 开启新会话：清空旧账号提示状态和待发事件队列
+        useDailyPromptStore.getState().bumpSession();
+        bumpAnalyticsSession();
         Alert.alert('成功', '登录成功！');
         navigation.navigate('index' as never);
       } else {
@@ -164,7 +169,12 @@ export default function SignIn() {
         await SecureStore.setItemAsync('access_token', access_token);
         await SecureStore.setItemAsync('expires_in', expires_in.toString());
         await SecureStore.setItemAsync('token_type', token_type);
+        // 开启新会话：清空旧账号提示状态和待发事件队列
+        useDailyPromptStore.getState().bumpSession();
+        bumpAnalyticsSession();
         Alert.alert('成功', '登录成功！');
+        console.log('登录的' + res.data.access_token);
+
         navigation.navigate('index' as never);
       }
     } catch (error: any) {
